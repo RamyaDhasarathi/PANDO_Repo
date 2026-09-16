@@ -169,6 +169,7 @@ export default function PandoMapExplore() {
   const [activeNavTab, setActiveNavTab] = useState('Buy');
   const [searchQuery, setSearchQuery] = useState('');
   const [isMuted, setIsMuted] = useState(false);
+  const mutedRef = useRef(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechText, setSpeechText] = useState(
     'Click on any property pin to explore details, or search any area or project in Dubai!'
@@ -229,7 +230,7 @@ export default function PandoMapExplore() {
   };
 
   const speak = (text) => {
-    if (isMuted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (mutedRef.current || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     try {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
@@ -577,10 +578,12 @@ export default function PandoMapExplore() {
                   e.stopPropagation();
                   setHasUserInteracted(true);
                   if (!isMuted) {
+                    mutedRef.current = true;
                     window.speechSynthesis?.cancel();
                     setIsSpeaking(false);
                     setIsMuted(true);
                   } else {
+                    mutedRef.current = false;
                     setIsMuted(false);
                     speak(speechText);
                   }

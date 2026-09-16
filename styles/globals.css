@@ -744,6 +744,7 @@ h1 em { color: var(--signal); font-style: italic; -webkit-text-stroke: 1px var(-
   top: auto;
   width: 310px;
   transform: rotate(-2deg);
+  pointer-events: auto;
 }
 
 /* ============================================================
