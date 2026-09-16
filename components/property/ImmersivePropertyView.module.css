@@ -120,6 +120,21 @@
   max-width: 65%;
 }
 
+.brandLink {
+  display: inline-block;
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
+  transition: opacity 0.2s ease;
+}
+
+.brandLink:hover {
+  opacity: 0.85;
+}
+
 .topActionRow {
   display: flex;
   align-items: center;
@@ -174,11 +189,11 @@
 .propertyTitle {
   margin: 4px 0 2px;
   color: #ffffff;
-  font-family: var(--hp-font-display, Georgia, serif);
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
   font-size: clamp(1.5rem, 2.3vw, 2.2rem);
   font-weight: 800;
   line-height: 1.15;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.03em;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
 }
 
@@ -281,51 +296,38 @@
 
 /* ==================================================
    SPEECH BUBBLE / VOICE NOTE
-   (Warm beige/golden card with dark outline matching reference)
+   (Matches the landing page's .speech-bubble in styles/globals.css)
 ================================================== */
 .speechBubble {
   position: relative;
-  background: #eedbb2;
-  border: 2px solid #4a3622;
-  border-radius: 16px;
-  padding: 9px 12px 10px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.12);
+  background: linear-gradient(145deg, rgba(255,231,181,0.97), rgba(197,160,89,0.94));
+  border: 2px solid var(--ink, #1e1e22);
+  border-radius: 24px 24px 24px 8px;
+  padding: 18px 20px 20px;
+  box-shadow: 10px 12px 0 rgba(30,30,34,0.28), inset 3px 3px 0 rgba(255,255,255,0.42), inset -5px -7px 14px rgba(104,73,33,0.2);
   display: flex;
   flex-direction: column;
   max-width: 240px;
   margin-bottom: 140px;
   margin-right: -38px;
   animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1), pandoDrift 5s ease-in-out infinite;
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
   z-index: 3;
 }
 
-/* Speech pointer arrow pointing RIGHT toward Pando (bubble is left of Pando) */
+/* Comic-style tail pointing right toward Pando (bubble is left of Pando) */
 .speechBubble::after {
   content: "";
   position: absolute;
+  width: 20px;
+  height: 20px;
   right: -12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-left: 12px solid #eedbb2;
-}
-
-.speechBubble::before {
-  content: "";
-  position: absolute;
-  right: -15px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-top: 12px solid transparent;
-  border-bottom: 12px solid transparent;
-  border-left: 14px solid #4a3622;
-  z-index: -1;
+  bottom: 24px;
+  background: var(--acid, #c5a059);
+  border-right: 2px solid var(--ink, #1e1e22);
+  border-bottom: 2px solid var(--ink, #1e1e22);
+  box-shadow: 5px 5px 0 rgba(30,30,34,0.2);
+  transform: rotate(-45deg);
 }
 
 @keyframes popIn {
@@ -340,53 +342,87 @@
 }
 
 .bubbleSpeaking {
-  box-shadow: 0 10px 28px rgba(193, 39, 45, 0.3), 0 0 0 2px rgba(193, 39, 45, 0.4);
+  transform: translateY(-5px);
+  background: linear-gradient(145deg, #ffe9bb, #d5ae65);
+  box-shadow: 12px 15px 0 rgba(30,30,34,0.3), inset 3px 3px 0 rgba(255,255,255,0.5), inset -5px -7px 16px rgba(104,73,33,0.22);
 }
 
-/* Top row: text + speaker button side by side */
-.speechBubbleTopRow {
+/* Header row: pulsing dot + "PANDO SAYS" label + mute button */
+.speechBubbleHeader {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: center;
   justify-content: space-between;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.speechBubbleLabel {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--signal, #d22c23);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.bubblePulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--signal, #d22c23);
+  display: inline-block;
+  box-shadow: 0 0 0 5px rgba(240, 68, 46, 0.16);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(210,44,35,0.4); }
+  70%  { box-shadow: 0 0 0 6px rgba(210,44,35,0); }
+  100% { box-shadow: 0 0 0 0 rgba(210,44,35,0); }
 }
 
 .speechBubbleText {
   margin: 0;
-  flex: 1;
-  color: #1c140c;
-  font-size: 0.82rem;
-  line-height: 1.38;
-  font-weight: 400;
-  letter-spacing: 0;
+  color: var(--ink, #1e1e22);
+  font-size: clamp(13px, 1.1vw, 16px);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: 900;
 }
 
-/* Embedded Circular Speaker Button inside Voice Note */
+/* Embedded Circular Mute Button inside Voice Note — matches .bubble-mute-btn */
 .bubbleSpeakerBtn {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
   flex-shrink: 0;
   width: 24px;
   height: 24px;
+  padding: 0;
+  margin: 0;
+  line-height: 0;
   border-radius: 50%;
-  background: rgba(74, 54, 34, 0.12);
-  border: 1px solid rgba(74, 54, 34, 0.3);
-  color: #3b2a1a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: var(--water, #4e7d63);
+  border: 2px solid var(--ink, #1e1e22);
+  color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
 }
+.bubbleSpeakerBtn svg { display: block; }
 
 .bubbleSpeakerBtn:hover {
-  background: rgba(74, 54, 34, 0.22);
-  color: #c1272d;
-  transform: scale(1.1);
+  background: var(--ink, #1e1e22);
+  color: var(--acid, #c5a059);
+}
+
+.bubbleSpeakerBtn.isMuted {
+  background: transparent;
+  color: var(--ink, #1e1e22);
 }
 
 .bubbleSpeakerActive {
-  background: #fee2e2;
-  color: #c1272d;
-  border-color: #c1272d;
   animation: speakerPulse 1.2s infinite ease-in-out;
 }
 
@@ -408,8 +444,8 @@
 .pandoShadow {
   position: absolute;
   bottom: -4px;
-  width: 210px;
-  height: 22px;
+  width: 170px;
+  height: 20px;
   background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.25) 50%, transparent 80%);
   border-radius: 50%;
   filter: blur(4px);
@@ -419,7 +455,7 @@
 .pandoCharacter {
   position: relative;
   z-index: 2;
-  width: clamp(260px, 24vw, 340px);
+  width: clamp(220px, 20vw, 260px);
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.4));
@@ -479,8 +515,8 @@
 }
 
 .inputContainer:focus-within {
-  border-color: var(--hp-primary, #c1272d);
-  box-shadow: 0 10px 28px rgba(193, 39, 45, 0.3), 0 0 0 2px rgba(193, 39, 45, 0.15);
+  border-color: var(--signal, #d22c23);
+  box-shadow: 0 10px 28px rgba(210, 44, 35, 0.3), 0 0 0 2px rgba(210, 44, 35, 0.15);
   background: #ffffff;
 }
 
@@ -498,7 +534,7 @@
   background: transparent;
   font-size: 0.84rem;
   font-weight: 500;
-  color: #10231d;
+  color: var(--ink, #1e1e22);
   outline: none;
   padding: 5px 0;
   min-width: 0;
@@ -510,7 +546,7 @@
 }
 
 .listeningTag {
-  color: #ef4444;
+  color: var(--signal, #d22c23);
   font-size: 0.8rem;
   margin-right: 6px;
   animation: pulseBadge 1s infinite ease-in-out;
@@ -538,42 +574,42 @@
 }
 
 .micButton:hover {
-  background: #fee2e2;
-  color: #ef4444;
-  border-color: #fca5a5;
+  background: rgba(210, 44, 35, 0.12);
+  color: var(--signal, #d22c23);
+  border-color: rgba(210, 44, 35, 0.35);
   transform: scale(1.08);
 }
 
 .micActive {
-  background: #ef4444 !important;
+  background: var(--signal, #d22c23) !important;
   color: #ffffff !important;
-  border-color: #ef4444 !important;
+  border-color: var(--signal, #d22c23) !important;
   animation: micPulse 1.2s infinite ease-in-out;
 }
 
 @keyframes micPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
-  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(210, 44, 35, 0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(210, 44, 35, 0); }
 }
 
 .sendButton {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--hp-primary-light, #e05252), var(--hp-primary, #c1272d));
+  background: linear-gradient(135deg, var(--hp-primary-light, #e05252), var(--hp-primary, #d22c23));
   border: none;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(193, 39, 45, 0.35);
+  box-shadow: 0 3px 10px rgba(210, 44, 35, 0.35);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
 }
 
 .sendButton:hover {
-  box-shadow: 0 5px 14px rgba(193, 39, 45, 0.45);
+  box-shadow: 0 5px 14px rgba(210, 44, 35, 0.45);
   transform: scale(1.06);
 }
 

@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Volume2, VolumeX } from 'lucide-react';
 import { properties as rawDatasetProperties } from '@/data/properties';
 
 const MASCOT_URL =
@@ -169,7 +170,6 @@ export default function PandoMapExplore() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isListening, setIsListening] = useState(false);
   const [speechText, setSpeechText] = useState(
     'Click on any property pin to explore details, or search any area or project in Dubai!'
   );
@@ -266,31 +266,6 @@ export default function PandoMapExplore() {
     const tip = PANDO_TIPS[Math.floor(Math.random() * PANDO_TIPS.length)];
     setSpeechText(tip);
     speak(tip);
-  };
-
-  const handleMicClick = (e) => {
-    e.stopPropagation();
-    setHasUserInteracted(true);
-    if (isListening) return;
-    setIsListening(true);
-    setSpeechText('Listening to your request…');
-    setTimeout(() => {
-      setIsListening(false);
-      const mocks = [
-        { q: 'Dubai Hills', id: 'hp-1004', text: 'I found this contemporary 3 BHK Townhouse in Dubai Hills Estate for you!' },
-        { q: 'Downtown Dubai', id: 'hp-1002', text: 'Here are the luxury Burj Khalifa Residences in Downtown Dubai!' },
-        { q: 'Palm Jumeirah', id: 'hp-1007', text: 'Here is the ultra-luxurious Royal Atlantis Sky Penthouse on Palm Jumeirah!' },
-      ];
-      const pick = mocks[Math.floor(Math.random() * mocks.length)];
-      setSearchQuery(pick.q);
-      const match = UNIFIED_PROPERTIES.find((p) => p.id === pick.id);
-      if (match) {
-        setSelectedProperty(match);
-        setActiveCategory('All');
-        setSpeechText(pick.text);
-        speak(pick.text);
-      }
-    }, 2000);
   };
 
   const handleSearchSubmit = (e) => {
@@ -596,51 +571,24 @@ export default function PandoMapExplore() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                 <span className="bubble-pulse" /> PANDO SAYS
               </div>
-              {/* Speaker first, Mic to its right — both inside bubble */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <button
-                  className="pando-bubble-action-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setHasUserInteracted(true);
-                    if (!isMuted) {
-                      window.speechSynthesis?.cancel();
-                      setIsSpeaking(false);
-                      setIsMuted(true);
-                    } else {
-                      setIsMuted(false);
-                      speak(speechText);
-                    }
-                  }}
-                  title={isMuted ? 'Unmute Pando' : 'Mute Pando'}
-                >
-                  {isMuted ? (
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none">
-                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                      <line x1="23" y1="9" x2="17" y2="15" />
-                      <line x1="17" y1="9" x2="23" y2="15" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none">
-                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-                    </svg>
-                  )}
-                </button>
-                <button
-                  className="pando-bubble-action-btn"
-                  onClick={handleMicClick}
-                  title="Speak to Pando"
-                  style={{ color: isListening ? '#d22c23' : '' }}
-                >
-                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none">
-                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                    <line x1="12" y1="19" x2="12" y2="22" />
-                  </svg>
-                </button>
-              </div>
+              <button
+                className={`bubble-mute-btn ${isMuted ? 'is-muted' : 'is-active'}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setHasUserInteracted(true);
+                  if (!isMuted) {
+                    window.speechSynthesis?.cancel();
+                    setIsSpeaking(false);
+                    setIsMuted(true);
+                  } else {
+                    setIsMuted(false);
+                    speak(speechText);
+                  }
+                }}
+                title={isMuted ? 'Unmute Pando' : 'Mute Pando'}
+              >
+                {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+              </button>
             </div>
             <p>{speechText}</p>
             <div className="bubble-tail" />
