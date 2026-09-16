@@ -1,0 +1,653 @@
+.container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: #0d1512;
+}
+
+/* ==================================================
+   FULL-WINDOW HERO CANVAS
+================================================== */
+.heroCanvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #111a17;
+  display: flex;
+}
+
+.imageWrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.heroImage {
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.topGradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44%;
+  background: linear-gradient(180deg, rgba(10, 20, 16, 0.88) 0%, rgba(10, 20, 16, 0.42) 60%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bottomGradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  background: linear-gradient(0deg, rgba(8, 16, 13, 0.94) 0%, rgba(8, 16, 13, 0.65) 55%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ==================================================
+   GALLERY NAVIGATION
+================================================== */
+.galleryNav {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 35, 29, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 4px 10px;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.navArrow {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1.3rem;
+  line-height: 1;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.navArrow:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(1.1);
+}
+
+.navCounter {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  padding: 0 4px;
+}
+
+/* ==================================================
+   TOP-LEFT OVERLAY: Navigation, Verification, Title, Location
+================================================== */
+.topLeftOverlay {
+  position: absolute;
+  top: 24px;
+  left: 32px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 65%;
+}
+
+.topActionRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: rgba(16, 35, 29, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 6px 14px;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+
+.backLink:hover {
+  color: #ffffff;
+  background: rgba(16, 35, 29, 0.8);
+  transform: translateX(-2px);
+}
+
+.backArrow {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.verifiedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(34, 197, 94, 0.22);
+  border: 1px solid rgba(34, 197, 94, 0.55);
+  color: #4ade80;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.propertyTitle {
+  margin: 4px 0 2px;
+  color: #ffffff;
+  font-family: var(--hp-font-display, Georgia, serif);
+  font-size: clamp(1.5rem, 2.3vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
+}
+
+.propertySubtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.6);
+}
+
+.pinIcon {
+  font-size: 0.95rem;
+}
+
+/* ==================================================
+   BOTTOM-LEFT OVERLAY: Price & Info Strip
+================================================== */
+.bottomLeftOverlay {
+  position: absolute;
+  bottom: 28px;
+  left: 32px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 52%;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+}
+
+.priceTag {
+  color: #ffffff;
+  font-size: clamp(1.3rem, 1.85vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  background: rgba(16, 35, 29, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 6px 18px;
+  border-radius: 12px;
+}
+
+/* Compact Horizontal Info Strip */
+.infoStrip {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(16, 35, 29, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 8px 18px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.infoItem {
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.infoDivider {
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 0.8rem;
+  font-weight: 300;
+}
+
+/* ==================================================
+   PANDO & COMPACT INPUT UNIT (RIGHT / LOWER-RIGHT)
+================================================== */
+.pandoInteractiveUnit {
+  position: absolute;
+  right: 32px;
+  bottom: 80px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.pandoRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+}
+
+/* ==================================================
+   SPEECH BUBBLE / VOICE NOTE
+   (Warm beige/golden card with dark outline matching reference)
+================================================== */
+.speechBubble {
+  position: relative;
+  background: #eedbb2;
+  border: 2px solid #4a3622;
+  border-radius: 16px;
+  padding: 9px 12px 10px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  max-width: 240px;
+  margin-bottom: 140px;
+  margin-right: -38px;
+  animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1), pandoDrift 5s ease-in-out infinite;
+  transition: all 0.25s ease;
+  z-index: 3;
+}
+
+/* Speech pointer arrow pointing RIGHT toward Pando (bubble is left of Pando) */
+.speechBubble::after {
+  content: "";
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 12px solid #eedbb2;
+}
+
+.speechBubble::before {
+  content: "";
+  position: absolute;
+  right: -15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 14px solid #4a3622;
+  z-index: -1;
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.bubbleSpeaking {
+  box-shadow: 0 10px 28px rgba(193, 39, 45, 0.3), 0 0 0 2px rgba(193, 39, 45, 0.4);
+}
+
+/* Top row: text + speaker button side by side */
+.speechBubbleTopRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.speechBubbleText {
+  margin: 0;
+  flex: 1;
+  color: #1c140c;
+  font-size: 0.82rem;
+  line-height: 1.38;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* Embedded Circular Speaker Button inside Voice Note */
+.bubbleSpeakerBtn {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(74, 54, 34, 0.12);
+  border: 1px solid rgba(74, 54, 34, 0.3);
+  color: #3b2a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bubbleSpeakerBtn:hover {
+  background: rgba(74, 54, 34, 0.22);
+  color: #c1272d;
+  transform: scale(1.1);
+}
+
+.bubbleSpeakerActive {
+  background: #fee2e2;
+  color: #c1272d;
+  border-color: #c1272d;
+  animation: speakerPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes speakerPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Pando Physical Character Figure (Enlarged & Grounded) */
+.pandoFigureWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.pandoShadow {
+  position: absolute;
+  bottom: -4px;
+  width: 210px;
+  height: 22px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.25) 50%, transparent 80%);
+  border-radius: 50%;
+  filter: blur(4px);
+  z-index: 1;
+}
+
+.pandoCharacter {
+  position: relative;
+  z-index: 2;
+  width: clamp(260px, 24vw, 340px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.4));
+  animation: pandoDrift 5s ease-in-out infinite;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.pandoCharacter:hover {
+  filter: drop-shadow(0 20px 32px rgba(0, 0, 0, 0.5)) brightness(1.05);
+}
+
+@keyframes pandoDrift {
+  0%   { transform: translate(0px, 0px); }
+  20%  { transform: translate(6px, -8px); }
+  40%  { transform: translate(-5px, -5px); }
+  60%  { transform: translate(-7px, 4px); }
+  80%  { transform: translate(4px, 6px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+.pandoSpeakingAnimation {
+  animation: pandoSpeakAnim 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes pandoSpeakAnim {
+  0% { transform: translateY(-2px) rotate(0deg); }
+  100% { transform: translateY(-7px) rotate(1.2deg); }
+}
+
+/* ==================================================
+   COMPACT ASK PANDO INPUT BELOW PANDO
+================================================== */
+.pandoInputWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 380px;
+  z-index: 20;
+}
+
+.inputContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  padding: 4px 6px 4px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s ease;
+}
+
+.inputContainer:focus-within {
+  border-color: var(--hp-primary, #c1272d);
+  box-shadow: 0 10px 28px rgba(193, 39, 45, 0.3), 0 0 0 2px rgba(193, 39, 45, 0.15);
+  background: #ffffff;
+}
+
+.inputPrefix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  color: var(--hp-slate);
+}
+
+.textInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #10231d;
+  outline: none;
+  padding: 5px 0;
+  min-width: 0;
+}
+
+.textInput::placeholder {
+  color: #7b8882;
+  font-weight: 400;
+}
+
+.listeningTag {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-right: 6px;
+  animation: pulseBadge 1s infinite ease-in-out;
+}
+
+@keyframes pulseBadge {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.8); }
+}
+
+.micButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f0f4f2;
+  border: 1px solid #d5dfda;
+  color: var(--hp-charcoal, #29352f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.micButton:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
+  transform: scale(1.08);
+}
+
+.micActive {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+  animation: micPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes micPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+.sendButton {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--hp-primary-light, #e05252), var(--hp-primary, #c1272d));
+  border: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(193, 39, 45, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.sendButton:hover {
+  box-shadow: 0 5px 14px rgba(193, 39, 45, 0.45);
+  transform: scale(1.06);
+}
+
+.sendButton:active {
+  transform: scale(0.95);
+}
+
+/* ==================================================
+   RESPONSIVE ADJUSTMENTS
+================================================== */
+@media (max-width: 1024px) {
+  .topLeftOverlay {
+    max-width: 85%;
+  }
+  .bottomLeftOverlay {
+    max-width: 85%;
+    bottom: 20px;
+    left: 20px;
+  }
+  .pandoInteractiveUnit {
+    right: 20px;
+    bottom: 18px;
+  }
+  .speechBubble {
+    max-width: 200px;
+    margin-bottom: 12px;
+  }
+  .pandoCharacter {
+    width: 220px;
+  }
+  .pandoInputWrap {
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 768px) {
+  .topLeftOverlay {
+    top: 14px;
+    left: 14px;
+    gap: 6px;
+  }
+  .propertyTitle {
+    font-size: 1.25rem;
+  }
+  .bottomLeftOverlay {
+    bottom: 14px;
+    left: 14px;
+    gap: 8px;
+  }
+  .priceTag {
+    font-size: 1.1rem;
+    padding: 4px 12px;
+  }
+  .infoStrip {
+    padding: 6px 12px;
+    gap: 8px;
+    font-size: 0.68rem;
+  }
+  .pandoInteractiveUnit {
+    right: 12px;
+    bottom: 12px;
+  }
+  .speechBubble {
+    max-width: 170px;
+    padding: 7px 10px;
+    margin-bottom: 10px;
+  }
+  .speechBubbleText {
+    font-size: 0.72rem;
+  }
+  .pandoCharacter {
+    width: 160px;
+  }
+  .pandoInputWrap {
+    max-width: 270px;
+  }
+}

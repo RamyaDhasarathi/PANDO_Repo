@@ -1,0 +1,870 @@
+/* ================================================================
+   HI PANDO — Global Design System  (based on hi-pando-ui3)
+   ================================================================ */
+
+/* Google Fonts loaded via layout.js next/font */
+
+:root {
+  --ink: #1e1e22;
+  --paper: #f1eef2;
+  --acid: #c5a059;
+  --signal: #d22c23;
+  --water: #4e7d63;
+  --sage: #b9d9c8;
+  --lavender: #e8e4eb;
+  --rule: rgba(30, 30, 34, 0.2);
+
+  /* Legacy aliases (kept for compatibility) */
+  --hp-primary: #d22c23;
+  --hp-primary-dark: #8f1620;
+  --hp-primary-light: #e05252;
+  --hp-gold: #c5a059;
+  --hp-mint-50: #fdf3f2;
+  --hp-mint-100: #fbe4e1;
+  --hp-mint-200: #f5c6c0;
+  --hp-ink: #1e1e22;
+  --hp-charcoal: #29352f;
+  --hp-slate: #5c6b64;
+  --hp-line: rgba(30, 30, 34, 0.2);
+  --hp-line-soft: rgba(30, 30, 34, 0.1);
+  --hp-surface: #ffffff;
+  --hp-bg: var(--paper);
+  --hp-shadow-sm: 0 1px 2px rgba(30, 30, 34, 0.06);
+  --hp-shadow-md: 0 8px 24px rgba(30, 30, 34, 0.08);
+  --hp-shadow-lg: 0 20px 48px rgba(30, 30, 34, 0.14);
+  --hp-radius-sm: 10px;
+  --hp-radius-md: 16px;
+  --hp-radius-lg: 24px;
+  --hp-radius-pill: 999px;
+  --hp-space-1: 4px;
+  --hp-space-2: 8px;
+  --hp-space-3: 12px;
+  --hp-space-4: 16px;
+  --hp-space-5: 24px;
+  --hp-space-6: 32px;
+  --hp-space-7: 48px;
+  --hp-space-8: 64px;
+  --hp-max-width: 1240px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; height: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+
+/* ============================================================
+   CONTAINER UTILITY
+   ============================================================ */
+.hp-container {
+  max-width: var(--hp-max-width);
+  margin: 0 auto;
+  padding: 0 var(--hp-space-5);
+}
+
+/* ============================================================
+   BUTTON UTILITIES
+   ============================================================ */
+.hp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  min-height: 38px;
+  padding: 0 14px;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.hp-btn:active { transform: scale(0.97); }
+
+.hp-btn-primary {
+  background: var(--signal);
+  color: #fffaf3;
+  border-color: var(--signal);
+}
+.hp-btn-primary:hover { background: var(--ink); border-color: var(--ink); }
+
+.hp-btn-ghost {
+  background: rgba(255, 250, 243, 0.52);
+  color: var(--ink);
+}
+.hp-btn-ghost:hover { background: var(--ink); color: var(--acid); }
+
+.hp-btn-soft {
+  background: rgba(255, 250, 243, 0.68);
+  color: var(--ink);
+}
+
+/* ============================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================ */
+.hp-section-title {
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.04em;
+}
+.hp-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--signal);
+}
+
+::selection { background: rgba(197, 160, 89, 0.3); color: var(--ink); }
+
+/* ============================================================
+   LANDING / HERO SHELL  (.pando-shell)
+   ============================================================ */
+.pando-shell {
+  height: 100svh;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  background: var(--paper);
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+}
+
+.architecture-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: url('/louvre-inspired-courtyard.png');
+  background-color: #dce9e6;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ============================================================
+   TOPBAR  (shared nav — used on hero page)
+   ============================================================ */
+.topbar {
+  height: 88px;
+  border-bottom: 2px solid rgba(30, 30, 34, 0.32);
+  background: linear-gradient(105deg, rgba(255,248,225,0.96), rgba(239,218,169,0.92) 52%, rgba(213,231,217,0.9));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4vw;
+  position: relative;
+  z-index: 5;
+}
+
+/* ============================================================
+   BRAND LOGO  (shared)
+   ============================================================ */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  color: #171717;
+  text-decoration: none;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.7);
+}
+.brand-avatar {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: #f4eee2;
+  box-shadow: 3px 3px 0 var(--ink);
+  flex: 0 0 auto;
+}
+.brand-avatar img { width: 124%; height: 124%; object-fit: cover; object-position: 50% 30%; }
+
+.brand-name {
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+
+/* ============================================================
+   HERO NAV ACTIONS
+   ============================================================ */
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+.nav-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  transition: transform 0.15s ease;
+}
+.nav-action:hover { transform: translateY(-2px); }
+.nav-action-soft { background: rgba(255, 250, 243, 0.68); }
+.nav-action-primary { background: var(--signal); color: #fffaf3; border-color: var(--signal); }
+.nav-action-primary:hover { background: var(--ink); border-color: var(--ink); }
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+.hero {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 48% 52%;
+  position: relative;
+}
+
+.hero-copy {
+  margin: 0;
+  padding: 0 4vw;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transform: translate(4%, -4%);
+  position: relative;
+  z-index: 2;
+}
+
+.hero-copy > * { position: relative; z-index: 1; }
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 22px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  font-weight: 800;
+}
+
+.live-dot, .bubble-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--signal);
+  display: inline-block;
+  box-shadow: 0 0 0 5px rgba(240, 68, 46, 0.16);
+  animation: pulse 2s infinite;
+}
+
+h1 {
+  margin: 0;
+  white-space: nowrap;
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: clamp(42px, 5.4vw, 88px);
+  line-height: 0.94;
+  letter-spacing: -0.08em;
+  font-weight: 800;
+  color: var(--ink);
+}
+h1 em { color: var(--signal); font-style: italic; -webkit-text-stroke: 1px var(--signal); }
+
+/* ============================================================
+   PROMPT FORM
+   ============================================================ */
+.prompt-form {
+  width: min(640px, 100%);
+  max-width: 640px;
+  margin-top: clamp(18px, 4vh, 44px);
+  text-align: left;
+}
+
+.prompt-form label {
+  display: block;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 8px;
+}
+
+.prompt-input-wrap {
+  display: flex;
+  min-height: 58px;
+  border: 2px solid var(--ink);
+  background: rgba(244, 238, 226, 0.94);
+  border-radius: 18px;
+  box-shadow: 6px 6px 0 var(--ink);
+  overflow: hidden;
+}
+
+.prompt-input-wrap input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  padding: 16px 17px;
+  background: transparent;
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+.prompt-input-wrap input::placeholder { color: #77756e; }
+
+.mic-button {
+  flex: 0 0 48px;
+  border: 0;
+  border-left: 1px solid var(--ink);
+  background: transparent;
+  color: var(--water);
+  display: grid;
+  place-items: center;
+}
+.mic-button:hover { color: var(--signal); background: rgba(181, 138, 67, 0.12); }
+
+.send-button {
+  flex: 0 0 58px;
+  width: 58px;
+  align-self: stretch;
+  border: 0;
+  border-left: 2px solid var(--ink);
+  background: var(--signal);
+  color: var(--paper);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.send-button:hover { background: var(--acid); color: var(--ink); }
+
+/* Quick-search chips */
+.prompt-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; }
+.prompt-chips button {
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: rgba(255, 250, 243, 0.58);
+  color: var(--ink);
+  padding: 7px 11px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.prompt-chips button:hover { background: var(--ink); color: var(--acid); }
+
+.trust-line {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 68px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  font-weight: 800;
+}
+.trust-line .line { width: 44px; height: 2px; background: var(--ink); }
+.trust-line span:first-child { color: var(--signal); }
+
+/* ============================================================
+   MASCOT STAGE
+   ============================================================ */
+.mascot-stage {
+  min-height: 0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 12px;
+  overflow: hidden;
+}
+
+.mascot-character {
+  width: min(60%, 480px);
+  max-height: 520px;
+  position: relative;
+  left: 12%;
+  z-index: 2;
+  transform-origin: 50% 88%;
+}
+
+.mascot-image {
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  object-position: bottom center;
+  display: block;
+  animation: float 5s ease-in-out infinite;
+}
+
+.mascot-character.mascot-twist { animation: mascot-twist 2.2s ease-in-out both; }
+.mascot-character.mascot-jump  { animation: mascot-jump  2.2s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.mascot-character.mascot-dance { animation: mascot-dance 2.2s ease-in-out both; }
+
+/* Orbit decorations */
+.mascot-orbit { position: absolute; border: 2px solid var(--ink); border-radius: 50%; transform: rotate(-22deg); opacity: 0.24; }
+.orbit-one { width: 68%; height: 48%; top: 34%; left: 17%; }
+.orbit-two { width: 54%; height: 72%; top: 13%; left: 25%; }
+
+/* ============================================================
+   SPEECH BUBBLE (landing)
+   ============================================================ */
+.speech-bubble {
+  position: absolute;
+  /* Sits to the left of the mascot, at roughly hand/arm height */
+  left: 5%;
+  top: 42%;
+  width: min(300px, 42%);
+  padding: 18px 20px 20px;
+  background: linear-gradient(145deg, rgba(255,231,181,0.97), rgba(197,160,89,0.94));
+  border: 2px solid var(--ink);
+  border-radius: 24px 24px 24px 8px;
+  box-shadow: 10px 12px 0 rgba(30,30,34,0.28), inset 3px 3px 0 rgba(255,255,255,0.42), inset -5px -7px 14px rgba(104,73,33,0.2);
+  z-index: 4;
+  transform: rotate(-1.5deg);
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.speech-bubble.speaking {
+  transform: rotate(-0.5deg) translateY(-5px);
+  background: linear-gradient(145deg, #ffe9bb, #d5ae65);
+  box-shadow: 12px 15px 0 rgba(30,30,34,0.3), inset 3px 3px 0 rgba(255,255,255,0.5), inset -5px -7px 16px rgba(104,73,33,0.22);
+}
+
+.bubble-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--signal);
+  margin-bottom: 12px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  font-weight: 800;
+}
+.bubble-label .bubble-pulse { width: 6px; height: 6px; box-shadow: none; }
+
+.speech-bubble p {
+  margin: 0;
+  font-size: clamp(14px, 1.3vw, 18px);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: 900;
+}
+
+/* Tail points right toward the mascot's hand */
+.bubble-tail {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  right: -12px;
+  bottom: 24px;
+  background: var(--acid);
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 rgba(30,30,34,0.2);
+  transform: rotate(-45deg);
+}
+
+/* Mute / voice button */
+.mute-button {
+  position: absolute;
+  right: 7%;
+  bottom: 9%;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 13px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--water);
+  color: white;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  font-weight: 900;
+}
+.mute-button:hover { background: var(--ink); color: var(--acid); }
+
+/* ============================================================
+   FOOTER BAR (hero)
+   ============================================================ */
+.footer-bar {
+  height: 22px;
+  min-height: 22px;
+  border-top: 2px solid rgba(30, 30, 34, 0.45);
+  background: transparent;
+  padding: 0 4vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  position: relative;
+  z-index: 5;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  font-weight: 800;
+}
+.footer-center { color: var(--signal); }
+
+/* ============================================================
+   MAP APP SHELL  (.pando-app)
+   ============================================================ */
+.pando-app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #e9ecef;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  color: #17181c;
+}
+
+.pando-app button, .pando-app input { font: inherit; }
+.pando-app button { border: 0; cursor: pointer; }
+
+/* Map fullscreen container */
+.pando-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* ============================================================
+   MAP PAGE HEADER  (.pando-header)
+   ============================================================ */
+.pando-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px 0 18px;
+  background: rgba(255, 255, 255, 0.90);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.pando-header .brand { gap: 12px; }
+.pando-header .brand-avatar { width: 38px; height: 38px; }
+.pando-header .brand-name { font-size: 21px; }
+
+/* Map header search */
+.pando-search {
+  position: relative;
+  width: min(520px, 40vw);
+  height: 48px;
+  display: flex;
+  align-items: center;
+  margin-left: 24px;
+}
+
+.pando-search-icon {
+  position: absolute;
+  left: 18px;
+  width: 19px;
+  height: 19px;
+  color: #17181c;
+  pointer-events: none;
+}
+
+.pando-search input {
+  width: 100%;
+  height: 100%;
+  padding: 0 20px 0 52px;
+  border: 1px solid #e2e3e6;
+  border-radius: 25px;
+  outline: none;
+  background: #f9fafb;
+  font-size: 14px;
+  font-weight: 500;
+  color: #202126;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.pando-search input::placeholder { color: #92949a; }
+.pando-search input:focus { background: #fff; border-color: #ef3734; box-shadow: 0 0 0 4px rgba(239,55,52,0.08); }
+
+/* Map header navigation tabs */
+.pando-navigation {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin-left: auto;
+}
+
+.pando-navigation button {
+  position: relative;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1d1e22;
+  transition: color 0.2s ease;
+}
+.pando-navigation button:hover { color: #e52e2e; }
+.pando-navigation button.active { color: #e52e2e; }
+.pando-navigation button.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -20px;
+  width: 22px;
+  height: 3px;
+  transform: translateX(-50%);
+  border-radius: 10px;
+  background: #e52e2e;
+}
+
+/* ============================================================
+   PROPERTY PINS (Leaflet)
+   ============================================================ */
+.pando-property-pin-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transform: scale(var(--map-pin-scale, 1));
+  transform-origin: bottom center;
+}
+
+.pando-property-pin {
+  width: 52px;
+  height: 65px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+.pando-property-pin:hover {
+  transform: scale(1.12);
+  filter: drop-shadow(0 10px 15px rgba(230,38,38,0.35));
+}
+.pando-property-pin img { width: 52px; height: 65px; object-fit: contain; pointer-events: none; }
+.pando-property-pin::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 12px;
+  height: 5px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(0,0,0,0.3);
+  filter: blur(2px);
+}
+
+.pando-property-pin.selected img { animation: pandoPinBounce 0.8s ease; }
+
+.pando-property-card {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  padding: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(255,255,255,0.98);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.16);
+  z-index: 45;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  pointer-events: auto;
+}
+.pando-property-card:hover { transform: translateX(-50%) translateY(-4px); box-shadow: 0 18px 42px rgba(0,0,0,0.22); }
+.pando-property-card.selected { border: 2px solid #ef3937; box-shadow: 0 16px 45px rgba(226,42,42,0.25); }
+
+.pando-property-image { width: 60px; height: 60px; flex-shrink: 0; object-fit: cover; border-radius: 8px; }
+.pando-property-content { min-width: 0; padding-top: 2px; flex: 1; }
+.pando-property-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+.pando-property-title { font-size: 12px; font-weight: 800; line-height: 1.2; color: #17181c; }
+.pando-property-location { margin-top: 3px; font-size: 10px; color: #74767b; }
+.pando-property-favorite { width: 22px; height: 22px; display: grid; place-items: center; flex-shrink: 0; background: transparent; color: #5d6065; cursor: pointer; }
+.pando-property-favorite:hover { color: #e52e2e; }
+
+/* ============================================================
+   PANDO AI CHARACTER (Map overlay)
+   ============================================================ */
+.pando-ai {
+  position: absolute;
+  right: 10px;
+  bottom: 20px;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 90;
+  pointer-events: none;
+}
+
+.pando-ai-character {
+  width: 240px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3));
+  animation: pandoFloat 4s ease-in-out infinite;
+  pointer-events: auto;
+  cursor: pointer;
+  position: relative;
+  z-index: 90;
+}
+
+/* Map speech bubble */
+.pando-speech-container {
+  position: absolute;
+  right: 260px;
+  bottom: 165px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 100;
+  animation: speechAppear 0.4s ease forwards, pandoFloat 4s ease-in-out infinite 0.4s;
+}
+
+.pando-speech-container .speech-bubble {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: 310px;
+  transform: rotate(-2deg);
+}
+
+.pando-bubble-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(30,30,34,0.2);
+  background: rgba(255,255,255,0.4);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+}
+.pando-bubble-action-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* ============================================================
+   KEYFRAME ANIMATIONS
+   ============================================================ */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+@keyframes pandoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes speechAppear {
+  from { opacity: 0; transform: translateY(8px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(210,44,35,0.4); }
+  70%  { box-shadow: 0 0 0 6px rgba(210,44,35,0); }
+  100% { box-shadow: 0 0 0 0 rgba(210,44,35,0); }
+}
+
+@keyframes pandoPinBounce {
+  0%   { transform: translateY(0); }
+  40%  { transform: translateY(-13px); }
+  70%  { transform: translateY(2px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes mascot-twist {
+  0%, 100% { transform: rotate(0) translateX(0); }
+  25%       { transform: rotate(-7deg) translateX(-10px); }
+  55%       { transform: rotate(8deg) translateX(12px); }
+  78%       { transform: rotate(-4deg) translateX(-5px); }
+}
+
+@keyframes mascot-jump {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  25%       { transform: translateY(-34px) rotate(-3deg); }
+  48%       { transform: translateY(0) rotate(3deg); }
+  62%       { transform: translateY(-16px) rotate(-2deg); }
+  80%       { transform: translateY(0) rotate(0); }
+}
+
+@keyframes mascot-dance {
+  0%, 100% { transform: rotate(0) translateX(0) scaleX(1); }
+  20%       { transform: rotate(-5deg) translateX(-10px) scaleX(0.98); }
+  42%       { transform: rotate(6deg) translateX(10px) scaleX(1.02); }
+  64%       { transform: rotate(-4deg) translateX(-8px) scaleX(0.99); }
+  82%       { transform: rotate(3deg) translateX(6px); }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  body { overflow: auto; }
+  .pando-shell { height: auto; min-height: 100svh; }
+  .hero { flex: none; grid-template-columns: 1fr; }
+  .hero-copy { margin: 20px 5vw 14px; padding: 32px 8vw 24px; }
+  .mascot-stage { min-height: 590px; margin-top: -35px; }
+  .mascot-character { width: min(55%, 380px); left: 10%; }
+  .speech-bubble { left: 8%; top: 45%; width: min(260px, 48%); }
+  .mute-button { bottom: 9%; right: 10%; }
+  .pando-navigation { display: none; }
+}
+
+@media (max-width: 600px) {
+  h1 { white-space: normal; font-size: clamp(40px, 12vw, 62px); }
+  .topbar { height: 70px; padding: 0 5vw; }
+  .brand-avatar { width: 40px; height: 40px; }
+  .brand-name { font-size: 20px; }
+  .nav-actions { gap: 5px; }
+  .nav-action { min-height: 32px; padding: 0 9px; font-size: 8px; letter-spacing: 0.04em; }
+  .hero-copy { padding: 58px 7vw 10px; }
+  .mascot-stage { min-height: 530px; margin-top: 0; }
+  .mascot-character { width: 65%; left: 8%; }
+  .speech-bubble { left: 5%; top: 38%; width: 58%; padding: 14px 16px 16px; }
+  .speech-bubble p { font-size: 15px; }
+  .mute-button { right: 7%; bottom: 8%; }
+  .footer-bar { padding: 15px 5vw; font-size: 8px; flex-wrap: wrap; }
+  .pando-ai { right: 5px; bottom: 80px; width: 160px; }
+  .pando-ai-character { width: 160px; }
+  .pando-speech-container { right: 175px; bottom: 130px; }
+  .pando-speech-container .speech-bubble { width: 220px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

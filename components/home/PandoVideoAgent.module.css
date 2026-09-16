@@ -1,0 +1,129 @@
+.wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hp-space-4);
+  height: 100%;
+  min-height: 0;
+  padding-top: 46px;
+}
+
+.liveBadge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--hp-surface);
+  border: 1px solid var(--hp-line-soft);
+  border-radius: var(--hp-radius-pill);
+  padding: 6px 14px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--hp-charcoal);
+  box-shadow: var(--hp-shadow-sm);
+  z-index: 2;
+}
+
+.liveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2fb463;
+}
+
+.speakerBtn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--hp-line-soft);
+  background: var(--hp-surface);
+  color: var(--hp-charcoal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--hp-shadow-sm);
+  z-index: 2;
+}
+
+.speakerBtn:hover {
+  color: var(--hp-primary);
+}
+
+.speechBubble {
+  position: relative;
+  z-index: 3;
+  flex-shrink: 0;
+  align-self: center;
+  background: var(--hp-surface);
+  border-radius: var(--hp-radius-md);
+  box-shadow: var(--hp-shadow-lg);
+  padding: var(--hp-space-3);
+  width: min(170px, 32%);
+}
+
+.speechHeader {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: var(--hp-primary);
+  letter-spacing: 0.02em;
+  margin-bottom: 5px;
+}
+
+.sparkle {
+  font-size: 0.75rem;
+}
+
+.liveTag {
+  margin-left: 3px;
+  background: var(--hp-mint-100);
+  color: #2f9c5f;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--hp-radius-pill);
+}
+
+.speechText {
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--hp-charcoal);
+  margin: 0;
+}
+
+.video {
+  width: min(380px, 66%);
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: center;
+  z-index: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 24px 20px rgba(16, 35, 29, 0.18));
+  -webkit-mask-image: radial-gradient(ellipse 62% 66% at 50% 46%, #000 68%, transparent 98%);
+  mask-image: radial-gradient(ellipse 62% 66% at 50% 46%, #000 68%, transparent 98%);
+}
+
+@media (max-width: 1023px) {
+  .wrap {
+    height: auto;
+    flex-direction: column;
+    padding-top: 44px;
+  }
+  .speechBubble {
+    width: min(240px, 70%);
+  }
+  .video {
+    width: min(300px, 78vw);
+  }
+}

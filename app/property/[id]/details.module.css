@@ -1,0 +1,272 @@
+.wrap {
+  background: var(--hp-bg);
+}
+
+.topbar {
+  border-bottom: 1px solid var(--hp-line-soft);
+  background: var(--hp-surface);
+}
+
+.topbarInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hp-space-4);
+  height: 52px;
+  flex-wrap: wrap;
+  padding: 0 var(--hp-space-5);
+}
+
+.body {
+  padding: 0 var(--hp-space-5) var(--hp-space-4);
+}
+
+.backLink {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--hp-charcoal);
+  flex-shrink: 0;
+}
+
+.backLink:hover {
+  color: var(--hp-primary);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--hp-slate);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.breadcrumb a:hover {
+  color: var(--hp-primary-dark);
+}
+
+.breadcrumbCurrent {
+  color: var(--hp-ink);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--hp-slate);
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2fb463;
+}
+
+.statusDotRed {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--hp-primary);
+}
+
+.titleBlock {
+  padding-top: var(--hp-space-3);
+}
+
+.verifiedTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #1f9d55;
+  background: rgba(47, 180, 99, 0.1);
+  border-radius: var(--hp-radius-pill);
+  padding: 4px 10px;
+}
+
+.title {
+  font-family: var(--hp-font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--hp-ink);
+  margin: 8px 0 4px;
+}
+
+.subLocation {
+  color: var(--hp-slate);
+  font-size: 0.95rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: var(--hp-space-5);
+  align-items: start;
+  margin-top: var(--hp-space-3);
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hp-space-3);
+  min-width: 0;
+}
+
+.galleryCol {
+  position: relative;
+  height: 300px;
+}
+
+.galleryBadge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1f9d55;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: var(--hp-radius-pill);
+  box-shadow: var(--hp-shadow-sm);
+}
+
+.priceCard {
+  background: var(--hp-surface);
+  border: 1px solid var(--hp-line-soft);
+  border-radius: var(--hp-radius-lg);
+  box-shadow: var(--hp-shadow-sm);
+  padding: var(--hp-space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.priceEyebrow {
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hp-slate);
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hp-space-3);
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.priceValue {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--hp-ink);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.priceActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.whatsappBtn {
+  background: #1f9d55;
+  color: #fff;
+  padding: 9px 18px;
+  font-size: 0.85rem;
+}
+
+.whatsappBtn:hover {
+  background: #188046;
+}
+
+.vipBtn {
+  white-space: nowrap;
+  padding: 9px 18px;
+  font-size: 0.85rem;
+}
+
+.metricsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--hp-space-3);
+}
+
+.metricCard {
+  background: var(--hp-surface);
+  border: 1px solid var(--hp-line-soft);
+  border-radius: var(--hp-radius-md);
+  padding: var(--hp-space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.metricIcon {
+  font-size: 1.2rem;
+}
+
+.metricValue {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--hp-ink);
+}
+
+.metricLabel {
+  font-size: 0.68rem;
+  color: var(--hp-slate);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.right {
+  min-width: 0;
+}
+
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .metricsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .topbarInner {
+    height: auto;
+    padding: var(--hp-space-3) 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .priceRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

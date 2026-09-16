@@ -1,0 +1,252 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hp-space-3);
+}
+
+.hero {
+  position: relative;
+  padding-bottom: 40px;
+  flex-shrink: 0;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #1f9d55;
+}
+
+.liveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2fb463;
+  box-shadow: 0 0 0 3px rgba(47, 180, 99, 0.25);
+}
+
+.introRow {
+  display: flex;
+  align-items: center;
+  gap: var(--hp-space-3);
+  margin-top: var(--hp-space-3);
+}
+
+.introBubble {
+  flex: 1;
+  min-width: 0;
+  background: #f3e3c1;
+  border-radius: var(--hp-radius-md);
+  padding: 8px 10px;
+  box-shadow: var(--hp-shadow-sm);
+}
+
+.introLead {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 4px;
+  font-weight: 800;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #7a5a1e;
+}
+
+.pandoDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--hp-primary);
+  flex-shrink: 0;
+}
+
+.introBody {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #3a2f1c;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  overflow: hidden;
+}
+
+.avatarWrap {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.avatar {
+  width: 220px;
+  max-width: 220px;
+  height: auto;
+  filter: drop-shadow(0 14px 16px rgba(16, 35, 29, 0.18));
+  animation: pandoIdle 4.5s ease-in-out infinite;
+}
+
+@keyframes pandoIdle {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  22% {
+    transform: translate(-4px, -6px) rotate(-3deg);
+  }
+  50% {
+    transform: translate(0, -10px) rotate(0deg);
+  }
+  78% {
+    transform: translate(4px, -6px) rotate(3deg);
+  }
+}
+
+.voicePill {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--hp-surface);
+  border: 1px solid var(--hp-line-soft);
+  box-shadow: var(--hp-shadow-sm);
+  color: var(--hp-charcoal);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--hp-radius-pill);
+  cursor: pointer;
+}
+
+.voicePill:hover {
+  border-color: var(--hp-primary);
+  color: var(--hp-primary);
+}
+
+.chatSection {
+  background: var(--hp-surface);
+  border: 1px solid var(--hp-line-soft);
+  border-radius: var(--hp-radius-lg);
+  box-shadow: var(--hp-shadow-sm);
+  padding: var(--hp-space-3) var(--hp-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chatTitle {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--hp-ink);
+}
+
+.chatLog {
+  max-height: 110px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px;
+}
+
+.chatEmpty {
+  font-size: 0.76rem;
+  color: var(--hp-slate);
+  font-style: italic;
+}
+
+.chatBubble {
+  max-width: 88%;
+  padding: 7px 10px;
+  border-radius: var(--hp-radius-md);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.chatBubbleUser {
+  align-self: flex-end;
+  background: var(--hp-primary);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.chatBubblePando {
+  align-self: flex-start;
+  background: var(--hp-mint-100);
+  color: var(--hp-ink);
+  border-bottom-left-radius: 4px;
+}
+
+.chatInputBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 280px;
+  border: 1.5px solid var(--hp-line);
+  border-radius: var(--hp-radius-pill);
+  padding: 3px 3px 3px 12px;
+  background: var(--hp-bg);
+}
+
+.chatInputBar:focus-within {
+  border-color: var(--hp-primary);
+  background: var(--hp-surface);
+}
+
+.chatInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.78rem;
+  padding: 7px 0;
+  color: var(--hp-ink);
+  min-width: 0;
+}
+
+.micBtn,
+.sendBtn {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.micBtn {
+  background: var(--hp-mint-100);
+  color: var(--hp-primary);
+}
+
+.micBtn:hover {
+  background: var(--hp-mint-200);
+}
+
+.micActive {
+  background: var(--hp-primary);
+  color: #fff;
+}
+
+.sendBtn {
+  background: var(--hp-primary);
+}
+
+.sendBtn:hover {
+  background: var(--hp-primary-dark);
+}
+
+@media (max-width: 480px) {
+  .introRow {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}

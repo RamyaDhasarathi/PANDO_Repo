@@ -1,0 +1,219 @@
+.bar {
+  background: var(--hp-surface);
+  border-radius: var(--hp-radius-lg);
+  box-shadow: var(--hp-shadow-lg);
+  border: 1px solid var(--hp-line-soft);
+  padding: var(--hp-space-3);
+}
+
+.barHero {
+  padding: var(--hp-space-4);
+}
+
+.barCompact {
+  padding: var(--hp-space-2);
+  box-shadow: var(--hp-shadow-md);
+}
+
+.toggleRow {
+  display: flex;
+  gap: 6px;
+  margin-bottom: var(--hp-space-3);
+}
+
+.toggle {
+  border: none;
+  background: var(--hp-mint-50);
+  color: var(--hp-slate);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 8px 20px;
+  border-radius: var(--hp-radius-pill);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggleActive {
+  background: var(--hp-primary);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(193, 39, 45, 0.3);
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr auto;
+  gap: var(--hp-space-2);
+  align-items: stretch;
+}
+
+.fieldsCompact {
+  grid-template-columns: 1.4fr 0.9fr auto;
+}
+
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1.5px solid var(--hp-line);
+  border-radius: var(--hp-radius-md);
+  padding: 0 var(--hp-space-4);
+  background: var(--hp-bg);
+}
+
+.field:focus-within {
+  border-color: var(--hp-primary);
+  background: #fff;
+}
+
+.fieldIcon {
+  flex-shrink: 0;
+  color: var(--hp-primary);
+}
+
+.input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  padding: 16px 0;
+  font-size: 0.95rem;
+  color: var(--hp-ink);
+}
+
+.barCompact .input {
+  padding: 11px 0;
+  font-size: 0.9rem;
+}
+
+.select {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  padding: 16px 0;
+  font-size: 0.95rem;
+  color: var(--hp-ink);
+  cursor: pointer;
+}
+
+.barCompact .select {
+  padding: 11px 0;
+  font-size: 0.9rem;
+}
+
+.searchBtn {
+  border: none;
+  border-radius: var(--hp-radius-md);
+  background: linear-gradient(135deg, var(--hp-primary-light), var(--hp-primary));
+  color: #fff;
+  font-weight: 700;
+  padding: 0 var(--hp-space-6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 10px 24px rgba(193, 39, 45, 0.3);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.searchBtn:hover {
+  box-shadow: 0 14px 30px rgba(193, 39, 45, 0.36);
+}
+
+.micBtn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: var(--hp-mint-100);
+  color: var(--hp-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.micBtn:hover {
+  background: var(--hp-mint-200);
+}
+
+.micActive {
+  background: var(--hp-primary);
+  color: #fff;
+  animation: micPulse 1.4s infinite;
+}
+
+@keyframes micPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(193, 39, 45, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(193, 39, 45, 0.15);
+  }
+}
+
+.suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: var(--hp-radius-md);
+  box-shadow: var(--hp-shadow-lg);
+  border: 1px solid var(--hp-line-soft);
+  overflow: hidden;
+  z-index: 30;
+}
+
+.suggestionItem {
+  padding: 12px var(--hp-space-4);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--hp-charcoal);
+}
+
+.suggestionItem:hover {
+  background: var(--hp-mint-50);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: var(--hp-space-3);
+}
+
+.chip {
+  border: 1.5px solid var(--hp-line);
+  background: #fff;
+  border-radius: var(--hp-radius-pill);
+  padding: 7px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--hp-charcoal);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chipActive {
+  background: var(--hp-mint-100);
+  border-color: var(--hp-primary);
+  color: var(--hp-primary-dark);
+}
+
+@media (max-width: 780px) {
+  .fields,
+  .fieldsCompact {
+    grid-template-columns: 1fr;
+  }
+  .searchBtn {
+    padding: 14px;
+    justify-content: center;
+  }
+}

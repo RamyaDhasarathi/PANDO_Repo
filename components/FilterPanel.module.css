@@ -1,0 +1,98 @@
+.panel {
+  background: var(--hp-surface);
+  border: 1px solid var(--hp-line-soft);
+  border-radius: var(--hp-radius-lg);
+  padding: var(--hp-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hp-space-5);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hp-space-3);
+}
+
+.groupTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--hp-ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: var(--hp-charcoal);
+  cursor: pointer;
+}
+
+.checkRow input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--hp-primary);
+  cursor: pointer;
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  border: 1.5px solid var(--hp-line);
+  background: var(--hp-bg);
+  border-radius: var(--hp-radius-pill);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--hp-charcoal);
+}
+
+.pillActive {
+  background: var(--hp-primary);
+  border-color: var(--hp-primary);
+  color: #fff;
+}
+
+.rangeInputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rangeInputs input {
+  width: 100%;
+  border: 1.5px solid var(--hp-line);
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.rangeInputs input:focus {
+  border-color: var(--hp-primary);
+}
+
+.divider {
+  height: 1px;
+  background: var(--hp-line-soft);
+}
+
+.resetBtn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--hp-primary-dark);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+}

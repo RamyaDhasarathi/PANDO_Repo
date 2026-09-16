@@ -1,0 +1,344 @@
+/* PANDO MASCOT & RESPONSE BUBBLE STYLES - EMBEDDED CONTAINER */
+
+.pando-embedded-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 12px;
+  max-width: 100%;
+  pointer-events: auto;
+  user-select: none;
+  z-index: 20;
+}
+
+/* RESPONSE SPEECH BUBBLE */
+.pando-speech-bubble {
+  position: relative;
+  max-width: 340px;
+  padding: 12px 14px;
+  background: linear-gradient(138deg, #FAF2DF 0%, #F5E8C9 100%);
+  border: 1.5px solid #1A1A1A;
+  border-radius: 16px 16px 4px 16px;
+  box-shadow: 4px 6px 14px rgba(0, 0, 0, 0.08), inset 1px 1px 0px rgba(255, 255, 255, 0.7);
+  z-index: 25;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-bottom: 28px;
+}
+
+.pando-speech-bubble.is-speaking {
+  background: linear-gradient(138deg, #FFF6DD 0%, #F7E4B5 100%);
+  border-color: #D92828;
+  box-shadow: 4px 8px 18px rgba(217, 40, 40, 0.15), inset 1px 1px 0px rgba(255, 255, 255, 0.8);
+}
+
+.bubble-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.bubble-header .red-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #D92828;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(217, 40, 40, 0.2);
+}
+
+.bubble-header .header-text {
+  color: #D92828;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.bubble-message {
+  margin: 0;
+  color: #111111;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+.bubble-pointer {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  right: -5px;
+  bottom: 18px;
+  background: #F5E8C9;
+  border-right: 1.5px solid #1A1A1A;
+  border-top: 1.5px solid #1A1A1A;
+  transform: rotate(45deg);
+}
+
+.pando-speech-bubble.is-speaking .bubble-pointer {
+  background: #F7E4B5;
+  border-color: #D92828;
+}
+
+/* PANDO MASCOT CHARACTER WITH DYNAMIC SHADOW */
+.pando-character-wrap {
+  width: 150px;
+  height: 160px;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+@media (min-width: 640px) {
+  .pando-character-wrap {
+    width: 175px;
+    height: 190px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pando-character-wrap {
+    width: 195px;
+    height: 210px;
+  }
+}
+
+
+.pando-mascot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.16));
+  animation: pando-float 4.5s ease-in-out infinite;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.pando-mascot-img:hover {
+  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.22));
+  transform: scale(1.03);
+}
+
+/* Ground shadow oval underneath mascot */
+.pando-character-wrap::after {
+  content: "";
+  position: absolute;
+  bottom: 0px;
+  width: 50%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 50%;
+  filter: blur(3px);
+  z-index: -1;
+  animation: pando-shadow 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ANIMATION KEYFRAMES */
+@keyframes pando-float {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-6px) rotate(1.2deg);
+  }
+}
+
+@keyframes pando-shadow {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: scale(0.75);
+    opacity: 0.3;
+  }
+}
+
+.pando-character-wrap.is-talking-anim {
+  animation: mascot-talking 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes mascot-talking {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  100% {
+    transform: translateY(-3px) rotate(-1.5deg);
+  }
+}
+
+.pando-character-wrap.mascot-twist {
+  animation: mascot-twist 2.2s ease-in-out both;
+}
+
+.pando-character-wrap.mascot-jump {
+  animation: mascot-jump 2.2s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.pando-character-wrap.mascot-dance {
+  animation: mascot-dance 2.2s ease-in-out both;
+}
+
+@keyframes mascot-twist {
+
+  0%,
+  100% {
+    transform: rotate(0) translateX(0);
+  }
+
+  25% {
+    transform: rotate(-4deg) translateX(-4px);
+  }
+
+  55% {
+    transform: rotate(5deg) translateX(5px);
+  }
+
+  78% {
+    transform: rotate(-2deg) translateX(-3px);
+  }
+}
+
+@keyframes mascot-jump {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  25% {
+    transform: translateY(-12px) rotate(-2deg);
+  }
+
+  48% {
+    transform: translateY(0) rotate(2deg);
+  }
+
+  62% {
+    transform: translateY(-6px) rotate(-1deg);
+  }
+
+  80% {
+    transform: translateY(0) rotate(0);
+  }
+}
+
+@keyframes mascot-dance {
+
+  0%,
+  100% {
+    transform: rotate(0) translateX(0) scaleX(1);
+  }
+
+  20% {
+    transform: rotate(-3deg) translateX(-4px);
+  }
+
+  42% {
+    transform: rotate(4deg) translateX(4px);
+  }
+
+  64% {
+    transform: rotate(-3deg) translateX(-4px);
+  }
+
+  82% {
+    transform: rotate(2deg) translateX(2px);
+  }
+}
+
+/* VOICE CONTROL BUTTON ON SPEECH NOTE HEADER */
+.pando-voice-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2.5px 7.5px;
+  border: 1.2px solid #1A1A1A;
+  background-color: #355C47;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  font-weight: 900;
+  border-radius: 9999px;
+  box-shadow: 1px 1px 0px rgba(26, 26, 26, 0.2);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.pando-voice-header-btn:hover {
+  background-color: #111111;
+  color: #D92828;
+}
+
+.pando-voice-header-btn.is-muted {
+  background-color: #66666E;
+}
+
+.pando-voice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3.5px 8px;
+  border: 1.5px solid #1A1A1A;
+  background-color: #355C47;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  font-weight: 900;
+  border-radius: 9999px;
+  box-shadow: 2px 2px 0px rgba(26, 26, 26, 0.25);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  margin-top: -6px;
+  z-index: 24;
+}
+
+.pando-voice-btn:hover {
+  background-color: #111111;
+  color: #D92828;
+  transform: translateY(-1px);
+}
+
+.pando-voice-btn.is-muted {
+  background-color: #66666E;
+}
+
+
+/* RESPONSIVE SCALING */
+@media (max-width: 639px) {
+  .pando-embedded-container {
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .pando-speech-bubble {
+    max-width: 240px;
+    margin-bottom: 20px;
+  }
+
+  .bubble-pointer {
+    right: 30px;
+    bottom: -5px;
+    top: auto;
+    transform: rotate(135deg);
+  }
+}
