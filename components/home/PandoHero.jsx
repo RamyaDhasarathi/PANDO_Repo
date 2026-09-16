@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Volume2, VolumeX } from 'lucide-react';
 import AuthForm from '@/components/AuthForm';
 
 const mascotUrl =
@@ -188,19 +189,6 @@ export default function PandoHero() {
                 placeholder="A home, a neighborhood, a plan..."
                 autoComplete="off"
               />
-              <button
-                type="button"
-                className="mic-button"
-                aria-label="Listen to Pando"
-                onClick={handleMascotOrBubbleClick}
-                title="Hear Pando speak"
-              >
-                <svg viewBox="0 0 24 24" width="19" height="19" stroke="currentColor" strokeWidth="2" fill="none">
-                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                  <line x1="12" y1="19" x2="12" y2="22" />
-                </svg>
-              </button>
               <button type="submit" className="send-button" aria-label="Ask Pando">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M7 17L17 7M17 7H7M17 7v10" />
@@ -222,9 +210,19 @@ export default function PandoHero() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                 <span className="bubble-pulse" /> PANDO SAYS
               </div>
-              <span style={{ fontSize: 9, opacity: 0.8, color: 'var(--ink)' }}>
-                {isSpeaking ? '🔊 Speaking...' : '🔊 Click to listen'}
-              </span>
+              <button
+                type="button"
+                className={`bubble-mute-btn ${muted ? 'is-muted' : 'is-active'}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleMute();
+                }}
+                aria-label={muted ? 'Unmute Pando' : 'Mute Pando'}
+                aria-pressed={muted}
+                title={muted ? 'Unmute Pando' : 'Mute Pando'}
+              >
+                {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+              </button>
             </div>
             <p>{reply}</p>
             <div className="bubble-tail" />
@@ -243,28 +241,6 @@ export default function PandoHero() {
               alt="Pando, a friendly red real estate advisor mascot"
             />
           </div>
-          <button
-            className="mute-button"
-            type="button"
-            onClick={toggleMute}
-            aria-label={muted ? 'Unmute Pando' : 'Mute Pando'}
-            aria-pressed={muted}
-          >
-            {muted ? (
-              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                <line x1="23" y1="9" x2="17" y2="15" />
-                <line x1="17" y1="9" x2="23" y2="15" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-              </svg>
-            )}
-            <span>{muted ? 'MUTED' : isSpeaking ? 'SPEAKING' : 'VOICE ON'}</span>
-          </button>
         </div>
       </section>
 

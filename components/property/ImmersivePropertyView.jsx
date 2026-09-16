@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
 import styles from "./ImmersivePropertyView.module.css";
 import { formatAED, formatPrice, bedroomLabel } from "@/lib/format";
 import { explainProperty, answerPropertyQuestion } from "@/lib/propertyAssistant";
@@ -251,6 +251,10 @@ export default function ImmersivePropertyView({ property }) {
 
         {/* TOP-LEFT OVERLAY: Navigation, Verification, Title, Location */}
         <div className={styles.topLeftOverlay}>
+          <Link href="/" className={styles.brandLink} aria-label="Hi Pando home">
+            Hi Pando!
+          </Link>
+
           <div className={styles.topActionRow}>
             <Link href="/search" className={styles.backLink}>
               <span className={styles.backArrow}>←</span> Back to Properties
@@ -294,32 +298,26 @@ export default function ImmersivePropertyView({ property }) {
         {/* PANDO & ASK INPUT UNIT INSIDE THE PROPERTY CANVAS (RIGHT / LOWER-RIGHT) */}
         <div className={styles.pandoInteractiveUnit}>
           <div className={styles.pandoRow}>
-            {/* Connected Voice Note Bubble with Reference Design */}
+            {/* Connected Voice Note Bubble — matches the landing page's .speech-bubble */}
             <div className={`${styles.speechBubble} ${isSpeaking ? styles.bubbleSpeaking : ""}`}>
-              <div className={styles.speechBubbleTopRow}>
-                <p className={styles.speechBubbleText}>{pandoMessage}</p>
+              <div className={styles.speechBubbleHeader}>
+                <div className={styles.speechBubbleLabel}>
+                  <span className={styles.bubblePulse} />
+                  PANDO SAYS
+                </div>
                 {speechSupported && (
                   <button
                     type="button"
-                    className={`${styles.bubbleSpeakerBtn} ${!muted && isSpeaking ? styles.bubbleSpeakerActive : ""}`}
+                    className={`${styles.bubbleSpeakerBtn} ${muted ? styles.isMuted : ""} ${!muted && isSpeaking ? styles.bubbleSpeakerActive : ""}`}
                     onClick={toggleVoiceAudio}
                     aria-label={muted ? "Turn Pando voice ON" : "Turn Pando voice OFF"}
                     title={muted ? "Turn voice ON" : "Turn voice OFF"}
                   >
-                    {muted ? (
-                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                        <path d="M2 6h2.5L8 3v10L4.5 10H2V6Z" fill="currentColor" />
-                        <path d="M10.5 5.5l4 5M14.5 5.5l-4 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                      </svg>
-                    ) : (
-                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                        <path d="M2 6h2.5L8 3v10L4.5 10H2V6Z" fill="currentColor" />
-                        <path d="M10.8 5.3a3.6 3.6 0 0 1 0 5.4M12.7 3.6a6.3 6.3 0 0 1 0 8.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                      </svg>
-                    )}
+                    {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
                   </button>
                 )}
               </div>
+              <p className={styles.speechBubbleText}>{pandoMessage}</p>
             </div>
 
             {/* Physical Pando Character Inside Scene with Ground Shadow */}

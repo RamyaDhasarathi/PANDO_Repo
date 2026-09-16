@@ -4,114 +4,110 @@
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 0;
   max-width: 100%;
   pointer-events: auto;
   user-select: none;
   z-index: 20;
 }
 
-/* RESPONSE SPEECH BUBBLE MATCHING IMAGE 1 */
+/* RESPONSE SPEECH BUBBLE — matches the landing page (.speech-bubble in styles/globals.css) */
 .pando-speech-bubble {
   position: relative;
   max-width: 360px;
-  padding: 14px 16px;
-  background: #FAF6EA;
-  border: 1px solid #EBE5D5;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+  margin-right: -28px;
+  padding: 18px 20px 20px;
+  background: linear-gradient(145deg, rgba(255,231,181,0.97), rgba(197,160,89,0.94));
+  border: 2px solid var(--ink);
+  border-radius: 24px 24px 24px 8px;
+  box-shadow: 10px 12px 0 rgba(30,30,34,0.28), inset 3px 3px 0 rgba(255,255,255,0.42), inset -5px -7px 14px rgba(104,73,33,0.2);
   z-index: 25;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  margin-bottom: 24px;
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  margin-bottom: 100px;
 }
 
 .pando-speech-bubble.is-speaking {
-  background: #FFFDF5;
-  border-color: #FCA5A5;
-  box-shadow: 0 12px 30px -5px rgba(220, 38, 38, 0.12);
+  transform: translateY(-5px);
+  background: linear-gradient(145deg, #ffe9bb, #d5ae65);
+  box-shadow: 12px 15px 0 rgba(30,30,34,0.3), inset 3px 3px 0 rgba(255,255,255,0.5), inset -5px -7px 16px rgba(104,73,33,0.22);
 }
 
 .bubble-header {
   display: flex;
   align-items: center;
-  margin-bottom: 6px;
+  justify-content: space-between;
+  gap: 9px;
+  margin-bottom: 12px;
 }
 
 .bubble-header .red-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background-color: #DC2626;
+  background: var(--signal);
   display: inline-block;
+  box-shadow: 0 0 0 5px rgba(240, 68, 46, 0.16);
+  animation: pulse 2s infinite;
 }
 
 .bubble-header .header-text {
-  color: #DC2626;
+  color: var(--signal);
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-weight: 800;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  font-family: 'Inter', -apple-system, sans-serif;
 }
 
 .bubble-message {
   margin: 0;
-  color: #374151;
-  font-family: 'Inter', -apple-system, sans-serif;
-  font-size: 12.5px;
-  line-height: 1.45;
-  font-weight: 400;
+  color: var(--ink);
+  font-size: clamp(12px, 1.05vw, 15px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 900;
 }
 
 .bubble-pointer {
   position: absolute;
-  width: 10px;
-  height: 10px;
-  right: -5px;
-  bottom: 20px;
-  background: #FAF6EA;
-  border-right: 1px solid #EBE5D5;
-  border-top: 1px solid #EBE5D5;
-  transform: rotate(45deg);
-}
-
-.pando-speech-bubble.is-speaking .bubble-pointer {
-  background: #FFFDF5;
-  border-color: #FCA5A5;
+  width: 20px;
+  height: 20px;
+  right: -12px;
+  bottom: 24px;
+  background: var(--acid);
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 rgba(30,30,34,0.2);
+  transform: rotate(-45deg);
 }
 
 /* PANDO MASCOT CHARACTER WITH DYNAMIC SHADOW */
 .pando-character-wrap {
-  width: 130px;
-  height: 150px;
+  width: 190px;
   position: relative;
   flex-shrink: 0;
   z-index: 22;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   cursor: pointer;
 }
 
 @media (min-width: 640px) {
   .pando-character-wrap {
-    width: 145px;
-    height: 165px;
+    width: 215px;
   }
 }
 
 @media (min-width: 1024px) {
   .pando-character-wrap {
-    width: 160px;
-    height: 180px;
+    width: 240px;
   }
 }
 
 .pando-mascot-img {
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: contain;
-  object-position: center;
   display: block;
   filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.12));
   animation: pando-float 4.5s ease-in-out infinite;
@@ -235,27 +231,34 @@
   }
 }
 
-/* VOICE CONTROL BUTTON ON SPEECH NOTE HEADER */
+/* VOICE CONTROL BUTTON ON SPEECH NOTE HEADER — matches .bubble-mute-btn in styles/globals.css */
 .pando-voice-header-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  border: none;
-  background-color: #1F2937;
-  color: #FFFFFF;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin: 0;
+  line-height: 0;
+  flex-shrink: 0;
+  border: 2px solid var(--ink);
   border-radius: 50%;
+  background: var(--water);
+  color: #fff;
   transition: all 0.2s ease;
   cursor: pointer;
-  flex-shrink: 0;
 }
+.pando-voice-header-btn svg { display: block; }
 
 .pando-voice-header-btn:hover {
-  background-color: #111827;
+  background: var(--ink);
+  color: var(--acid);
 }
 
 .pando-voice-header-btn.is-muted {
-  background-color: #6B7280;
+  background: transparent;
+  color: var(--ink);
 }
 
 /* RESPONSIVE SCALING */
@@ -268,13 +271,13 @@
 
   .pando-speech-bubble {
     max-width: 250px;
-    margin-bottom: 16px;
+    margin-right: 0;
+    margin-bottom: -16px;
   }
 
   .bubble-pointer {
     right: 30px;
-    bottom: -5px;
-    top: auto;
-    transform: rotate(135deg);
+    bottom: -8px;
+    transform: rotate(45deg);
   }
 }
