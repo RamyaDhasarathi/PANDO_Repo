@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SlidersHorizontal, ChevronDown, Check, Search, X } from 'lucide-react';
 
 export const PropertyFilters = ({
@@ -18,6 +18,20 @@ export const PropertyFilters = ({
 }) => {
   const [isRefineOpen, setIsRefineOpen] = useState(false);
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsRefineOpen(false);
+        setIsLocationDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const locations = [
     { label: 'All Locations', value: 'all' },
@@ -65,13 +79,13 @@ export const PropertyFilters = ({
   };
 
   const getActiveLocationLabel = () => {
-    if (selectedLocation === 'all') return 'Waterfront & Skyline';
+    if (selectedLocation === 'all') return 'All Locations';
     const found = locations.find((l) => l.value === selectedLocation);
     return found ? found.label : 'Location';
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div ref={containerRef} style={{ position: 'relative' }}>
       {/* Primary Pill Filter Buttons */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         {/* Waterfront & Skyline Pill Dropdown Button */}

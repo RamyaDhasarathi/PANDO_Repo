@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Volume2, VolumeX } from 'lucide-react';
-import { properties as rawDatasetProperties } from '@/data/properties';
 
 const MASCOT_URL =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png';
@@ -38,117 +37,7 @@ const COMMUNITY_COORDS = {
   'Water Canal': { lat: 25.1820, lng: 55.2500 },
 };
 
-// Build unified property dataset
-const UNIFIED_PROPERTIES = [
-  // Flagship UI3 projects
-  {
-    id: 'hp-1007',
-    title: 'Royal Atlantis Sky Penthouse',
-    location: 'Palm Jumeirah',
-    community: 'Palm Jumeirah',
-    city: 'Dubai',
-    price: 'AED 45,000,000',
-    rawPrice: 45000000,
-    meta: '5 BR · Villa & Penthouse',
-    bedrooms: 5,
-    bathrooms: 6,
-    areaSqft: 6200,
-    furnishing: 'Furnished',
-    amenities: ['Pool', 'Private Beach', 'Parking', 'Garden', 'Concierge'],
-    lat: 25.1124,
-    lng: 55.1390,
-    category: 'Penthouses',
-    type: 'Buy',
-    purpose: 'sale',
-    image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80',
-    description: 'Ultra-luxurious beachfront residence on Palm Jumeirah with private beach access and panoramic resort views.',
-  },
-  {
-    id: 'hp-1002',
-    title: 'Burj Khalifa Residences',
-    location: 'Downtown Dubai',
-    community: 'Downtown Dubai',
-    city: 'Dubai',
-    price: 'AED 400,000/yr',
-    rawPrice: 400000,
-    meta: '1 BR · Apartment',
-    bedrooms: 1,
-    bathrooms: 1,
-    areaSqft: 780,
-    furnishing: 'Furnished',
-    amenities: ['Pool', 'Gym', 'Parking', 'Burj View'],
-    lat: 25.1972,
-    lng: 55.2744,
-    category: 'Apartments',
-    type: 'Rent',
-    purpose: 'rent',
-    image: 'https://images.unsplash.com/photo-1580674684081-7617fbf3d745?auto=format&fit=crop&w=800&q=80',
-    description: 'Luxury high-rise suites in Downtown Dubai with views of the Burj Khalifa and Dubai Fountains.',
-  },
-  {
-    id: 'hp-1001',
-    title: '2 BHK Apartment in Dubai Marina',
-    location: 'Dubai Marina',
-    community: 'Dubai Marina',
-    city: 'Dubai',
-    price: 'AED 1,850,000',
-    rawPrice: 1850000,
-    meta: '2 BR · Apartment',
-    bedrooms: 2,
-    bathrooms: 2,
-    areaSqft: 1250,
-    furnishing: 'Semi-Furnished',
-    amenities: ['Pool', 'Gym', 'Parking', 'Balcony'],
-    lat: 25.0772,
-    lng: 55.1332,
-    category: 'Apartments',
-    type: 'Buy',
-    purpose: 'sale',
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80&auto=format&fit=crop',
-    description: 'A bright 2-bedroom apartment with unobstructed marina views, floor-to-ceiling windows and a spacious balcony.',
-  },
-  // Map remaining raw properties
-  ...rawDatasetProperties
-    .filter((p) => !['hp-1001', 'hp-1002', 'hp-1007'].includes(p.id))
-    .map((p, index) => {
-      const baseCoords = COMMUNITY_COORDS[p.community] || { lat: 25.12, lng: 55.22 };
-      const offsetLat = ((index % 5) - 2) * 0.0045;
-      const offsetLng = (Math.floor(index / 5) - 2) * 0.0045;
-      const formattedPrice =
-        p.purpose === 'rent'
-          ? `AED ${p.price.toLocaleString()}/yr`
-          : `AED ${p.price.toLocaleString()}`;
-
-      let cat = 'Apartments';
-      if (p.type === 'Villa') cat = 'Villas';
-      else if (p.type === 'Townhouse') cat = 'Townhouses';
-      else if (p.type === 'Plot') cat = 'Plots';
-      else if (p.type === 'Commercial') cat = 'Commercial';
-
-      return {
-        id: p.id,
-        title: p.title,
-        location: p.community,
-        community: p.community,
-        city: p.city || 'Dubai',
-        price: formattedPrice,
-        rawPrice: p.price,
-        meta: `${p.bedrooms || 0} BR · ${p.type}`,
-        bedrooms: p.bedrooms,
-        bathrooms: p.bathrooms,
-        areaSqft: p.areaSqft,
-        furnishing: p.furnishing,
-        amenities: p.amenities || [],
-        lat: baseCoords.lat + offsetLat,
-        lng: baseCoords.lng + offsetLng,
-        category: cat,
-        type: p.purpose === 'sale' ? 'Buy' : 'Rent',
-        purpose: p.purpose,
-        image: p.images?.[0] || 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80',
-        description: p.description,
-      };
-    }),
-];
+// Empty, generated dynamically in component instead
 
 const CATEGORIES = ['All', 'Apartments', 'Villas', 'Off-Plan', 'Penthouses', 'Townhouses'];
 const NAV_TABS = ['Buy', 'Rent', 'Off-Plan', 'Explore'];
@@ -161,13 +50,14 @@ const PANDO_TIPS = [
   'Ask me anything or click any property pin to inspect live listings!',
 ];
 
-export default function PandoMapExplore() {
+export default function PandoMapExplore({ dbProperties = [] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeNavTab, setActiveNavTab] = useState('Buy');
   const [searchQuery, setSearchQuery] = useState('');
+  const [apiSearchResults, setApiSearchResults] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const mutedRef = useRef(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -177,6 +67,42 @@ export default function PandoMapExplore() {
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   // Increments each time a filter/tab is clicked — signals PandoMapInner to fly to Dubai
   const [filterZoomKey, setFilterZoomKey] = useState(0);
+
+  // Map database properties to the expected map structure
+  const UNIFIED_PROPERTIES = useMemo(() => {
+    return dbProperties.map((p, index) => {
+      const community = p.community || 'Dubai';
+      
+      const formattedPrice = p.purpose === 'rent'
+        ? `AED ${p.price.toLocaleString()}/yr`
+        : `AED ${p.price.toLocaleString()}`;
+
+      return {
+        id: p.originalId || p._id,
+        title: p.title || p.name,
+        location: community,
+        community: community,
+        city: p.city || 'Dubai',
+        price: formattedPrice,
+        rawPrice: p.price,
+        meta: `${p.bedrooms || 0} BR · ${p.propertyType}`,
+        bedrooms: p.bedrooms,
+        bathrooms: p.bathrooms,
+        areaSqft: p.areaSqft,
+        furnishing: p.furnishing, 
+        amenities: p.amenities || [],
+        lat: p.coordinates?.lat || 25.12,
+        lng: p.coordinates?.lng || 55.22,
+        category: p.category,
+        type: p.purpose === 'sale' ? 'Buy' : 'Rent',
+        purpose: p.purpose, 
+        image: p.images && p.images.length > 0 ? p.images[0] : 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80',
+        description: p.description,
+        source: p.source,
+        listedBy: p.listedBy
+      };
+    });
+  }, [dbProperties]);
 
   // Read URL query on mount
   useEffect(() => {
@@ -257,7 +183,16 @@ export default function PandoMapExplore() {
   const handleSelectProperty = (prop) => {
     setHasUserInteracted(true);
     setSelectedProperty(prop);
-    const text = `Here are the details for ${prop.title} in ${prop.location}: ${prop.price} (${prop.meta}). ${prop.description}`;
+    
+    // Format price for natural speech instead of spelling out digits
+    let spokenPrice = `${prop.rawPrice} dirhams`;
+    if (prop.rawPrice >= 1000000) {
+      spokenPrice = `${(prop.rawPrice / 1000000).toFixed(1).replace('.0', '')} million dirhams`;
+    } else if (prop.rawPrice >= 1000) {
+      spokenPrice = `${(prop.rawPrice / 1000).toFixed(1).replace('.0', '')} thousand dirhams`;
+    }
+
+    const text = `Here are the details for ${prop.title} in ${prop.location}: ${spokenPrice} (${prop.meta}). ${prop.description}`;
     setSpeechText(text);
     speak(text);
   };
@@ -269,41 +204,45 @@ export default function PandoMapExplore() {
     speak(tip);
   };
 
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = async (e) => {
     e.preventDefault();
     setHasUserInteracted(true);
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim()) {
+      setApiSearchResults(null);
+      return;
+    }
 
-    const q = searchQuery.toLowerCase().trim();
-    const matches = UNIFIED_PROPERTIES.filter(
-      (p) =>
-        p.title.toLowerCase().includes(q) ||
-        p.community.toLowerCase().includes(q) ||
-        p.location.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.type.toLowerCase().includes(q) ||
-        p.id.toLowerCase() === q
-    );
-
-    if (matches.length > 0) {
-      const match = matches[0];
-      setSelectedProperty(match);
-      const msg = `Found ${matches.length} matching properties in Dubai! Displaying ${match.title} in ${match.location}: ${match.price}.`;
-      setSpeechText(msg);
-      speak(msg);
-    } else {
-      const notFoundMsg = `No exact match found for "${searchQuery}". Showing available Dubai properties.`;
-      setSpeechText(notFoundMsg);
-      speak(notFoundMsg);
+    const q = searchQuery.trim();
+    try {
+      const res = await fetch(`/api/properties?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      
+      if (data.success && data.data && data.data.length > 0) {
+        setApiSearchResults(data.data.map(d => d.id));
+        const match = UNIFIED_PROPERTIES.find(p => p.id === data.data[0].id) || data.data[0];
+        setSelectedProperty(match);
+        const msg = `Found ${data.data.length} matching properties in Dubai! Displaying ${match.title || match.name} in ${match.location || match.community}.`;
+        setSpeechText(msg);
+        speak(msg);
+      } else {
+        setApiSearchResults([]);
+        const notFoundMsg = `No exact match found for "${searchQuery}". Showing available Dubai properties.`;
+        setSpeechText(notFoundMsg);
+        speak(notFoundMsg);
+      }
+    } catch (err) {
+      console.error('Search error:', err);
     }
   };
 
   // Filter properties
   const filteredProperties = useMemo(() => {
     return UNIFIED_PROPERTIES.filter((p) => {
-      // 1. Search Query Filter
-      if (searchQuery.trim()) {
+      // 1. Search Query Filter (via API if submitted)
+      if (apiSearchResults !== null) {
+        if (!apiSearchResults.includes(p.id)) return false;
+      } else if (searchQuery.trim()) {
+        // Fallback live-filter while typing if API hasn't run yet
         const q = searchQuery.toLowerCase().trim();
         const matchesQuery =
           p.title.toLowerCase().includes(q) ||
@@ -327,7 +266,7 @@ export default function PandoMapExplore() {
 
       return true;
     });
-  }, [searchQuery, activeCategory, activeNavTab]);
+  }, [searchQuery, apiSearchResults, activeCategory, activeNavTab, UNIFIED_PROPERTIES]);
 
   return (
     <div className="pando-app">
@@ -364,6 +303,7 @@ export default function PandoMapExplore() {
               type="button"
               onClick={() => {
                 setSearchQuery('');
+                setApiSearchResults(null);
                 setSelectedProperty(null);
               }}
               style={{

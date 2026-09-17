@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Volume2, VolumeX } from 'lucide-react';
+import { useAuth } from '@/providers/AuthProvider';
 import AuthForm from '@/components/AuthForm';
+import ProfilePopup from '@/components/ProfilePopup';
 
 const mascotUrl =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png';
@@ -16,12 +18,15 @@ const replies = [
 
 export default function PandoHero() {
   const router = useRouter();
+  const { user } = useAuth();
   const [prompt, setPrompt] = useState('');
   const [reply, setReply] = useState(replies[0]);
+  const [isPersonalized, setIsPersonalized] = useState(false);
   const [muted, setMuted] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [mascotMove, setMascotMove] = useState('');
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [authMode, setAuthMode] = useState('sign-in');
   const hasSpokenRef = useRef(false);
 
@@ -42,6 +47,46 @@ export default function PandoHero() {
     timeoutId = setTimeout(scheduleMove, 3000 + Math.random() * 2000);
     return () => clearTimeout(timeoutId);
   }, []);
+
+  // Fetch AI preferences to personalize greeting
+  useEffect(() => {
+    async function loadPreferences() {
+      if (!user) {
+        setReply(replies[0]);
+        setIsPersonalized(false);
+        return;
+      }
+      try {
+        const res = await fetch('/api/buyer/profile');
+        const data = await res.json();
+        if (data.success && data.profile) {
+          const { purchasingGoal, budgetRange, preferredTypology, preferredLocations } = data.profile;
+          
+          let greeting = `Welcome back, ${user.name || 'friend'}. `;
+          if (purchasingGoal === 'Investor') {
+            greeting += `I've prepared the latest high-yield investment data `;
+            if (budgetRange) greeting += `for the ${budgetRange} bracket.`;
+            else greeting += `for you today.`;
+          } else if (purchasingGoal === 'End-User') {
+            greeting += `Ready to find your perfect home? `;
+            if (preferredTypology && preferredLocations?.length > 0) {
+              greeting += `I've shortlisted some incredible ${preferredTypology.toLowerCase()}s in ${preferredLocations[0]}.`;
+            } else if (preferredTypology) {
+              greeting += `I have some amazing ${preferredTypology.toLowerCase()}s to show you.`;
+            }
+          } else {
+            greeting += `I'm ready to help you find your next place.`;
+          }
+          
+          setReply(greeting);
+          setIsPersonalized(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch preferences for hero", err);
+      }
+    }
+    loadPreferences();
+  }, [user]);
 
   // Voice synthesis helper
   const getVoice = () => {
@@ -121,8 +166,8 @@ export default function PandoHero() {
     const query = prompt.trim();
     router.push(query ? `/search?q=${encodeURIComponent(query)}` : '/search');
     const nextReply = query
-      ? `${replies[Math.floor(Math.random() * replies.length)]} I’m ready when you are.`
-      : replies[0];
+      ? `Analyzing options for "${query}"... I’m ready when you are.`
+      : (isPersonalized ? reply : replies[0]);
     setReply(nextReply);
     speak(nextReply);
   };
@@ -154,16 +199,29 @@ export default function PandoHero() {
           <span className="brand-name">Hi Pando!</span>
         </a>
         <div className="nav-actions">
-          <button 
-            className="nav-action nav-action-soft" 
-            style={{cursor: 'pointer', background: 'rgba(255, 250, 243, 0.45)', backdropFilter: 'blur(8px)', border: '1px solid rgba(0,0,0,0.08)', fontSize: '9px', fontWeight: '800', letterSpacing: '0.1em', padding: '0 18px', minHeight: '34px'}}
-            onClick={() => {
-              setAuthMode('sign-in');
-              setIsAuthOpen(true);
-            }}
-          >
-            SIGN IN / SIGN UP
-          </button>
+          {user ? (
+            <button 
+              onClick={() => setIsProfileOpen(true)} 
+              className="nav-action nav-action-soft" 
+              style={{ cursor: 'pointer', background: 'rgba(255, 250, 243, 0.45)', backdropFilter: 'blur(8px)', border: '1px solid rgba(0,0,0,0.08)', fontSize: '12px', fontWeight: '600', padding: '0 18px', minHeight: '34px', display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#e11d48', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold' }}>
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              Hi, {user.name || 'User'}
+            </button>
+          ) : (
+            <button 
+              className="nav-action nav-action-soft" 
+              style={{cursor: 'pointer', background: 'rgba(255, 250, 243, 0.45)', backdropFilter: 'blur(8px)', border: '1px solid rgba(0,0,0,0.08)', fontSize: '9px', fontWeight: '800', letterSpacing: '0.1em', padding: '0 18px', minHeight: '34px'}}
+              onClick={() => {
+                setAuthMode('sign-in');
+                setIsAuthOpen(true);
+              }}
+            >
+              SIGN IN / SIGN UP
+            </button>
+          )}
           <a className="nav-action nav-action-primary" href="/explore">
             EXPLORE MAP{' '}
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -252,6 +310,10 @@ export default function PandoHero() {
           onSwitchMode={setAuthMode} 
           onClose={() => setIsAuthOpen(false)} 
         />
+      )}
+      
+      {isProfileOpen && (
+        <ProfilePopup onClose={() => setIsProfileOpen(false)} />
       )}
     </main>
   );

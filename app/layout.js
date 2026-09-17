@@ -1,6 +1,7 @@
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import TopNav from "@/components/TopNav";
+import { AuthProvider } from "@/providers/AuthProvider";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -23,8 +24,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={plusJakarta.variable}>
       <body>
-        <TopNav />
-        {children}
+        <AuthProvider>
+          <TopNav />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

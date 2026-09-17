@@ -15,8 +15,8 @@ export const PropertyCard = ({
   const [isHovered, setIsHovered] = useState(false);
 
   // Format currency
-  const formatAed = (val) => 'AED ' + val.toLocaleString('en-US');
-  const formatUsd = (val) => '~$' + val.toLocaleString('en-US') + ' USD';
+  const formatAed = (val) => 'AED ' + (val?.toLocaleString('en-US') ?? '');
+  const formatUsd = (val) => '~$' + (val?.toLocaleString('en-US') ?? '') + ' USD';
 
   const handleClick = () => {
     onSelect?.(property);
@@ -105,7 +105,7 @@ export const PropertyCard = ({
               letterSpacing: '-0.01em',
             }}
           >
-            {property.indexLabel}
+            {property.indexLabel || property.category || 'Prime'}
           </span>
         </div>
 
@@ -160,7 +160,7 @@ export const PropertyCard = ({
             zIndex: 10,
           }}
         >
-          {property.sectorBadge}
+          {property.sectorBadge || 'Sector 01'}
         </div>
       </div>
 
@@ -193,10 +193,17 @@ export const PropertyCard = ({
               {property.name}
             </h3>
             <div style={{ flexShrink: 0 }}>
-              <StatusBadge
-                label={property.statusBadge.label}
-                variant={property.statusBadge.variant}
-              />
+              {property.statusBadge ? (
+                <StatusBadge
+                  label={property.statusBadge.label}
+                  variant={property.statusBadge.variant}
+                />
+              ) : (
+                <StatusBadge
+                  label={property.purpose === 'rent' ? 'For Rent' : 'For Sale'}
+                  variant="exclusive"
+                />
+              )}
             </div>
           </div>
 
@@ -212,12 +219,12 @@ export const PropertyCard = ({
               textOverflow: 'ellipsis',
             }}
           >
-            {`${property.propertyType} • ${property.bedrooms} Beds • ${property.area.toLocaleString('en-US')} sq.ft`}
+            {`${property.propertyType || property.category} • ${property.bedrooms || 0} Beds • ${(property.area || property.areaSqft || 0).toLocaleString('en-US')} sq.ft`}
           </p>
 
           {/* Feature Tags Row */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
-            {property.tags.slice(0, 2).map((tag) => (
+            {(property.tags || property.amenities || []).slice(0, 2).map((tag) => (
               <span
                 key={tag}
                 style={{
@@ -234,7 +241,7 @@ export const PropertyCard = ({
                 {tag}
               </span>
             ))}
-            {property.tags.length > 2 && (
+            {(property.tags || property.amenities || []).length > 2 && (
               <span
                 style={{
                   backgroundColor: '#F3F4F6',
@@ -246,7 +253,7 @@ export const PropertyCard = ({
                   borderRadius: '9999px',
                 }}
               >
-                +{property.tags.length - 2}
+                +{(property.tags || property.amenities || []).length - 2}
               </span>
             )}
           </div>
@@ -284,7 +291,7 @@ export const PropertyCard = ({
                 lineHeight: 1.1,
               }}
             >
-              {formatUsd(property.priceUsd)}
+              {formatUsd(property.priceUsd || (property.price * 0.27))}
             </span>
           </div>
 

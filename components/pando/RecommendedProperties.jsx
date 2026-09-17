@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Mic, ArrowUp } from 'lucide-react';
 import { PropertyCard } from './PropertyCard';
@@ -27,13 +27,37 @@ export const RecommendedProperties = ({
   const router = useRouter();
 
   // Selection & AI Assistant States
-  const [selectedPropertyId, setSelectedPropertyId] = useState('prop-1');
-  const [pandoMessage, setPandoMessage] = useState(
-    'Palm Jumeirah is a premier beachfront sanctuary with 6 bedrooms, 8,400 sq.ft and private mooring. Current valuation is AED 85 million and available off-market.'
-  );
+  const [selectedPropertyId, setSelectedPropertyId] = useState(null);
+  const [pandoMessage, setPandoMessage] = useState('Loading your premium property recommendations...');
   const [aiInput, setAiInput] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [statusState, setStatusState] = useState('IDLE');
+
+  // Synchronize Pando's message with the loaded properties
+  useEffect(() => {
+    if (properties && properties.length > 0) {
+      const firstProp = properties[0];
+      setSelectedPropertyId(firstProp.id);
+      
+      if (searchQuery) {
+        let spokenPrice = '';
+        if (firstProp.price) {
+          if (firstProp.price >= 1000000) {
+            spokenPrice = `${(firstProp.price / 1000000).toFixed(1).replace('.0', '')} million dirhams`;
+          } else if (firstProp.price >= 1000) {
+            spokenPrice = `${(firstProp.price / 1000).toFixed(1).replace('.0', '')} thousand dirhams`;
+          } else {
+            spokenPrice = `${firstProp.price} dirhams`;
+          }
+        }
+        setPandoMessage(`I found ${properties.length} properties matching "${searchQuery}". Here is a great option: ${firstProp.name || firstProp.title} ${spokenPrice ? 'for ' + spokenPrice : ''}.`);
+      } else {
+        setPandoMessage(PandoService.getPropertyExplanation(firstProp));
+      }
+    } else if (properties && properties.length === 0) {
+      setPandoMessage(searchQuery ? `I couldn't find any properties matching "${searchQuery}". Try adjusting your filters.` : 'Welcome to the AI Concierge Workspace.');
+    }
+  }, [properties, searchQuery]);
 
   // Handle Property Card Click - Navigate directly to separate property screen
   const handleOpenPropertyScreen = (property) => {

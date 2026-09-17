@@ -5,11 +5,13 @@ import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/pando/Header';
 import { RecommendedProperties } from '@/components/pando/RecommendedProperties';
 import { Toast } from '@/components/pando/Toast';
-import { PropertyService } from '@/services/propertyService';
+import { PropertyService } from '@/services/propertyService'; // Fallback for local favorites
 import styles from '@/components/pando/pando-properties.module.css';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default function SearchResults() {
   const searchParams = useSearchParams();
+  const { user } = useAuth();
 
   // Filter and Search States
   const [selectedLocation, setSelectedLocation] = useState('all');
@@ -19,10 +21,12 @@ export default function SearchResults() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Interactive and Toast States
+  const [properties, setProperties] = useState([]);
   const [savedPropertyIds, setSavedPropertyIds] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Sync with searchParams from URL if user navigated with query params
+  // Sync with searchParams from URL
   useEffect(() => {
     const q = searchParams.get('q') || searchParams.get('location') || '';
     const type = searchParams.get('type') || 'all';
@@ -33,22 +37,58 @@ export default function SearchResults() {
     if (maxPrice && maxPrice !== 'all') setSelectedPrice(maxPrice);
   }, [searchParams]);
 
-  // Load saved properties on mount
+  // Fetch properties from DB when filters change
   useEffect(() => {
-    const saved = PropertyService.getSavedPropertyIds();
-    setSavedPropertyIds(saved);
-  }, []);
-
-  // Filtered & Sorted Properties List
-  const filteredProperties = useMemo(() => {
-    return PropertyService.filterAndSort({
-      searchQuery,
-      location: selectedLocation,
-      propertyType: selectedType,
-      priceRange: selectedPrice,
-      sortOption: selectedSort,
-    });
+    async function fetchProperties() {
+      setLoading(true);
+      try {
+        const queryParams = new URLSearchParams({
+          q: searchQuery,
+          location: selectedLocation,
+          type: selectedType,
+          priceRange: selectedPrice,
+          sort: selectedSort
+        });
+        const res = await fetch(`/api/properties?${queryParams.toString()}`);
+        const data = await res.json();
+        if (data.success) {
+          setProperties(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch properties", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    // Add small debounce to avoid spamming API on typing
+    const delayDebounce = setTimeout(() => {
+      fetchProperties();
+    }, 300);
+    return () => clearTimeout(delayDebounce);
   }, [searchQuery, selectedLocation, selectedType, selectedPrice, selectedSort]);
+
+  // Load saved properties
+  useEffect(() => {
+    async function loadFavorites() {
+      if (user) {
+        try {
+          const res = await fetch('/api/favorites');
+          const data = await res.json();
+          if (data.success) {
+            setSavedPropertyIds(data.savedIds || []);
+          }
+        } catch (err) {
+          console.error("Failed to fetch favorites", err);
+        }
+      } else {
+        // Fallback to local storage for guests
+        const saved = PropertyService.getSavedPropertyIds();
+        setSavedPropertyIds(saved);
+      }
+    }
+    loadFavorites();
+  }, [user]);
 
   // Toast Helper
   const showToast = (msg) => {
@@ -59,51 +99,80 @@ export default function SearchResults() {
   };
 
   // Toggle Save Property
-  const handleToggleSave = (id) => {
-    const isNowSaved = PropertyService.toggleSavedProperty(id);
-    setSavedPropertyIds(PropertyService.getSavedPropertyIds());
-    const prop = PropertyService.getById(id);
-    showToast(
-      isNowSaved
-        ? `Saved "${prop?.name || 'Property'}" to your Portfolio`
-        : `Removed from saved residences`
-    );
+  const handleToggleSave = async (id) => {
+    const targetProp = properties.find(p => p.id === id);
+    
+    if (user) {
+      try {
+        const res = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ propertyId: id })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setSavedPropertyIds(data.savedIds);
+          showToast(
+            data.isSaved
+              ? `Saved "${targetProp?.name || 'Property'}" to your Portfolio`
+              : `Removed from saved residences`
+          );
+        }
+      } catch (err) {
+        showToast("Error saving property");
+      }
+    } else {
+      // Guest mode
+      const isNowSaved = PropertyService.toggleSavedProperty(id);
+      setSavedPropertyIds(PropertyService.getSavedPropertyIds());
+      showToast(
+        isNowSaved
+          ? `Saved "${targetProp?.name || 'Property'}" locally. Sign in to sync across devices.`
+          : `Removed from saved residences`
+      );
+    }
   };
 
   return (
     <div className={styles.container}>
       {/* Top Quantum Header */}
-      <Header syncedAssetsCount={filteredProperties.length} />
+      <Header syncedAssetsCount={properties.length} />
 
       {/* Main Single Primary Container Canvas */}
       <main className={styles.mainCanvas}>
-        <RecommendedProperties
-          properties={filteredProperties}
-          onToggleSave={handleToggleSave}
-          savedIds={savedPropertyIds}
-          selectedLocation={selectedLocation}
-          onSelectLocation={(loc) => {
-            setSelectedLocation(loc);
-            showToast(`Filter updated: ${loc === 'all' ? 'All Locations' : loc}`);
-          }}
-          selectedPrice={selectedPrice}
-          onSelectPrice={(p) => {
-            setSelectedPrice(p);
-            showToast('Valuation filter updated');
-          }}
-          selectedType={selectedType}
-          onSelectType={(t) => {
-            setSelectedType(t);
-            showToast('Typology filter updated');
-          }}
-          selectedSort={selectedSort}
-          onSelectSort={(s) => {
-            setSelectedSort(s);
-            showToast('Matrix sorting recalibrated');
-          }}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
+        {loading ? (
+          <div style={{ padding: '60px', textAlign: 'center', color: '#666', gridColumn: '1 / -1' }}>
+            Syncing matrix parameters...
+          </div>
+        ) : (
+          <RecommendedProperties
+            properties={properties}
+            onToggleSave={handleToggleSave}
+            savedIds={savedPropertyIds}
+            selectedLocation={selectedLocation}
+            onSelectLocation={(loc) => {
+              setSelectedLocation(loc);
+              showToast(`Filter updated: ${loc === 'all' ? 'All Locations' : loc}`);
+            }}
+            selectedPrice={selectedPrice}
+            onSelectPrice={(p) => {
+              setSelectedPrice(p);
+              showToast('Valuation filter updated');
+            }}
+            selectedType={selectedType}
+            onSelectType={(t) => {
+              setSelectedType(t);
+              showToast('Typology filter updated');
+            }}
+            selectedSort={selectedSort}
+            onSelectSort={(s) => {
+              setSelectedSort(s);
+              showToast('Matrix sorting recalibrated');
+            }}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+        )}
       </main>
 
       {/* Real-time Toast Notifications */}
