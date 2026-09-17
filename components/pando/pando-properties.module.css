@@ -1,83 +1,90 @@
-/* PANDO PROPERTIES SCREEN STYLING - REDESIGNED MATCHING REFERENCE IMAGE 1 */
+/* ================================================================
+   RECOMMENDED PROPERTIES — quiet concierge redesign
+   Materials: warm ivory paper, hairline borders, ink + bronze accents.
+   No uniform card shadows, no caps eyebrows, no pill clusters.
+   ================================================================ */
 
 .container {
   height: 100vh;
   height: 100dvh;
-  max-height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  background-color: var(--paper, #f1eef2);
-  color: var(--ink, #1e1e22);
-  overflow: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--p-paper);
+  color: var(--p-ink);
+  font-family: var(--font-plus-jakarta), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   box-sizing: border-box;
+
+  /* Page-scoped design tokens */
+  --p-ink: #1E1E22;
+  --p-paper: #F6F1E8;
+  --p-surface: #FFFFFF;
+  --p-stone: #6E6659;
+  --p-bronze: #B08A4E;
+  --p-bronze-deep: #8C6A38;
+  --p-hairline: rgba(30, 30, 34, 0.12);
+  --p-serif: var(--font-fraunces), Georgia, 'Times New Roman', serif;
 }
 
 .mainCanvas {
   flex: 1;
   min-height: 0;
   width: 100%;
-  padding: 12px 18px 18px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  padding: 28px clamp(20px, 4vw, 56px) 32px;
   box-sizing: border-box;
 }
 
 .workspaceCard {
-  height: 100%;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  position: relative;
-  overflow: hidden;
-  background-color: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  border-radius: 20px;
-  padding: 18px 24px;
-  box-sizing: border-box;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
+/* ---------- Quiet top telemetry line (replaces colorful status pills) ---------- */
 .sectorHeader {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--signal, #d22c23);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 8px;
+  align-items: baseline;
+  justify-content: flex-end;
+  font-size: 12px;
+  color: var(--p-stone);
+  margin-bottom: 28px;
   flex-shrink: 0;
 }
 
 .sectorLeft {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.locationPin {
-  font-size: 12px;
+  display: none;
 }
 
 .sectorRight {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #9CA3AF;
   font-weight: 400;
-  font-size: 12px;
-  text-transform: none;
 }
 
+.sectorRight::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--p-bronze);
+  display: inline-block;
+  animation: presencePulse 2.6s ease-in-out infinite;
+}
+
+/* ---------- Header row: serif title + quiet refine control ---------- */
 .titleRow {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 24px;
+  margin-bottom: 32px;
   flex-shrink: 0;
 }
 
@@ -89,224 +96,329 @@
 
 .titleBadgeContainer {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 10px;
 }
 
 .mainTitle {
   margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--ink, #1e1e22);
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-  line-height: 1.2;
+  font-family: var(--p-serif);
+  font-size: clamp(26px, 2.4vw, 34px);
+  font-weight: 500;
+  color: var(--p-ink);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 
 .subTitle {
-  margin: 4px 0 0 0;
-  font-size: 13.5px;
+  margin: 6px 0 0 0;
+  font-size: 14px;
   font-weight: 400;
-  color: #6B7280;
-  line-height: 1.3;
+  color: var(--p-stone);
+  line-height: 1.4;
 }
 
-.curationBadge {
-  background-color: rgba(210, 44, 35, 0.12);
-  border: 1px solid rgba(210, 44, 35, 0.35);
-  border-radius: 9999px;
-  padding: 3px 10px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  user-select: none;
-  flex-shrink: 0;
-}
-
-.curationText {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--signal, #d22c23);
-  line-height: 1;
-}
-
+/* Retired badge — kept as a no-op so nothing breaks if referenced */
+.curationBadge,
+.curationText,
 .curationNumber {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--signal, #d22c23);
-  line-height: 1;
+  display: none;
 }
 
-/* PROPERTY GRID AREA - 2x2 GRID MATCHING IMAGE 1 */
+/* ---------- Stage: 2x2 quadrant grid — 3 residences, same shape, ranked
+   by fit. The 4th (bottom-right) quadrant is left empty; Pando floats
+   there independently (position: fixed, see pando-mascot.css), never
+   boxed inside this grid. ---------- */
 .propertyAreaWrapper {
   flex: 1;
   min-height: 0;
-  position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
-/* Vertical scroll container with hidden scrollbar */
-.propertyVerticalScroll {
+.quadrantGrid {
   flex: 1;
+  min-width: 0;
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  align-content: start;
-  gap: 16px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 2px;
-  padding-bottom: 20px;
-  box-sizing: border-box;
-  scroll-behavior: smooth;
-  -ms-overflow-style: none !important;
-  scrollbar-width: none !important;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 20px;
 }
 
-.propertyVerticalScroll::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
+.quadrantCard {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+.quadrantEmpty {
+  min-height: 0;
+  min-width: 0;
+  border: 1px dashed var(--p-hairline);
+  border-radius: 8px;
+}
+
+@media (max-width: 1080px) {
+  .quadrantGrid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 16px;
+  }
 }
 
 @media (max-width: 768px) {
-  .propertyVerticalScroll {
+  /* No-scroll holds at every width: the 3 cards stack into a single
+     column of 3 equal rows and compress (chrome tightened, images
+     shrinking before text) to fit the fixed viewport rather than
+     scrolling past it. */
+  .quadrantGrid {
     grid-template-columns: 1fr;
-    gap: 14px;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 8px;
   }
-}
-
-/* Pando interactive floating unit with mascot, note & compact command input below */
-.pandoFloatingUnit {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  z-index: 35;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  max-width: min(92%, 420px);
-  pointer-events: auto;
-}
-
-/* Compact AI Command Bar below Pando */
-.compactAiBar {
-  width: 100%;
-  max-width: 380px;
-  background-color: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  border-radius: 9999px;
-  padding: 5px 8px 5px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  box-sizing: border-box;
-  z-index: 40;
-  transition: all 0.2s ease;
-}
-
-.compactAiBar:focus-within {
-  border-color: var(--signal, #d22c23);
-  box-shadow: 0 4px 20px rgba(210, 44, 35, 0.12), 0 0 0 2px rgba(210, 44, 35, 0.1);
-}
-
-.compactAiInput {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--ink, #1e1e22);
-  font-size: 12px;
-  font-weight: 400;
-  font-family: inherit;
-  min-width: 0;
-}
-
-.compactAiInput::placeholder {
-  color: #9CA3AF;
-}
-
-.compactAiActions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.compactMicBtn {
-  background: none;
-  border: none;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6B7280;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.compactMicBtn:hover {
-  color: var(--ink, #1e1e22);
-  background-color: #F3F4F6;
-}
-
-.compactMicBtn.listening {
-  background-color: var(--signal, #d22c23);
-  color: #FFFFFF;
-  animation: pulseListening 1.2s infinite;
-}
-
-@keyframes pulseListening {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-
-.compactSendBtn {
-  background-color: var(--signal, #d22c23);
-  color: #FFFFFF;
-  border: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(210, 44, 35, 0.25);
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.compactSendBtn:hover {
-  background-color: var(--ink, #1e1e22);
-  transform: scale(1.04);
-}
-
-.compactSendBtn:active {
-  transform: scale(0.96);
+  .mainCanvas {
+    padding: 12px 14px 10px;
+  }
+  .sectorHeader {
+    margin-bottom: 10px;
+  }
+  .titleRow {
+    margin-bottom: 10px;
+  }
+  .subTitle {
+    margin-top: 2px;
+    font-size: 12.5px;
+  }
 }
 
 @media (max-width: 640px) {
-  .workspaceCard {
-    padding: 12px 14px;
-    border-radius: 16px;
-  }
   .mainTitle {
-    font-size: 18px;
+    font-size: 22px;
   }
   .sectorRight {
-    display: none;
+    font-size: 11px;
+  }
+}
+
+/* ================================================================
+   PROPERTY CARD — image → location/title → price → one differentiator → link.
+   Hairline border, no shadow, minimal radius. Sizing (not a pill) signals rank.
+   ================================================================ */
+.card {
+  cursor: pointer;
+  border: 1px solid var(--p-hairline);
+  border-radius: 8px;
+  background-color: var(--p-surface);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.card:hover,
+.card:focus-visible {
+  border-color: rgba(30, 30, 34, 0.28);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--p-bronze);
+  outline-offset: 2px;
+}
+
+.cardImageWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background-color: #EDE7DC;
+}
+
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .cardImage {
+  transform: scale(1.02);
+}
+
+.saveBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+  transition: transform 0.15s ease;
+}
+
+.saveBtn:hover {
+  transform: scale(1.08);
+}
+
+.saveBtn:focus-visible {
+  outline: 2px solid #FFFFFF;
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+.cardBody {
+  flex: 0 0 auto;
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cardLocation {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  color: var(--p-stone);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardTitle {
+  margin: 0 0 14px 0;
+  font-family: var(--p-serif);
+  font-size: clamp(17px, 1.5vw, 20px);
+  font-weight: 500;
+  color: var(--p-ink);
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+}
+
+.cardPriceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.cardPrice {
+  font-family: var(--p-serif);
+  font-size: clamp(17px, 1.6vw, 20px);
+  font-weight: 500;
+  color: var(--p-bronze-deep);
+  letter-spacing: -0.01em;
+}
+
+.cardPriceUsd {
+  font-size: 12px;
+  color: var(--p-stone);
+}
+
+.cardDifferentiator {
+  margin: 2px 0 16px 0;
+  font-family: var(--p-serif);
+  font-style: italic;
+  font-size: 13.5px;
+  color: var(--p-ink);
+  opacity: 0.75;
+  line-height: 1.35;
+}
+
+.cardFootRow {
+  margin-top: auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--p-hairline);
+}
+
+.cardSpecs {
+  font-size: 12px;
+  color: var(--p-stone);
+}
+
+.cardLink {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--p-ink);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cardLink span:first-child {
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.card:hover .cardLink span:first-child,
+.cardLink:focus-visible span:first-child {
+  border-bottom-color: var(--p-bronze);
+}
+
+.cardLink:focus-visible {
+  outline: 2px solid var(--p-bronze);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.cardArrow {
+  transition: transform 0.2s ease;
+}
+
+.card:hover .cardArrow {
+  transform: translateX(2px);
+}
+
+@media (max-width: 768px) {
+  /* Compressed spacing so 3 stacked cards keep full price/spec text
+     legible while the fixed viewport still holds all three without
+     scrolling — the image is what gives way, not the text. */
+  .cardImageWrap {
+    aspect-ratio: auto;
+    min-height: 34px;
+  }
+  .cardBody {
+    padding: 10px 12px 10px;
+  }
+  .cardLocation {
+    margin-bottom: 2px;
+  }
+  .cardTitle {
+    margin-bottom: 4px;
+    line-height: 1.15;
+  }
+  .cardPriceRow {
+    margin-bottom: 2px;
+  }
+  .cardDifferentiator {
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+  }
+  .cardFootRow {
+    padding-top: 6px;
   }
 }

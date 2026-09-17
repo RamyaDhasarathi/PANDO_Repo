@@ -1,40 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { Volume2, VolumeX, Bell, ChevronDown, Activity, Zap, BarChart2 } from 'lucide-react';
+import { Bell } from 'lucide-react';
 
-const OPENING_MASCOT_URL = '/pando-favicon.png';
+// Same brand mascot used in the Home / Explore / Property headers
+const MASCOT_URL =
+  'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png';
 
 export const Header = ({
   syncedAssetsCount = 4,
-  onAudioToggle,
 }) => {
-  const [audioActive, setAudioActive] = useState(true);
-  const [activeTooltip, setActiveTooltip] = useState(null);
-
-  const toggleAudio = () => {
-    const next = !audioActive;
-    setAudioActive(next);
-    onAudioToggle?.(next);
-  };
-
   return (
     <header
       style={{
         width: '100%',
-        backgroundColor: '#FFFFFF',
-        borderBottom: '1px solid #E5E7EB',
+        backgroundColor: 'var(--paper)',
+        borderBottom: '2px solid rgba(30, 30, 34, 0.28)',
         flexShrink: 0,
         zIndex: 40,
-        padding: '10px 24px',
+        padding: '14px clamp(20px, 4vw, 56px)',
         boxSizing: 'border-box',
-        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)',
       }}
     >
       <div
         style={{
-          maxWidth: '1540px',
+          maxWidth: '1440px',
           margin: '0 auto',
           display: 'flex',
           alignItems: 'center',
@@ -42,238 +33,98 @@ export const Header = ({
           gap: '16px',
         }}
       >
-        {/* Left: Logo & Brand */}
+        {/* Left: same bold brand mark as Home / Explore / Property */}
         <Link
           href="/"
+          aria-label="Hi Pando home"
           style={{
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
-            gap: '10px',
+            gap: '12px',
             textDecoration: 'none',
             color: 'inherit',
             cursor: 'pointer',
           }}
         >
-          {/* Avatar Icon */}
-          <div
+          <span
             style={{
               display: 'grid',
               placeItems: 'center',
-              width: '36px',
-              height: '36px',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
-              backgroundColor: '#FEE2E2',
-              border: '1px solid #FCA5A5',
+              border: '2px solid var(--ink)',
+              boxShadow: '2px 2px 0 var(--ink)',
+              backgroundColor: '#f4eee2',
               overflow: 'hidden',
               flexShrink: 0,
             }}
           >
             <img
-              src={OPENING_MASCOT_URL}
-              alt="Hi Pando Mascot"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
+              src={MASCOT_URL}
+              alt=""
+              style={{ width: '124%', height: '124%', objectFit: 'cover', objectPosition: '50% 30%' }}
               onError={(e) => {
-                e.target.src = '/images/pando-agent.png';
+                e.target.style.display = 'none';
               }}
             />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span
-                style={{
-                  fontSize: '18px',
-                  fontWeight: 700,
-                  color: '#111827',
-                  letterSpacing: '-0.02em',
-                  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-                }}
-              >
-                Hi Pando!
-              </span>
-              <span
-                style={{
-                  fontSize: '9px',
-                  fontWeight: 700,
-                  color: '#DC2626',
-                  backgroundColor: '#FEE2E2',
-                  border: '1px solid #FCA5A5',
-                  padding: '2px 7px',
-                  borderRadius: '9999px',
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                QUANTUM
-              </span>
-            </div>
-            <span
-              style={{
-                fontSize: '8.5px',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: '#9CA3AF',
-                marginTop: '1px',
-              }}
-            >
-              DIFC DUBAI PRIME RESIDENTIAL INTELLIGENCE
-            </span>
-          </div>
+          </span>
+          <span
+            style={{
+              fontFamily: "'Plus Jakarta Sans', Arial, sans-serif",
+              fontSize: '22px',
+              fontWeight: 800,
+              color: 'var(--ink)',
+              letterSpacing: '-0.04em',
+            }}
+          >
+            Hi Pando!
+          </span>
         </Link>
 
-        {/* Center: Intelligence Status Indicators matching Image 1 */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-          }}
-          className="quantum-indicators-center"
-        >
-          {/* Pill 1: Assets Synced */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#ECFDF5',
-              border: '1px solid #A7F3D0',
-              color: '#047857',
-              fontSize: '11px',
-              fontWeight: 500,
-              padding: '5px 12px',
-              borderRadius: '9999px',
-            }}
-          >
-            <span
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: '#10B981',
-              }}
-            />
-            <span>{syncedAssetsCount} Assets Synced</span>
-          </div>
-
-          {/* Pill 2: MLS Latency */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#ECFDF5',
-              border: '1px solid #A7F3D0',
-              color: '#047857',
-              fontSize: '11px',
-              fontWeight: 500,
-              padding: '5px 12px',
-              borderRadius: '9999px',
-            }}
-          >
-            <Zap size={12} color="#047857" />
-            <span>MLS Latency 8ms</span>
-          </div>
-
-          {/* Pill 3: Dubai Ultra-Prime & Off-Market */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#FFFBEB',
-              border: '1px solid #FDE68A',
-              color: '#B45309',
-              fontSize: '11px',
-              fontWeight: 500,
-              padding: '5px 12px',
-              borderRadius: '9999px',
-            }}
-          >
-            <BarChart2 size={12} color="#B45309" />
-            <span>Dubai Ultra-Prime &amp; Off-Market</span>
-          </div>
-
-          {/* Pill 4: Neural Audio Active */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#ECFDF5',
-              border: '1px solid #A7F3D0',
-              color: '#047857',
-              fontSize: '11px',
-              fontWeight: 500,
-              padding: '5px 12px',
-              borderRadius: '9999px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: '11px' }}>
-              <span style={{ width: '2px', height: '6px', backgroundColor: '#047857', animation: 'bounceSoft 0.8s infinite' }} />
-              <span style={{ width: '2px', height: '10px', backgroundColor: '#047857', animation: 'bounceSoft 0.8s infinite 0.15s' }} />
-              <span style={{ width: '2px', height: '5px', backgroundColor: '#047857', animation: 'bounceSoft 0.8s infinite 0.3s' }} />
-            </div>
-            <span>Neural Audio Active</span>
-          </div>
-        </div>
-
-        {/* Right: Controls & Profile Pill */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          {/* Notification Bell */}
+        {/* Right: notification and profile, restyled to the shared bordered/ink look */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
           <button
             style={{
               width: '34px',
               height: '34px',
               borderRadius: '50%',
-              border: '1px solid #E5E7EB',
-              backgroundColor: '#FFFFFF',
+              border: '2px solid var(--ink)',
+              backgroundColor: 'rgba(255, 250, 243, 0.68)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: '#4B5563',
+              color: 'var(--ink)',
             }}
             title="Notifications"
+            aria-label="Notifications"
           >
             <Bell size={15} />
           </button>
 
-          {/* User Profile Pill */}
-          <button
+          <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#F3F4F6',
-              border: '1px solid #E5E7EB',
+              display: 'grid',
+              placeItems: 'center',
+              width: '34px',
+              height: '34px',
               borderRadius: '50%',
-              padding: '3px',
-              cursor: 'pointer',
+              backgroundColor: '#f4eee2',
+              border: '2px solid var(--ink)',
+              overflow: 'hidden',
+              flexShrink: 0,
             }}
           >
-            <div
-              style={{
-                width: '26px',
-                height: '26px',
-                borderRadius: '50%',
-                backgroundColor: '#E5E7EB',
-                color: '#374151',
-                fontWeight: 600,
-                fontSize: '11px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+            <img
+              src={MASCOT_URL}
+              alt=""
+              style={{ width: '124%', height: '124%', objectFit: 'cover', objectPosition: '50% 30%' }}
+              onError={(e) => {
+                e.target.style.display = 'none';
               }}
-            >
-              SS
-            </div>
-          </button>
+            />
+          </div>
         </div>
       </div>
     </header>

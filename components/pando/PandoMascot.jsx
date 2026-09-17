@@ -19,31 +19,13 @@ export function PandoMascot({
   onClick,
   onVoiceToggle,
   className = '',
+  children,
 }) {
   const finalMascotUrl = mascotUrl || src || DEFAULT_MASCOT_URL;
   const [muted, setMuted] = useState(!enableVoice);
   const [internalSpeaking, setInternalSpeaking] = useState(false);
   const isSpeaking = externalIsSpeaking ?? internalSpeaking;
-  const [mascotMove, setMascotMove] = useState('');
   const utteranceRef = useRef(null);
-
-  // Periodic subtle idle mascot animations (twist, jump, dance)
-  useEffect(() => {
-    let timeoutId;
-    const moves = ['mascot-twist', 'mascot-jump', 'mascot-dance'];
-
-    const scheduleMove = () => {
-      const move = moves[Math.floor(Math.random() * moves.length)];
-      setMascotMove(move);
-      timeoutId = setTimeout(() => {
-        setMascotMove('');
-        scheduleMove();
-      }, 2200);
-    };
-
-    timeoutId = setTimeout(scheduleMove, 4000 + Math.random() * 2500);
-    return () => clearTimeout(timeoutId);
-  }, []);
 
   // Web Speech API synthesis with strict single-playback cancellation
   const speakText = (text) => {
@@ -69,15 +51,9 @@ export function PandoMascot({
 
       if (naturalVoice) utterance.voice = naturalVoice;
 
-      utterance.onstart = () => {
-        setInternalSpeaking(true);
-      };
-      utterance.onend = () => {
-        setInternalSpeaking(false);
-      };
-      utterance.onerror = () => {
-        setInternalSpeaking(false);
-      };
+      utterance.onstart = () => setInternalSpeaking(true);
+      utterance.onend = () => setInternalSpeaking(false);
+      utterance.onerror = () => setInternalSpeaking(false);
 
       utteranceRef.current = utterance;
       window.speechSynthesis.speak(utterance);
@@ -96,6 +72,7 @@ export function PandoMascot({
         window.speechSynthesis.cancel();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message, muted]);
 
   const toggleMute = (e) => {
@@ -113,69 +90,53 @@ export function PandoMascot({
   };
 
   return (
-    <div className={`pando-embedded-container ${className}`}>
-      {/* PANDO RESPONSE SPEECH BUBBLE */}
-      <div
-        className={`pando-speech-bubble ${isSpeaking ? 'is-speaking' : ''}`}
-        role="status"
-        aria-live="polite"
-      >
-        {/* Header Row with PANDO SAYS on Left & VOICE ON button on Top-Right */}
-        <div className="bubble-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span className="red-dot" />
-            <span className="header-text">PANDO SAYS</span>
-          </div>
-
-          {/* Top Right Controls: Speaking Waveform + Voice Toggle Button */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            {isSpeaking && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-end',
-                  gap: '3px',
-                  backgroundColor: '#D92828',
-                  padding: '2px 5px',
-                  borderRadius: '9999px',
-                  height: '14px',
-                }}
-              >
-                <span style={{ width: '2px', height: '6px', backgroundColor: '#FFFFFF', borderRadius: '2px', animation: 'bounceSoft 0.8s infinite' }} />
-                <span style={{ width: '2px', height: '10px', backgroundColor: '#FFFFFF', borderRadius: '2px', animation: 'bounceSoft 0.8s infinite 0.15s' }} />
-                <span style={{ width: '2px', height: '7px', backgroundColor: '#FFFFFF', borderRadius: '2px', animation: 'bounceSoft 0.8s infinite 0.3s' }} />
-              </div>
-            )}
-
-            {/* Voice Mute / Unmute Button on Top-Right of Speech Note */}
+    <div className={`pando-floating-agent ${className}`}>
+      {/* Bubble — same gold "Pando says" speech-bubble pattern used on Home/Explore */}
+      <div className="pando-bubble-col">
+        <div className={`pando-bubble ${isSpeaking ? 'is-speaking' : ''}`}>
+          <div className="pando-bubble-header">
+            <span className="pando-bubble-dot" aria-hidden="true" />
+            <span className="pando-bubble-label">Pando says</span>
             <button
               type="button"
-              className={`pando-voice-header-btn ${muted ? 'is-muted' : 'is-active'}`}
+              className={`pando-bubble-mute-btn ${muted ? 'is-muted' : ''}`}
               onClick={toggleMute}
               aria-label={muted ? 'Unmute Pando voice' : 'Mute Pando voice'}
-              title={muted ? 'Voice is Muted (Click to Unmute)' : 'Voice is Active (Click to Mute)'}
+              title={muted ? 'Voice is muted' : 'Voice is active'}
             >
-              {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+              {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
             </button>
           </div>
+
+          <blockquote key={message} className="pando-bubble-quote" role="status" aria-live="polite">
+            {message}
+          </blockquote>
+
+          {children}
+
+          <span className="pando-bubble-tail" aria-hidden="true" />
         </div>
-
-        {/* Message Content */}
-        <p className="bubble-message">{message}</p>
-
-        {/* Speech Bubble Pointer */}
-        <div className="bubble-pointer" />
       </div>
 
-      {/* PANDO MASCOT CHARACTER */}
+      {/* Character — the virtual agent, made to shine: glow halo + twinkle accents */}
       <div
-        className={`pando-character-wrap ${mascotMove} ${isSpeaking ? 'is-talking-anim' : ''}`}
+        className={`pando-character-wrap ${isSpeaking ? 'is-talking-anim' : ''}`}
         onClick={onClick}
-        title="Click to interact with Pando"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick?.();
+          }
+        }}
+        aria-label="Speak with Pando"
       >
+        <span className="pando-sparkle pando-sparkle-1" aria-hidden="true" />
+        <span className="pando-sparkle pando-sparkle-2" aria-hidden="true" />
         <img
           src={finalMascotUrl}
-          alt="Pando 3D AI Concierge Mascot"
+          alt="Pando, your residential concierge"
           className="pando-mascot-img"
           onError={(e) => {
             e.target.src = '/images/pando-agent.png';

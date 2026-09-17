@@ -120,159 +120,154 @@ export const RecommendedProperties = ({
 
   return (
     <section className={styles.workspaceCard}>
-      {/* Top Metadata Header Line matching Image 1 */}
+      {/* Quiet system-status line — one sentence, not a strip of colored pills */}
       <div className={styles.sectorHeader}>
-        <div className={styles.sectorLeft}>
-          <span className={styles.locationPin}>📍</span>
-          <span>DUBAI PRIME  /  AI CONCIERGE WORKSPACE</span>
-        </div>
         <div className={styles.sectorRight}>
-          <span>4 portfolios online</span>
-          <span>•</span>
-          <span>Voice engine ready</span>
+          <span>Session synced — {properties.length} residences ready, voice on standby</span>
         </div>
       </div>
 
-      {/* Main Header & Filter Controls Row */}
+      {/* Header: serif headline + subtext, quiet refine control */}
       <div className={styles.titleRow}>
         <div className={styles.titleLeftBlock}>
-          <div className={styles.titleBadgeContainer}>
-            <h1 className={styles.mainTitle}>Recommended Properties</h1>
-
-            {/* CURATION 02 Badge */}
-            <div className={styles.curationBadge}>
-              <span className={styles.curationText}>CURATION</span>
-              <span className={styles.curationNumber}>02</span>
-            </div>
-          </div>
-          <p className={styles.subTitle}>Handpicked homes that match your preferences</p>
+          <h1 className={styles.mainTitle}>Recommended for you</h1>
+          <p className={styles.subTitle}>Three residences matched to your brief, ranked by fit.</p>
         </div>
 
-        {/* Filter Area (Location dropdown + Refine button) */}
-        <div>
-          <PropertyFilters
-            selectedLocation={selectedLocation}
-            onSelectLocation={onSelectLocation}
-            selectedPrice={selectedPrice}
-            onSelectPrice={onSelectPrice}
-            selectedType={selectedType}
-            onSelectType={onSelectType}
-            selectedSort={selectedSort}
-            onSelectSort={onSelectSort}
-            searchQuery={searchQuery}
-            onSearchChange={onSearchChange}
-            totalMatches={properties.length}
-          />
-        </div>
+        <PropertyFilters
+          selectedLocation={selectedLocation}
+          onSelectLocation={onSelectLocation}
+          selectedPrice={selectedPrice}
+          onSelectPrice={onSelectPrice}
+          selectedType={selectedType}
+          onSelectType={onSelectType}
+          selectedSort={selectedSort}
+          onSelectSort={onSelectSort}
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
+          totalMatches={properties.length}
+        />
       </div>
 
-      {/* Primary Workspace Box (2x2 Grid + Integrated Pando Unit matching Image 1) */}
+      {/* 2x2 quadrant grid of exactly 3 residences, same shape, ranked by fit.
+          The 4th (bottom-right) quadrant is deliberately left empty — Pando
+          floats there independently, outside this grid entirely. */}
       <div className={styles.propertyAreaWrapper}>
-        {properties.length === 0 ? (
-          <div
-            style={{
-              flex: 1,
-              backgroundColor: '#FFFFFF',
-              borderRadius: '16px',
-              border: '1px solid #E5E7EB',
-              padding: '24px',
-              textAlign: 'center',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <p style={{ fontSize: '14px', fontWeight: 500, color: '#111827', margin: '0 0 8px 0' }}>
-              No residences match your current criteria
-            </p>
-            <button
-              onClick={() => {
-                onSelectLocation('all');
-                onSelectPrice('all');
-                onSelectType('all');
-                onSearchChange('');
-              }}
+        <div className={styles.quadrantGrid}>
+          {properties.length === 0 ? (
+            <div
               style={{
-                backgroundColor: '#111827',
-                color: '#FFFFFF',
-                fontSize: '12px',
-                fontWeight: 600,
-                padding: '8px 18px',
-                borderRadius: '9999px',
-                border: 'none',
-                cursor: 'pointer',
+                gridColumn: '1 / -1',
+                gridRow: '1 / -1',
+                backgroundColor: '#FFFFFF',
+                borderRadius: '8px',
+                border: '1px solid var(--p-hairline)',
+                padding: '32px 24px',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              Reset Filters
-            </button>
-          </div>
-        ) : (
-          /* Smooth 2x2 Grid */
-          <div className={styles.propertyVerticalScroll}>
-            {properties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                onOpenDetails={() => handleOpenPropertyScreen(property)}
-                onToggleSave={onToggleSave}
-                isSaved={savedIds.includes(property.id)}
-                onSelect={() => handleOpenPropertyScreen(property)}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* INTEGRATED PANDO OVERLAY UNIT MATCHING IMAGE 1 */}
-        <div className={styles.pandoFloatingUnit}>
-          <PandoMascot
-            message={pandoMessage}
-            enableVoice={true}
-            isListening={isListening}
-            statusState={statusState}
-            onClick={() => {
-              const currentProp = properties.find((p) => p.id === selectedPropertyId) || properties[0];
-              if (currentProp) {
-                const explanation = PandoService.getPropertyExplanation(currentProp);
-                setPandoMessage(explanation);
-                setStatusState('SPEAKING');
-              }
-            }}
-          />
-
-          {/* Compact Input Bar directly inside/below Speech Bubble */}
-          <form onSubmit={handleAiSubmit} className={styles.compactAiBar}>
-            <input
-              type="text"
-              value={aiInput}
-              onChange={(e) => setAiInput(e.target.value)}
-              placeholder="Ask Pando anything about the property..."
-              className={styles.compactAiInput}
-            />
-
-            <div className={styles.compactAiActions}>
+              <p style={{ fontSize: '15px', fontWeight: 500, color: 'var(--p-ink)', margin: '0 0 10px 0' }}>
+                No residences match your current brief
+              </p>
               <button
-                type="button"
-                onClick={handleMicToggle}
-                aria-label="Voice microphone input"
-                className={`${styles.compactMicBtn} ${isListening ? styles.listening : ''}`}
-                title={isListening ? 'Listening...' : 'Voice Input'}
+                onClick={() => {
+                  onSelectLocation('all');
+                  onSelectPrice('all');
+                  onSelectType('all');
+                  onSearchChange('');
+                }}
+                style={{
+                  backgroundColor: 'var(--p-ink)',
+                  color: '#FFFFFF',
+                  fontSize: '12.5px',
+                  fontWeight: 500,
+                  padding: '9px 20px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
               >
-                <Mic size={15} />
-              </button>
-
-              <button
-                type="submit"
-                aria-label="Send query to Pando AI"
-                className={styles.compactSendBtn}
-                title="Ask Pando"
-              >
-                <ArrowUp size={14} strokeWidth={2.5} />
+                Reset filters
               </button>
             </div>
-          </form>
+          ) : (
+            <>
+              {/* Exactly 3 property cards, always visible — no pagination, no carousel */}
+              {properties.slice(0, 3).map((property) => (
+                <div key={property.id} className={styles.quadrantCard}>
+                  <PropertyCard
+                    property={property}
+                    onOpenDetails={() => handleOpenPropertyScreen(property)}
+                    onToggleSave={onToggleSave}
+                    isSaved={savedIds.includes(property.id)}
+                    onSelect={() => handleOpenPropertyScreen(property)}
+                  />
+                </div>
+              ))}
+
+              {/* Filler slots if fewer than 3 matches, keeps the grid's rhythm intact */}
+              {Array.from({ length: Math.max(0, 3 - Math.min(properties.length, 3)) }).map((_, i) => (
+                <div key={`filler-${i}`} className={styles.quadrantEmpty} />
+              ))}
+            </>
+          )}
         </div>
       </div>
+
+      {/* Pando — floats free in the bottom-right, outside the grid/card
+          container entirely, matching the mascot + speech-bubble pattern
+          used on Home and Explore */}
+      <PandoMascot
+        message={pandoMessage}
+        enableVoice={true}
+        isListening={isListening}
+        statusState={statusState}
+        onClick={() => {
+          const currentProp = properties.find((p) => p.id === selectedPropertyId) || properties[0];
+          if (currentProp) {
+            const explanation = PandoService.getPropertyExplanation(currentProp);
+            setPandoMessage(explanation);
+            setStatusState('SPEAKING');
+          }
+        }}
+      >
+        {/* The single ask bar — the primary way to talk to Pando */}
+        <form onSubmit={handleAiSubmit} className="pando-ask-row">
+          <input
+            type="text"
+            value={aiInput}
+            onChange={(e) => setAiInput(e.target.value)}
+            placeholder="Ask Pando…"
+            className="pando-ask-input"
+            aria-label="Ask Pando about these residences"
+          />
+
+          <div className="pando-ask-actions">
+            <button
+              type="button"
+              onClick={handleMicToggle}
+              aria-label="Voice microphone input"
+              className={`pando-ask-mic ${isListening ? 'is-listening' : ''}`}
+              title={isListening ? 'Listening...' : 'Voice input'}
+            >
+              <Mic size={15} />
+            </button>
+
+            <button
+              type="submit"
+              aria-label="Send query to Pando"
+              className="pando-ask-send"
+              title="Ask Pando"
+            >
+              <ArrowUp size={15} strokeWidth={2.5} />
+            </button>
+          </div>
+        </form>
+      </PandoMascot>
     </section>
   );
 };
