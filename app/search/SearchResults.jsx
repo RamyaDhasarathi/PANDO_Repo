@@ -2,11 +2,13 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { Header } from '@/components/pando/Header';
 import { RecommendedProperties } from '@/components/pando/RecommendedProperties';
 import { Toast } from '@/components/pando/Toast';
 import { PropertyService } from '@/services/propertyService'; // Fallback for local favorites
 import { useAuth } from '@/providers/AuthProvider';
+import PandoLoader from '@/components/PandoLoader';
 
 export default function SearchResults() {
   const searchParams = useSearchParams();
@@ -20,10 +22,8 @@ export default function SearchResults() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Interactive and Toast States
-  const [properties, setProperties] = useState([]);
   const [savedPropertyIds, setSavedPropertyIds] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   // Sync with searchParams from URL
   useEffect(() => {
@@ -36,36 +36,25 @@ export default function SearchResults() {
     if (maxPrice && maxPrice !== 'all') setSelectedPrice(maxPrice);
   }, [searchParams]);
 
-  // Fetch properties from DB when filters change
-  useEffect(() => {
-    async function fetchProperties() {
-      setLoading(true);
-      try {
-        const queryParams = new URLSearchParams({
-          q: searchQuery,
-          location: selectedLocation,
-          type: selectedType,
-          priceRange: selectedPrice,
-          sort: selectedSort
-        });
-        const res = await fetch(`/api/properties?${queryParams.toString()}`);
-        const data = await res.json();
-        if (data.success) {
-          setProperties(data.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch properties", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    
-    // Add small debounce to avoid spamming API on typing
-    const delayDebounce = setTimeout(() => {
-      fetchProperties();
-    }, 300);
-    return () => clearTimeout(delayDebounce);
-  }, [searchQuery, selectedLocation, selectedType, selectedPrice, selectedSort]);
+  // TanStack Query for Properties
+  const { data: propertiesResponse, isLoading: loading } = useQuery({
+    queryKey: ['properties', searchQuery, selectedLocation, selectedType, selectedPrice, selectedSort],
+    queryFn: async () => {
+      const queryParams = new URLSearchParams({
+        q: searchQuery,
+        location: selectedLocation,
+        type: selectedType,
+        priceRange: selectedPrice,
+        sort: selectedSort
+      });
+      const res = await fetch(`/api/properties?${queryParams.toString()}`);
+      if (!res.ok) throw new Error('Network response was not ok');
+      return res.json();
+    },
+    staleTime: 60 * 1000, // 1 minute
+  });
+
+  const properties = propertiesResponse?.data || [];
 
   // Load saved properties
   useEffect(() => {
@@ -143,9 +132,7 @@ export default function SearchResults() {
       {/* Main Single Primary Container Canvas */}
       <main className="flex-1 min-h-0 w-full p-[12px_18px_18px] overflow-hidden flex flex-col box-border">
         {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#666', width: '100%' }}>
-            Syncing matrix parameters...
-          </div>
+          <PandoLoader />
         ) : (
           <RecommendedProperties
             properties={properties}

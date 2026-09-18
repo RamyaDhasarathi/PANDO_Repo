@@ -39,7 +39,8 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
           isEmail: method === "email",
           code: "000000",
           name: isSignUp ? name : undefined,
-          devMode: true
+          devMode: true,
+          isSignUp
         };
         
         const res = await fetch("/api/auth/verify-otp", {
@@ -83,7 +84,7 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
         const res = await fetch("/api/auth/send-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contact: fullNumber, isEmail: false }),
+          body: JSON.stringify({ contact: fullNumber, isEmail: false, isSignUp }),
         });
         const data = await res.json();
         
@@ -108,7 +109,7 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
         const res = await fetch("/api/auth/send-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contact, isEmail: true }),
+          body: JSON.stringify({ contact, isEmail: true, isSignUp }),
         });
         const data = await res.json();
         
@@ -144,7 +145,8 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
         contact: method === "mobile" ? fullNumber : contact,
         isEmail: method === "email",
         code,
-        name: isSignUp ? name : undefined
+        name: isSignUp ? name : undefined,
+        isSignUp
       };
       
       const res = await fetch("/api/auth/verify-otp", {
@@ -254,7 +256,7 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
                   </label>
                   <input
                     id="name"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1E7A5F] focus:border-transparent outline-none transition-all text-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#d22c23] focus:border-transparent outline-none transition-all text-sm"
                     placeholder="Enter your full name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -267,7 +269,7 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
                 <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="contact">
                   {method === "mobile" ? "Mobile Number" : "Email Address"}
                 </label>
-                <div className="flex items-center border border-gray-300 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-[#1E7A5F] focus-within:border-transparent transition-all bg-white">
+                <div className="flex items-center border border-gray-300 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-[#d22c23] focus-within:border-transparent transition-all bg-white">
                   {method === "mobile" && (
                     <select 
                       value={countryCode} 
@@ -293,7 +295,20 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
                 </div>
               </div>
               
-              <button type="submit" disabled={loading} className="w-full bg-[#1E7A5F] hover:bg-[#155a45] text-white font-medium py-3 rounded-xl transition-colors disabled:opacity-70 mt-2">
+              <div className="flex items-center gap-2 mt-4 mb-2">
+                <input
+                  type="checkbox"
+                  id="devMode"
+                  checked={devMode}
+                  onChange={(e) => setDevMode(e.target.checked)}
+                  className="w-4 h-4 text-[#d22c23] border-gray-300 rounded focus:ring-[#d22c23] cursor-pointer"
+                />
+                <label htmlFor="devMode" className="text-sm text-gray-600 cursor-pointer font-medium select-none">
+                  Dev Mode: Bypass OTP (Instantly sign in)
+                </label>
+              </div>
+
+              <button type="submit" disabled={loading} className="w-full bg-[#d22c23] hover:bg-[#b8261e] text-white font-medium py-3 rounded-xl transition-colors disabled:opacity-70 mt-2">
                 {loading ? "Processing..." : (devMode ? "Instant Sign In" : "Continue")}
               </button>
             </form>
@@ -308,7 +323,7 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
                     <input
                       key={i}
                       id={`otp-${i}`}
-                      className="w-12 h-14 text-center text-xl font-bold border border-gray-300 rounded-xl outline-none focus:border-transparent focus:ring-2 focus:ring-[#1E7A5F] transition-all"
+                      className="w-12 h-14 text-center text-xl font-bold border border-gray-300 rounded-xl outline-none focus:border-transparent focus:ring-2 focus:ring-[#d22c23] transition-all"
                       value={digit}
                       maxLength={1}
                       inputMode="numeric"
@@ -317,11 +332,11 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
                   ))}
                 </div>
               </div>
-              <button type="submit" disabled={loading} className="w-full bg-[#1E7A5F] hover:bg-[#155a45] text-white font-medium py-3 rounded-xl transition-colors disabled:opacity-70">
+              <button type="submit" disabled={loading} className="w-full bg-[#d22c23] hover:bg-[#b8261e] text-white font-medium py-3 rounded-xl transition-colors disabled:opacity-70">
                 {loading ? "Verifying..." : "Verify & Continue"}
               </button>
               <div className="text-center">
-                <button type="button" className="text-[#1E7A5F] text-sm font-medium hover:underline bg-transparent border-none p-0 cursor-pointer" onClick={() => setStep("contact")}>
+                <button type="button" className="text-[#d22c23] text-sm font-medium hover:underline bg-transparent border-none p-0 cursor-pointer" onClick={() => setStep("contact")}>
                   Change Phone Number
                 </button>
               </div>
@@ -332,14 +347,14 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
             {isSignUp ? (
               <>
                 Already have an account?{" "}
-                <button type="button" onClick={() => handleSwitchMode("sign-in")} className="text-[#1E7A5F] font-bold hover:underline bg-transparent border-none p-0 cursor-pointer">
+                <button type="button" onClick={() => handleSwitchMode("sign-in")} className="text-[#d22c23] font-bold hover:underline bg-transparent border-none p-0 cursor-pointer">
                   Sign in
                 </button>
               </>
             ) : (
               <>
                 New to Hi Pando?{" "}
-                <button type="button" onClick={() => handleSwitchMode("sign-up")} className="text-[#1E7A5F] font-bold hover:underline bg-transparent border-none p-0 cursor-pointer">
+                <button type="button" onClick={() => handleSwitchMode("sign-up")} className="text-[#d22c23] font-bold hover:underline bg-transparent border-none p-0 cursor-pointer">
                   Create an account
                 </button>
               </>

@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Volume2, VolumeX, Bell, ChevronDown, Activity, Zap, BarChart2 } from 'lucide-react';
+import ProfilePopup from '@/components/ProfilePopup';
+import { useAuth } from '@/providers/AuthProvider';
+import AuthForm from '@/components/AuthForm';
 
 const OPENING_MASCOT_URL = '/pando-favicon.png';
 
@@ -12,6 +15,11 @@ export const Header = ({
 }) => {
   const [audioActive, setAudioActive] = useState(true);
   const [activeTooltip, setActiveTooltip] = useState(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState('sign-in');
+  
+  const { user } = useAuth();
 
   const toggleAudio = () => {
     const next = !audioActive;
@@ -245,37 +253,68 @@ export const Header = ({
           </button>
 
           {/* User Profile Pill */}
-          <button
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#F3F4F6',
-              border: '1px solid #E5E7EB',
-              borderRadius: '50%',
-              padding: '3px',
-              cursor: 'pointer',
-            }}
-          >
-            <div
+          {user ? (
+            <button
+              onClick={() => setIsProfileOpen(true)}
               style={{
-                width: '26px',
-                height: '26px',
-                borderRadius: '50%',
-                backgroundColor: '#E5E7EB',
-                color: '#374151',
-                fontWeight: 600,
-                fontSize: '11px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                backgroundColor: '#F3F4F6',
+                border: '1px solid #E5E7EB',
+                borderRadius: '50%',
+                padding: '3px',
+                cursor: 'pointer',
+              }}
+              title="Profile"
+            >
+              <div
+                style={{
+                  width: '26px',
+                  height: '26px',
+                  borderRadius: '50%',
+                  backgroundColor: '#E5E7EB',
+                  color: '#374151',
+                  fontWeight: 600,
+                  fontSize: '11px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {user.name ? user.name.substring(0, 2).toUpperCase() : 'U'}
+              </div>
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsAuthOpen(true)}
+              style={{
+                backgroundColor: '#d22c23',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '6px 14px',
+                fontWeight: 600,
+                fontSize: '11px',
+                cursor: 'pointer',
+                letterSpacing: '0.04em'
               }}
             >
-              SS
-            </div>
-          </button>
+              SIGN IN
+            </button>
+          )}
         </div>
       </div>
+      
+      {isProfileOpen && <ProfilePopup onClose={() => setIsProfileOpen(false)} />}
+      
+      {isAuthOpen && (
+        <AuthForm
+          mode={authMode}
+          onSwitchMode={setAuthMode}
+          onClose={() => setIsAuthOpen(false)}
+        />
+      )}
     </header>
   );
 };

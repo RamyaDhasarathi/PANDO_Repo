@@ -12,7 +12,7 @@ const client = twilio(
 
 export async function POST(req) {
   try {
-    const { contact, isEmail, phoneNumber, code, name, devMode } = await req.json();
+    const { contact, isEmail, phoneNumber, code, name, devMode, isSignUp } = await req.json();
     const target = contact || phoneNumber;
 
     if (!target || !code) {
@@ -45,9 +45,22 @@ export async function POST(req) {
     let user = await Buyer.findOne(query);
     let isNewUser = false;
     
-    if (!user) {
+    if (isSignUp) {
+      if (user) {
+        return NextResponse.json(
+          { success: false, error: 'Account already exists. Please sign in.' },
+          { status: 400 }
+        );
+      }
       user = await Buyer.create({ ...query, name: name || '' });
       isNewUser = true;
+    } else {
+      if (!user) {
+        return NextResponse.json(
+          { success: false, error: 'Account not found. Please create an account.' },
+          { status: 400 }
+        );
+      }
     }
 
     // 3. Create JWT Session

@@ -15,16 +15,53 @@ export async function GET(request) {
 
     let query = {};
 
-    // 1. Text Search Query
+    // 1. Natural Language Parsing (NLP) for Query
     if (q) {
-      const regex = new RegExp(q, 'i');
-      query.$or = [
-        { title: regex },
-        { community: regex },
-        { propertyType: regex },
-        { category: regex },
-        { description: regex }
-      ];
+      let remainingText = q;
+
+      // Extract Area (e.g. 1600 sqft, 200 sq feet, 1500 sqm)
+      const areaMatch = remainingText.match(/(\d+(?:,\d+)?(?:\.\d+)?)\s*(sqft|sq\s*feet|sq\s*ft|sqm|sq\s*m)/i);
+      if (areaMatch) {
+        const areaVal = parseFloat(areaMatch[1].replace(/,/g, ''));
+        // 15% range for area search
+        query.areaSqft = { $gte: areaVal * 0.85, $lte: areaVal * 1.15 };
+        remainingText = remainingText.replace(areaMatch[0], '');
+      }
+
+      // Extract Bedrooms (e.g. 4 beds, 3 bedroom, 2 bhk)
+      const bedMatch = remainingText.match(/(\d+)\s*(bed|beds|bedroom|bedrooms|bhk)/i);
+      if (bedMatch) {
+        const beds = parseInt(bedMatch[1], 10);
+        query.bedrooms = beds;
+        remainingText = remainingText.replace(bedMatch[0], '');
+      }
+
+      // Extract Price (e.g. 5m, 200k, 500000 aed)
+      const priceMatch = remainingText.match(/(\d+(?:,\d+)?(?:\.\d+)?)\s*(m|million|k|aed|dirham)/i);
+      if (priceMatch) {
+        let priceVal = parseFloat(priceMatch[1].replace(/,/g, ''));
+        const unit = priceMatch[2].toLowerCase();
+        
+        if (unit.startsWith('m')) priceVal *= 1000000;
+        else if (unit === 'k') priceVal *= 1000;
+        
+        // 20% range for price search
+        query.price = { ...query.price, $gte: priceVal * 0.8, $lte: priceVal * 1.2 };
+        remainingText = remainingText.replace(priceMatch[0], '');
+      }
+
+      // Clean up remaining text and apply standard regex search
+      remainingText = remainingText.trim().replace(/\s+/g, ' ');
+      if (remainingText.length > 1) {
+        const regex = new RegExp(remainingText, 'i');
+        query.$or = [
+          { title: regex },
+          { community: regex },
+          { propertyType: regex },
+          { category: regex },
+          { description: regex }
+        ];
+      }
     }
 
     // 2. Location Filtering
