@@ -1,12 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "@/providers/AuthProvider";
 
 export default function ProfilePopup({ onClose }) {
   const { user, logout } = useAuth();
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState("favorites"); // 'favorites' or 'preferences'
-  
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [favorites, setFavorites] = useState([]);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
 
@@ -73,7 +79,6 @@ export default function ProfilePopup({ onClose }) {
           preferredLocations: preferences.preferredLocations ? [preferences.preferredLocations] : [],
         }),
       });
-      // Optional: show a small success toast/message here
     } catch (err) {
       console.error("Failed to save preferences", err);
     } finally {
@@ -81,11 +86,11 @@ export default function ProfilePopup({ onClose }) {
     }
   };
 
-  if (!user) return null;
+  if (!user || !mounted) return null;
 
-  return (
-    <div className="fixed top-0 left-0 w-screen h-screen bg-black/40 backdrop-blur-[4px] z-[1000] flex justify-end items-start pt-[80px] pb-[20px] px-[20px]" onClick={onClose}>
-      <div className="bg-white w-full max-w-[380px] rounded-[16px] shadow-[0_20px_40px_rgba(0,0,0,0.15)] p-[24px] relative flex flex-col gap-[20px] animate-[slideIn_0.3s_cubic-bezier(0.16,1,0.3,1)]" onClick={(e) => e.stopPropagation()}>
+  const content = (
+    <div className="fixed inset-0 w-screen h-screen bg-black/50 backdrop-blur-[6px] z-[99999] flex justify-end items-start pt-[75px] pr-[24px] pb-[24px] box-border" onClick={onClose}>
+      <div className="bg-white w-full max-w-[390px] max-h-[calc(100vh-100px)] overflow-y-auto rounded-[18px] shadow-[0_25px_60px_rgba(0,0,0,0.3)] p-[24px] relative flex flex-col gap-[20px] animate-[slideIn_0.25s_ease-out]" onClick={(e) => e.stopPropagation()}>
         <button type="button" className="absolute top-[16px] right-[16px] bg-[#f3f4f6] border-none w-[32px] h-[32px] rounded-full flex items-center justify-center cursor-pointer text-[#4b5563] transition-colors duration-200 hover:bg-[#e5e7eb]" onClick={onClose} aria-label="Close">
           <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -222,4 +227,6 @@ export default function ProfilePopup({ onClose }) {
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }

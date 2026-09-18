@@ -102,7 +102,7 @@ export const PropertyFilters = ({
   });
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', zIndex: 10000 }}>
+    <div ref={containerRef} style={{ position: 'relative', zIndex: (isRefineOpen || isLocationDropdownOpen) ? 500 : 1 }}>
       {/* Primary Filter Row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         {/* All locations Pill Dropdown Button */}
@@ -141,7 +141,7 @@ export const PropertyFilters = ({
                 border: '1px solid var(--p-hairline)',
                 borderRadius: '10px',
                 boxShadow: '0 16px 36px rgba(30,30,34,0.16)',
-                zIndex: 10001,
+                zIndex: 501,
                 padding: '10px 12px',
               }}
             >
@@ -211,7 +211,7 @@ export const PropertyFilters = ({
             border: '1px solid var(--p-hairline)',
             borderRadius: '14px',
             boxShadow: '0 24px 52px rgba(0, 0, 0, 0.22)',
-            zIndex: 10001,
+            zIndex: 501,
             padding: '22px 24px',
             boxSizing: 'border-box',
           }}
