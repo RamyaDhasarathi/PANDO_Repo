@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Volume2, VolumeX } from 'lucide-react';
+import { getPandoVoice, PANDO_VOICE_SETTINGS } from '@/lib/pandoVoice';
 
 const MASCOT_URL =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png';
@@ -137,33 +138,15 @@ export default function PandoMapExplore({ dbProperties = [] }) {
     }
   }, [searchParams]);
 
-  // Voice synthesis
-  const getVoice = () => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return null;
-    const voices = window.speechSynthesis.getVoices();
-    return (
-      voices.find(
-        (v) =>
-          v.lang.startsWith('en') &&
-          (v.name.includes('Natural') ||
-            v.name.includes('Google') ||
-            v.name.includes('Samantha') ||
-            v.name.includes('Daniel'))
-      ) ||
-      voices.find((v) => v.lang.startsWith('en')) ||
-      voices[0]
-    );
-  };
-
   const speak = (text) => {
     if (mutedRef.current || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     try {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      const voice = getVoice();
+      const voice = getPandoVoice();
       if (voice) utterance.voice = voice;
-      utterance.rate = 0.95;
-      utterance.pitch = 1.05;
+      utterance.rate = PANDO_VOICE_SETTINGS.rate;
+      utterance.pitch = PANDO_VOICE_SETTINGS.pitch;
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);

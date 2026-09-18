@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import styles from "./PandoVideoAgent.module.css";
 
 // Bump this whenever /public/videos/pando-speaking.webm is replaced —
 // browsers cache <video src> aggressively by URL, so the query string
@@ -82,15 +81,15 @@ export default function PandoVideoAgent() {
   }
 
   return (
-    <div className={styles.wrap}>
-      <span className={styles.liveBadge}>
-        <span className={styles.liveDot} /> LIVE 3D AGENT
+    <div className="relative flex items-center justify-center gap-hp-4 h-full min-h-0 pt-[46px] max-lg:h-auto max-lg:flex-col max-lg:pt-[44px]">
+      <span className="absolute top-0 left-1/2 -translate-x-1/2 inline-flex items-center gap-[6px] bg-white border border-hp-line-soft rounded-hp-pill px-[14px] py-[6px] text-[0.7rem] font-bold tracking-[0.04em] text-hp-charcoal shadow-hp-sm z-[2]">
+        <span className="w-[6px] h-[6px] rounded-full bg-[#2fb463]" /> LIVE 3D AGENT
       </span>
 
       {speechSupported && (
         <button
           type="button"
-          className={styles.speakerBtn}
+          className="absolute top-0 right-0 w-[34px] h-[34px] rounded-full border border-hp-line-soft bg-white text-hp-charcoal flex items-center justify-center cursor-pointer shadow-hp-sm z-[2] hover:text-hp-primary transition-colors"
           onClick={toggleMute}
           aria-label={muted ? "Unmute Pando" : "Mute Pando"}
           title={muted ? "Unmute Pando" : "Mute Pando"}
@@ -109,17 +108,17 @@ export default function PandoVideoAgent() {
         </button>
       )}
 
-      <div className={styles.speechBubble}>
-        <div className={styles.speechHeader}>
-          <span className={styles.sparkle}>✨</span> PANDO 
-          <span className={styles.liveTag}>Live</span>
+      <div className="relative z-[3] shrink-0 self-center bg-white rounded-hp-md shadow-hp-lg p-hp-3 w-[min(170px,32%)] max-lg:w-[min(240px,70%)]">
+        <div className="flex items-center gap-[5px] text-[0.66rem] font-extrabold text-hp-primary tracking-[0.02em] mb-[5px]">
+          <span className="text-[0.75rem]">✨</span> PANDO 
+          <span className="ml-[3px] bg-hp-mint-100 text-[#2f9c5f] text-[0.6rem] font-bold px-[7px] py-[2px] rounded-hp-pill">Live</span>
         </div>
-        <p className={styles.speechText}>&ldquo;{SCRIPT_LINES[lineIndex]}&rdquo;</p>
+        <p className="text-[0.76rem] leading-[1.4] text-hp-charcoal m-0">&ldquo;{SCRIPT_LINES[lineIndex]}&rdquo;</p>
       </div>
 
       <video
         ref={videoRef}
-        className={styles.video}
+        className="w-[min(380px,66%)] max-lg:w-[min(300px,78vw)] aspect-[3/4] object-cover object-center z-[1] shrink-0 drop-shadow-[0_24px_20px_rgba(16,35,29,0.18)] [mask-image:radial-gradient(ellipse_62%_66%_at_50%_46%,#000_68%,transparent_98%)] [-webkit-mask-image:radial-gradient(ellipse_62%_66%_at_50%_46%,#000_68%,transparent_98%)]"
         src={VIDEO_SRC}
         autoPlay
         muted

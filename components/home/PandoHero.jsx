@@ -6,6 +6,7 @@ import { Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import AuthForm from '@/components/AuthForm';
 import ProfilePopup from '@/components/ProfilePopup';
+import { getPandoVoice, PANDO_VOICE_SETTINGS } from '@/lib/pandoVoice';
 
 const mascotUrl =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png';
@@ -88,34 +89,15 @@ export default function PandoHero() {
     loadPreferences();
   }, [user]);
 
-  // Voice synthesis helper
-  const getVoice = () => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return null;
-    const voices = window.speechSynthesis.getVoices();
-    return (
-      voices.find(
-        (v) =>
-          v.lang.startsWith('en') &&
-          (v.name.includes('Natural') ||
-            v.name.includes('Google') ||
-            v.name.includes('Samantha') ||
-            v.name.includes('Daniel') ||
-            v.name.includes('Alex'))
-      ) ||
-      voices.find((v) => v.lang.startsWith('en')) ||
-      voices[0]
-    );
-  };
-
   const speak = (text) => {
     if (muted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     try {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      const voice = getVoice();
+      const voice = getPandoVoice();
       if (voice) utterance.voice = voice;
-      utterance.rate = 0.96;
-      utterance.pitch = 1.08;
+      utterance.rate = PANDO_VOICE_SETTINGS.rate;
+      utterance.pitch = PANDO_VOICE_SETTINGS.pitch;
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);

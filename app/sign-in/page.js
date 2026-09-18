@@ -45,6 +45,9 @@ export default function SignIn() {
     }
   };
 
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const callbackUrl = searchParams?.get('callbackUrl') || '/';
+
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -59,7 +62,7 @@ export default function SignIn() {
       const data = await res.json();
       
       if (data.success) {
-        router.push('/');
+        router.push(callbackUrl);
         router.refresh(); // Refresh to update auth state globally
       } else {
         setError(data.error || 'Invalid OTP');

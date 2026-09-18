@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styles from "./ProfilePopup.module.css";
 import { useAuth } from "@/providers/AuthProvider";
 
 export default function ProfilePopup({ onClose }) {
@@ -85,54 +84,54 @@ export default function ProfilePopup({ onClose }) {
   if (!user) return null;
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.container} onClick={(e) => e.stopPropagation()}>
-        <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close">
+    <div className="fixed top-0 left-0 w-screen h-screen bg-black/40 backdrop-blur-[4px] z-[1000] flex justify-end items-start pt-[80px] pb-[20px] px-[20px]" onClick={onClose}>
+      <div className="bg-white w-full max-w-[380px] rounded-[16px] shadow-[0_20px_40px_rgba(0,0,0,0.15)] p-[24px] relative flex flex-col gap-[20px] animate-[slideIn_0.3s_cubic-bezier(0.16,1,0.3,1)]" onClick={(e) => e.stopPropagation()}>
+        <button type="button" className="absolute top-[16px] right-[16px] bg-[#f3f4f6] border-none w-[32px] h-[32px] rounded-full flex items-center justify-center cursor-pointer text-[#4b5563] transition-colors duration-200 hover:bg-[#e5e7eb]" onClick={onClose} aria-label="Close">
           <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
 
-        <div className={styles.header}>
-          <div className={styles.avatar}>
+        <div className="flex items-center gap-[16px] pb-[20px] border-b border-[#f3f4f6]">
+          <div className="w-[50px] h-[50px] bg-[#e11d48] text-white rounded-full flex items-center justify-center text-[20px] font-bold">
             {user.name ? user.name.charAt(0).toUpperCase() : "U"}
           </div>
           <div>
-            <h3 className={styles.name}>{user.name || "Buyer"}</h3>
-            <p className={styles.contact}>{user.phoneNumber || user.email}</p>
+            <h3 className="m-0 text-[18px] font-bold text-[#111827]">{user.name || "Buyer"}</h3>
+            <p className="mt-[4px] text-[13px] text-[#6b7280]">{user.phoneNumber || user.email}</p>
           </div>
         </div>
 
-        <div className={styles.tabs}>
+        <div className="flex gap-[8px] mb-[16px] bg-[#f9fafb] p-[4px] rounded-[10px]">
           <button 
-            className={`${styles.tab} ${activeTab === 'favorites' ? styles.active : ''}`}
+            className={`flex-1 py-[8px] px-[12px] border-none rounded-[6px] text-[13px] font-semibold cursor-pointer transition-all duration-200 ${activeTab === 'favorites' ? 'bg-white text-[#111827] shadow-[0_1px_3px_rgba(0,0,0,0.1)]' : 'bg-transparent text-[#6b7280]'}`}
             onClick={() => setActiveTab('favorites')}
           >
             Saved ({favorites.length})
           </button>
           <button 
-            className={`${styles.tab} ${activeTab === 'preferences' ? styles.active : ''}`}
+            className={`flex-1 py-[8px] px-[12px] border-none rounded-[6px] text-[13px] font-semibold cursor-pointer transition-all duration-200 ${activeTab === 'preferences' ? 'bg-white text-[#111827] shadow-[0_1px_3px_rgba(0,0,0,0.1)]' : 'bg-transparent text-[#6b7280]'}`}
             onClick={() => setActiveTab('preferences')}
           >
             AI Preferences
           </button>
         </div>
 
-        <div className={styles.section}>
+        <div>
           {activeTab === 'favorites' ? (
-            <div className={styles.favoritesList}>
+            <div className="flex flex-col gap-[12px] max-h-[300px] overflow-y-auto pr-[4px]">
               {loadingFavorites ? (
-                <p className={styles.emptyState}>Loading...</p>
+                <p className="text-[14px] text-[#9ca3af] text-center py-[20px]">Loading...</p>
               ) : favorites.length === 0 ? (
-                <p className={styles.emptyState}>No saved properties yet. Start exploring!</p>
+                <p className="text-[14px] text-[#9ca3af] text-center py-[20px]">No saved properties yet. Start exploring!</p>
               ) : (
                 favorites.map((prop) => (
-                  <div key={prop.id} className={styles.favoriteItem}>
-                    <img src={prop.image} alt={prop.name} className={styles.favoriteImage} />
-                    <div className={styles.favoriteInfo}>
-                      <h5 className={styles.favoriteName}>{prop.name}</h5>
-                      <p className={styles.favoritePrice}>
+                  <div key={prop.id} className="flex gap-[12px] p-[10px] rounded-[12px] bg-[#f9fafb] border border-[#f3f4f6] transition-all duration-200 cursor-pointer hover:bg-white hover:border-[#e11d48] hover:shadow-[0_4px_12px_rgba(225,29,72,0.1)]">
+                    <img src={prop.image} alt={prop.name} className="w-[60px] h-[60px] rounded-[8px] object-cover" />
+                    <div className="flex flex-col justify-center">
+                      <h5 className="m-0 mb-[4px] text-[14px] font-semibold text-[#111827] line-clamp-1">{prop.name}</h5>
+                      <p className="m-0 text-[13px] font-bold text-[#e11d48]">
                         {new Intl.NumberFormat('en-AE', { style: 'currency', currency: 'AED', maximumFractionDigits: 0 }).format(prop.price)}
                       </p>
                     </div>
@@ -143,14 +142,15 @@ export default function ProfilePopup({ onClose }) {
           ) : (
             <div>
               {loadingPrefs ? (
-                <p className={styles.emptyState}>Loading preferences...</p>
+                <p className="text-[14px] text-[#9ca3af] text-center py-[20px]">Loading preferences...</p>
               ) : (
                 <>
-                  <div className={styles.formGroup}>
-                    <label>Purchasing Goal</label>
+                  <div className="flex flex-col gap-[6px] mb-[12px]">
+                    <label className="text-[11px] font-bold text-[#4b5563] uppercase tracking-[0.05em]">Purchasing Goal</label>
                     <select 
                       value={preferences.purchasingGoal} 
                       onChange={(e) => setPreferences({...preferences, purchasingGoal: e.target.value})}
+                      className="px-[12px] py-[10px] border border-[#e5e7eb] rounded-[8px] text-[13px] text-[#111827] bg-white outline-none cursor-pointer focus:border-[#e11d48]"
                     >
                       <option value="">Select your goal...</option>
                       <option value="End-User">End-User (Looking for a home)</option>
@@ -158,11 +158,12 @@ export default function ProfilePopup({ onClose }) {
                     </select>
                   </div>
                   
-                  <div className={styles.formGroup}>
-                    <label>Budget Range</label>
+                  <div className="flex flex-col gap-[6px] mb-[12px]">
+                    <label className="text-[11px] font-bold text-[#4b5563] uppercase tracking-[0.05em]">Budget Range</label>
                     <select 
                       value={preferences.budgetRange} 
                       onChange={(e) => setPreferences({...preferences, budgetRange: e.target.value})}
+                      className="px-[12px] py-[10px] border border-[#e5e7eb] rounded-[8px] text-[13px] text-[#111827] bg-white outline-none cursor-pointer focus:border-[#e11d48]"
                     >
                       <option value="">Select your budget...</option>
                       <option value="Under AED 50M">Under AED 50M</option>
@@ -171,11 +172,12 @@ export default function ProfilePopup({ onClose }) {
                     </select>
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label>Preferred Typology</label>
+                  <div className="flex flex-col gap-[6px] mb-[12px]">
+                    <label className="text-[11px] font-bold text-[#4b5563] uppercase tracking-[0.05em]">Preferred Typology</label>
                     <select 
                       value={preferences.preferredTypology} 
                       onChange={(e) => setPreferences({...preferences, preferredTypology: e.target.value})}
+                      className="px-[12px] py-[10px] border border-[#e5e7eb] rounded-[8px] text-[13px] text-[#111827] bg-white outline-none cursor-pointer focus:border-[#e11d48]"
                     >
                       <option value="">Select property type...</option>
                       <option value="Villa">Villa / Mansion</option>
@@ -184,11 +186,12 @@ export default function ProfilePopup({ onClose }) {
                     </select>
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label>Top Location</label>
+                  <div className="flex flex-col gap-[6px] mb-[12px]">
+                    <label className="text-[11px] font-bold text-[#4b5563] uppercase tracking-[0.05em]">Top Location</label>
                     <select 
                       value={preferences.preferredLocations} 
                       onChange={(e) => setPreferences({...preferences, preferredLocations: e.target.value})}
+                      className="px-[12px] py-[10px] border border-[#e5e7eb] rounded-[8px] text-[13px] text-[#111827] bg-white outline-none cursor-pointer focus:border-[#e11d48]"
                     >
                       <option value="">Select a location...</option>
                       <option value="Palm Jumeirah">Palm Jumeirah</option>
@@ -199,7 +202,7 @@ export default function ProfilePopup({ onClose }) {
                   </div>
 
                   <button 
-                    className={styles.saveButton} 
+                    className="w-full p-[12px] bg-[#111827] text-white border-none rounded-[8px] font-semibold text-[14px] cursor-pointer mt-[8px] transition-colors duration-200 hover:bg-[#1f2937] disabled:bg-[#9ca3af] disabled:cursor-not-allowed" 
                     onClick={handleSavePreferences}
                     disabled={savingPrefs}
                   >
@@ -211,8 +214,8 @@ export default function ProfilePopup({ onClose }) {
           )}
         </div>
 
-        <div className={styles.footer}>
-          <button onClick={() => { logout(); onClose(); }} className={styles.logoutButton}>
+        <div className="pt-[16px] border-t border-[#f3f4f6]">
+          <button onClick={() => { logout(); onClose(); }} className="w-full p-[12px] bg-white border border-[#e5e7eb] rounded-[8px] text-[#374151] font-semibold text-[14px] cursor-pointer transition-colors duration-200 hover:bg-[#f3f4f6] hover:text-[#111827]">
             Sign Out
           </button>
         </div>

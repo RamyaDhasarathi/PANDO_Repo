@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
 import styles from "./ImmersivePropertyView.module.css";
 import { formatAED, formatPrice, bedroomLabel } from "@/lib/format";
 import { explainProperty, answerPropertyQuestion } from "@/lib/propertyAssistant";
+import { getPandoVoice, PANDO_VOICE_SETTINGS } from "@/lib/pandoVoice";
 
 export default function ImmersivePropertyView({ property }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -39,18 +40,11 @@ export default function ImmersivePropertyView({ property }) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
-    utterance.rate = 0.98;
-    utterance.pitch = 0.95;
+    utterance.rate = PANDO_VOICE_SETTINGS.rate;
+    utterance.pitch = PANDO_VOICE_SETTINGS.pitch;
 
-    const voices = window.speechSynthesis.getVoices();
-    const maleVoice =
-      voices.find((v) => v.lang.startsWith("en") && /david|mark|george|guy|alex|daniel|male|james|tom|ryan|oliver/i.test(v.name)) ||
-      voices.find((v) => v.lang.startsWith("en") && !/zira|samantha|victoria|karen|female|susan|catherine|hazel/i.test(v.name)) ||
-      voices.find((v) => v.lang === "en-US") ||
-      voices.find((v) => v.lang?.startsWith("en")) ||
-      voices[0];
-
-    if (maleVoice) utterance.voice = maleVoice;
+    const voice = getPandoVoice();
+    if (voice) utterance.voice = voice;
 
     utterance.onstart = () => {
       setIsSpeaking(true);

@@ -3,11 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import styles from "@/app/auth.module.css";
 
 import { useAuth } from "@/providers/AuthProvider";
 
-export default function AuthForm({ mode, onSwitchMode, onClose }) {
+export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
   const isSignUp = mode === "sign-up";
   const router = useRouter();
   const { login } = useAuth();
@@ -53,6 +52,7 @@ export default function AuthForm({ mode, onSwitchMode, onClose }) {
         if (data.success) {
           await login();
           onClose();
+          onSuccess?.();
           router.refresh();
         } else {
           setError(data.error || "Failed to bypass OTP");
@@ -157,6 +157,7 @@ export default function AuthForm({ mode, onSwitchMode, onClose }) {
       if (data.success) {
         await login(); // Refresh the auth state
         onClose();
+        onSuccess?.();
         router.refresh();
       } else {
         setError(data.error || "Invalid OTP");
@@ -194,173 +195,158 @@ export default function AuthForm({ mode, onSwitchMode, onClose }) {
   };
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.wrap} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.card}>
-          <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 bg-black/40 backdrop-blur-sm animate-[fadeIn_0.3s_ease-out]" onClick={onClose}>
+      <div className="w-full max-w-md animate-[slideUpFade_0.4s_cubic-bezier(0.16,1,0.3,1)]" onClick={(e) => e.stopPropagation()}>
+        <div className="w-full bg-white rounded-2xl shadow-lg p-8 relative">
+          <button type="button" className="absolute top-[16px] right-[16px] w-[32px] h-[32px] flex items-center justify-center border-none bg-transparent text-hp-slate cursor-pointer rounded-full transition-all duration-200 hover:bg-black/5 hover:text-hp-charcoal" onClick={onClose} aria-label="Close">
             <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
-          <div className={styles.mark}>
-            <Image src="/images/logo-mascot.png" alt="Hi Pando" width={44} height={44} />
+          <div className="w-11 h-11 rounded-xl overflow-hidden flex items-center justify-center mb-4 mx-auto">
+            <Image src="/images/logo-mascot.png" alt="Hi Pando" width={44} height={44} className="w-full h-full object-cover" />
           </div>
-          <div className={styles.title}>{isSignUp ? "Create your account" : "Welcome back"}</div>
-        <div className={styles.subtitle}>
-          {isSignUp
-            ? "Sign up to save properties and get personalised alerts."
-            : "Sign in to continue exploring homes in Dubai."}
-        </div>
-
-        {error && (
-          <div style={{ color: '#dc2626', fontSize: '14px', margin: '0 0 20px 0', textAlign: 'center', backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '12px 16px', borderRadius: '8px', fontWeight: 500, wordBreak: 'break-word', lineHeight: '1.4' }}>
-            {error}
+          <div className="text-3xl font-bold text-gray-900 text-center mb-2">{isSignUp ? "Welcome to Hi Pando" : "Welcome back"}</div>
+          <div className="text-gray-500 text-sm text-center mb-8">
+            {isSignUp
+              ? "Sign up to save properties and get personalised alerts."
+              : "Sign in to continue exploring homes in Dubai."}
           </div>
-        )}
 
-        {step === "contact" ? (
-          <form onSubmit={handleContinue}>
-            <div className={styles.methodToggle}>
-              <button
-                type="button"
-                className={`${styles.methodBtn} ${method === "mobile" ? styles.methodBtnActive : ""}`}
-                onClick={() => {
-                  setMethod("mobile");
-                  setContact("");
-                  setError("");
-                }}
-              >
-                Mobile Number
-              </button>
-              <button
-                type="button"
-                className={`${styles.methodBtn} ${method === "email" ? styles.methodBtnActive : ""}`}
-                onClick={() => {
-                  setMethod("email");
-                  setContact("");
-                  setError("");
-                }}
-              >
-                Email
-              </button>
+          {error && (
+            <div style={{ color: '#dc2626', fontSize: '14px', margin: '0 0 20px 0', textAlign: 'center', backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '12px 16px', borderRadius: '8px', fontWeight: 500, wordBreak: 'break-word', lineHeight: '1.4' }}>
+              {error}
             </div>
+          )}
 
-            {isSignUp && (
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="name">
-                  Full Name
-                </label>
-                <div className={styles.inputRow}>
+          {step === "contact" ? (
+            <form onSubmit={handleContinue} className="space-y-6">
+              <div className="flex bg-gray-100 rounded-full p-1 mb-6">
+                <button
+                  type="button"
+                  className={`flex-1 border-none bg-transparent p-2 rounded-full font-bold text-sm cursor-pointer transition-colors ${method === "mobile" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                  onClick={() => {
+                    setMethod("mobile");
+                    setContact("");
+                    setError("");
+                  }}
+                >
+                  Mobile Number
+                </button>
+                <button
+                  type="button"
+                  className={`flex-1 border-none bg-transparent p-2 rounded-full font-bold text-sm cursor-pointer transition-colors ${method === "email" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+                  onClick={() => {
+                    setMethod("email");
+                    setContact("");
+                    setError("");
+                  }}
+                >
+                  Email
+                </button>
+              </div>
+
+              {isSignUp && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="name">
+                    Full Name
+                  </label>
                   <input
                     id="name"
-                    className={styles.input}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1E7A5F] focus:border-transparent outline-none transition-all text-sm"
                     placeholder="Enter your full name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
                   />
                 </div>
-              </div>
-            )}
+              )}
 
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="contact">
-                {method === "mobile" ? "Mobile Number" : "Email Address"}
-              </label>
-              <div className={styles.inputRow}>
-                {method === "mobile" && (
-                  <select 
-                    value={countryCode} 
-                    onChange={(e) => setCountryCode(e.target.value)}
-                    style={{ border: 'none', background: 'transparent', outline: 'none', padding: '0 8px', color: '#666', fontWeight: 500, fontSize: '15px', cursor: 'pointer' }}
-                  >
-                    <option value="+971">+971 (UAE)</option>
-                    <option value="+91">+91 (IND)</option>
-                  </select>
-                )}
-                <input
-                  id="contact"
-                  className={styles.input}
-                  type={method === "mobile" ? "tel" : "email"}
-                  placeholder={method === "mobile" ? (countryCode === "+971" ? "50 123 4567" : "98765 43210") : "you@example.com"}
-                  value={contact}
-                  onChange={handleContactChange}
-                  pattern={method === "email" ? "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$" : undefined}
-                  title={method === "email" ? "Please enter a valid email address (e.g. you@example.com)" : undefined}
-                  maxLength={method === "mobile" ? (countryCode === "+971" ? 9 : 10) : undefined}
-                  required
-                />
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', background: '#f3f4f6', padding: '10px 14px', borderRadius: '8px' }}>
-              <input 
-                type="checkbox" 
-                id="devModeToggle" 
-                checked={devMode}
-                onChange={(e) => setDevMode(e.target.checked)}
-                style={{ accentColor: '#e11d48', cursor: 'pointer', width: '16px', height: '16px' }}
-              />
-              <label htmlFor="devModeToggle" style={{ fontSize: '13px', fontWeight: 600, color: '#4b5563', cursor: 'pointer', userSelect: 'none' }}>
-                Dev Mode: Bypass OTP Verification
-              </label>
-            </div>
-
-            <button type="submit" disabled={loading} className="hp-btn hp-btn-primary" style={{ width: "100%", padding: 14, opacity: loading ? 0.7 : 1 }}>
-              {loading ? "Processing..." : (devMode ? "Instant Sign In" : "Continue")}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerify}>
-            <div className={styles.field}>
-              <label className={styles.label}>Enter the 6-digit code sent to {contact || "your number"}</label>
-              <div className={styles.otpRow} style={{ gap: '6px' }}>
-                {otp.map((digit, i) => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="contact">
+                  {method === "mobile" ? "Mobile Number" : "Email Address"}
+                </label>
+                <div className="flex items-center border border-gray-300 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-[#1E7A5F] focus-within:border-transparent transition-all bg-white">
+                  {method === "mobile" && (
+                    <select 
+                      value={countryCode} 
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="border-none bg-transparent outline-none text-gray-600 font-medium text-sm cursor-pointer pr-2"
+                    >
+                      <option value="+971">+971 (UAE)</option>
+                      <option value="+91">+91 (IND)</option>
+                    </select>
+                  )}
                   <input
-                    key={i}
-                    id={`otp-${i}`}
-                    className={styles.otpDigit}
-                    style={{ padding: '0', width: '40px', height: '48px' }}
-                    value={digit}
-                    maxLength={1}
-                    inputMode="numeric"
-                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                    id="contact"
+                    className="border-none bg-transparent outline-none w-full text-sm"
+                    type={method === "mobile" ? "tel" : "email"}
+                    placeholder={method === "mobile" ? (countryCode === "+971" ? "50 123 4567" : "98765 43210") : "you@example.com"}
+                    value={contact}
+                    onChange={handleContactChange}
+                    pattern={method === "email" ? "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$" : undefined}
+                    title={method === "email" ? "Please enter a valid email address (e.g. you@example.com)" : undefined}
+                    maxLength={method === "mobile" ? (countryCode === "+971" ? 9 : 10) : undefined}
+                    required
                   />
-                ))}
+                </div>
               </div>
-            </div>
-            <button type="submit" disabled={loading} className="hp-btn hp-btn-primary" style={{ width: "100%", padding: 14, opacity: loading ? 0.7 : 1 }}>
-              {loading ? "Verifying..." : "Verify & Continue"}
-            </button>
-            <div className={styles.resend}>
-              Didn&apos;t get a code?{" "}
-              <button type="button" className={styles.resendLink} onClick={() => setStep("contact")}>
-                Resend / Change details
+              
+              <button type="submit" disabled={loading} className="w-full bg-[#1E7A5F] hover:bg-[#155a45] text-white font-medium py-3 rounded-xl transition-colors disabled:opacity-70 mt-2">
+                {loading ? "Processing..." : (devMode ? "Instant Sign In" : "Continue")}
               </button>
-            </div>
-          </form>
-        )}
-
-        <div className={styles.switchRow}>
-          {isSignUp ? (
-            <>
-              Already have an account?{" "}
-              <button type="button" onClick={() => handleSwitchMode("sign-in")} className={styles.switchLink} style={{background: 'none', border: 'none', padding: 0, cursor: 'pointer'}}>
-                Sign in
-              </button>
-            </>
+            </form>
           ) : (
-            <>
-              New to Hi Pando?{" "}
-              <button type="button" onClick={() => handleSwitchMode("sign-up")} className={styles.switchLink} style={{background: 'none', border: 'none', padding: 0, cursor: 'pointer'}}>
-                Create an account
+            <form onSubmit={handleVerify} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
+                  Enter the 6-digit code sent to {contact || "your number"}
+                </label>
+                <div className="flex justify-center gap-2">
+                  {otp.map((digit, i) => (
+                    <input
+                      key={i}
+                      id={`otp-${i}`}
+                      className="w-12 h-14 text-center text-xl font-bold border border-gray-300 rounded-xl outline-none focus:border-transparent focus:ring-2 focus:ring-[#1E7A5F] transition-all"
+                      value={digit}
+                      maxLength={1}
+                      inputMode="numeric"
+                      onChange={(e) => handleOtpChange(i, e.target.value)}
+                    />
+                  ))}
+                </div>
+              </div>
+              <button type="submit" disabled={loading} className="w-full bg-[#1E7A5F] hover:bg-[#155a45] text-white font-medium py-3 rounded-xl transition-colors disabled:opacity-70">
+                {loading ? "Verifying..." : "Verify & Continue"}
               </button>
-            </>
+              <div className="text-center">
+                <button type="button" className="text-[#1E7A5F] text-sm font-medium hover:underline bg-transparent border-none p-0 cursor-pointer" onClick={() => setStep("contact")}>
+                  Change Phone Number
+                </button>
+              </div>
+            </form>
           )}
+
+          <div className="text-center mt-6 pt-6 border-t border-gray-100 text-sm text-gray-500">
+            {isSignUp ? (
+              <>
+                Already have an account?{" "}
+                <button type="button" onClick={() => handleSwitchMode("sign-in")} className="text-[#1E7A5F] font-bold hover:underline bg-transparent border-none p-0 cursor-pointer">
+                  Sign in
+                </button>
+              </>
+            ) : (
+              <>
+                New to Hi Pando?{" "}
+                <button type="button" onClick={() => handleSwitchMode("sign-up")} className="text-[#1E7A5F] font-bold hover:underline bg-transparent border-none p-0 cursor-pointer">
+                  Create an account
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
-  </div>
   );
 }

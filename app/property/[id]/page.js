@@ -45,8 +45,8 @@ export default async function PropertyDetailsPage({ params }) {
     areaSqft: dbProperty.areaSqft || 0,
     furnishing: dbProperty.furnishing || "Furnished",
     amenities: dbProperty.amenities || [],
-    images: dbProperty.images && dbProperty.images.length > 0 
-      ? dbProperty.images 
+    images: Array.isArray(dbProperty.images) && dbProperty.images.filter(Boolean).length > 0 
+      ? dbProperty.images.filter(Boolean)
       : ["https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80"],
     description: dbProperty.description || "",
   };

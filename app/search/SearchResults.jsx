@@ -6,7 +6,6 @@ import { Header } from '@/components/pando/Header';
 import { RecommendedProperties } from '@/components/pando/RecommendedProperties';
 import { Toast } from '@/components/pando/Toast';
 import { PropertyService } from '@/services/propertyService'; // Fallback for local favorites
-import styles from '@/components/pando/pando-properties.module.css';
 import { useAuth } from '@/providers/AuthProvider';
 
 export default function SearchResults() {
@@ -98,6 +97,9 @@ export default function SearchResults() {
     }, 3500);
   };
 
+  // Lifted selection state
+  const [selectedPropertyId, setSelectedPropertyId] = useState(null);
+
   // Toggle Save Property
   const handleToggleSave = async (id) => {
     const targetProp = properties.find(p => p.id === id);
@@ -134,19 +136,22 @@ export default function SearchResults() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className="h-screen h-[100dvh] max-h-[100dvh] flex flex-col bg-[#f1eef2] text-[#1e1e22] overflow-hidden font-sans box-border">
       {/* Top Quantum Header */}
       <Header syncedAssetsCount={properties.length} />
 
       {/* Main Single Primary Container Canvas */}
-      <main className={styles.mainCanvas}>
+      <main className="flex-1 min-h-0 w-full p-[12px_18px_18px] overflow-hidden flex flex-col box-border">
         {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#666', gridColumn: '1 / -1' }}>
+          <div style={{ padding: '60px', textAlign: 'center', color: '#666', width: '100%' }}>
             Syncing matrix parameters...
           </div>
         ) : (
           <RecommendedProperties
             properties={properties}
+            user={user}
+            selectedPropertyId={selectedPropertyId}
+            onSelectProperty={setSelectedPropertyId}
             onToggleSave={handleToggleSave}
             savedIds={savedPropertyIds}
             selectedLocation={selectedLocation}

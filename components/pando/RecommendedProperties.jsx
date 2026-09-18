@@ -7,10 +7,13 @@ import { PropertyCard } from './PropertyCard';
 import { PropertyFilters } from './PropertyFilters';
 import { PandoMascot } from './PandoMascot';
 import { PandoService } from '@/services/pandoService';
-import styles from './pando-properties.module.css';
+import AuthForm from '@/components/AuthForm';
 
 export const RecommendedProperties = ({
   properties = [],
+  user = null,
+  selectedPropertyId,
+  onSelectProperty,
   onToggleSave,
   savedIds = [],
   selectedLocation,
@@ -27,17 +30,23 @@ export const RecommendedProperties = ({
   const router = useRouter();
 
   // Selection & AI Assistant States
-  const [selectedPropertyId, setSelectedPropertyId] = useState(null);
   const [pandoMessage, setPandoMessage] = useState('Loading your premium property recommendations...');
   const [aiInput, setAiInput] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [statusState, setStatusState] = useState('IDLE');
 
+  // Auth Modal State
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingPropertyId, setPendingPropertyId] = useState(null);
+  const [authMode, setAuthMode] = useState('sign-in');
+
   // Synchronize Pando's message with the loaded properties
   useEffect(() => {
     if (properties && properties.length > 0) {
       const firstProp = properties[0];
-      setSelectedPropertyId(firstProp.id);
+      if (!selectedPropertyId) {
+        onSelectProperty?.(firstProp.id);
+      }
       
       if (searchQuery) {
         let spokenPrice = '';
@@ -59,12 +68,18 @@ export const RecommendedProperties = ({
     }
   }, [properties, searchQuery]);
 
-  // Handle Property Card Click - Navigate directly to separate property screen
+  // Handle Property Card Click - Navigate to property or login
   const handleOpenPropertyScreen = (property) => {
-    setSelectedPropertyId(property.id);
+    onSelectProperty?.(property.id);
     const explanation = PandoService.getPropertyExplanation(property);
     setPandoMessage(explanation);
-    router.push(`/property/${property.id}`);
+    
+    if (!user) {
+      setPendingPropertyId(property.id);
+      setAuthModalOpen(true);
+    } else {
+      router.push(`/property/${property.id}`);
+    }
   };
 
   // Handle AI Input Command Submission
@@ -80,7 +95,7 @@ export const RecommendedProperties = ({
       const res = PandoService.processQuery(queryText, properties);
       setPandoMessage(res.reply);
       if (res.selectedId) {
-        setSelectedPropertyId(res.selectedId);
+        onSelectProperty?.(res.selectedId);
       }
       setStatusState('SPEAKING');
     }, 250);
@@ -120,7 +135,7 @@ export const RecommendedProperties = ({
             setAiInput(transcript);
             const res = PandoService.processQuery(transcript, properties);
             setPandoMessage(res.reply);
-            if (res.selectedId) setSelectedPropertyId(res.selectedId);
+            if (res.selectedId) onSelectProperty?.(res.selectedId);
             setStatusState('SPEAKING');
           }
           setIsListening(false);
@@ -143,14 +158,14 @@ export const RecommendedProperties = ({
   };
 
   return (
-    <section className={styles.workspaceCard}>
+    <section className="h-full flex flex-col min-h-0 relative overflow-hidden bg-white border border-[#E5E7EB] rounded-[20px] p-[18px_24px] box-border shadow-[0_4px_20px_rgba(0,0,0,0.03)] max-sm:p-[12px_14px] max-sm:rounded-[16px]">
       {/* Top Metadata Header Line matching Image 1 */}
-      <div className={styles.sectorHeader}>
-        <div className={styles.sectorLeft}>
-          <span className={styles.locationPin}>📍</span>
+      <div className="flex items-center justify-between text-[11px] font-semibold text-[#d22c23] uppercase tracking-[0.04em] mb-[8px] shrink-0">
+        <div className="flex items-center gap-[6px]">
+          <span className="text-[12px]">📍</span>
           <span>DUBAI PRIME  /  AI CONCIERGE WORKSPACE</span>
         </div>
-        <div className={styles.sectorRight}>
+        <div className="flex items-center gap-[8px] text-[#9CA3AF] font-normal text-[12px] normal-case max-sm:hidden">
           <span>4 portfolios online</span>
           <span>•</span>
           <span>Voice engine ready</span>
@@ -158,18 +173,18 @@ export const RecommendedProperties = ({
       </div>
 
       {/* Main Header & Filter Controls Row */}
-      <div className={styles.titleRow}>
-        <div className={styles.titleLeftBlock}>
-          <div className={styles.titleBadgeContainer}>
-            <h1 className={styles.mainTitle}>Recommended Properties</h1>
+      <div className="flex items-start justify-between gap-[16px] mb-[16px] shrink-0">
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-[10px]">
+            <h1 className="m-0 text-[24px] font-bold text-[#1e1e22] tracking-[-0.02em] whitespace-nowrap leading-[1.2] max-sm:text-[18px]">Recommended Properties</h1>
 
             {/* CURATION 02 Badge */}
-            <div className={styles.curationBadge}>
-              <span className={styles.curationText}>CURATION</span>
-              <span className={styles.curationNumber}>02</span>
+            <div className="bg-[#d22c23]/12 border border-[#d22c23]/35 rounded-full px-[10px] py-[3px] flex items-center gap-[4px] select-none shrink-0">
+              <span className="text-[9px] font-bold uppercase tracking-[0.08em] text-[#d22c23] leading-none">CURATION</span>
+              <span className="text-[11px] font-bold text-[#d22c23] leading-none">02</span>
             </div>
           </div>
-          <p className={styles.subTitle}>Handpicked homes that match your preferences</p>
+          <p className="m-[4px_0_0_0] text-[13.5px] font-normal text-[#6B7280] leading-[1.3]">Handpicked homes that match your preferences</p>
         </div>
 
         {/* Filter Area (Location dropdown + Refine button) */}
@@ -191,7 +206,7 @@ export const RecommendedProperties = ({
       </div>
 
       {/* Primary Workspace Box (2x2 Grid + Integrated Pando Unit matching Image 1) */}
-      <div className={styles.propertyAreaWrapper}>
+      <div className="flex-1 min-h-0 relative flex flex-col overflow-hidden">
         {properties.length === 0 ? (
           <div
             style={{
@@ -233,7 +248,7 @@ export const RecommendedProperties = ({
           </div>
         ) : (
           /* Smooth 2x2 Grid */
-          <div className={styles.propertyVerticalScroll}>
+          <div className="flex-1 min-h-0 grid grid-cols-2 content-start gap-[16px] overflow-y-auto overflow-x-hidden pr-[2px] pb-[20px] box-border scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-md:grid-cols-1 max-md:gap-[14px]">
             {properties.map((property) => (
               <PropertyCard
                 key={property.id}
@@ -248,7 +263,7 @@ export const RecommendedProperties = ({
         )}
 
         {/* INTEGRATED PANDO OVERLAY UNIT MATCHING IMAGE 1 */}
-        <div className={styles.pandoFloatingUnit}>
+        <div className="absolute bottom-[12px] right-[12px] z-[35] flex flex-col items-end gap-[4px] w-full max-w-[min(92%,420px)] pointer-events-auto">
           <PandoMascot
             message={pandoMessage}
             enableVoice={true}
@@ -265,21 +280,21 @@ export const RecommendedProperties = ({
           />
 
           {/* Compact Input Bar directly inside/below Speech Bubble */}
-          <form onSubmit={handleAiSubmit} className={styles.compactAiBar}>
+          <form onSubmit={handleAiSubmit} className="w-full max-w-[380px] bg-white border border-[#E5E7EB] rounded-full p-[5px_8px_5px_16px] flex items-center justify-between gap-[8px] shadow-[0_4px_16px_rgba(0,0,0,0.08)] box-border z-[40] transition-all duration-200 focus-within:border-[#d22c23] focus-within:shadow-[0_4px_20px_rgba(210,44,35,0.12),0_0_0_2px_rgba(210,44,35,0.1)]">
             <input
               type="text"
               value={aiInput}
               onChange={(e) => setAiInput(e.target.value)}
               placeholder="Ask Pando anything about the property..."
-              className={styles.compactAiInput}
+              className="flex-1 bg-transparent border-none outline-none text-[#1e1e22] text-[12px] font-normal font-sans min-w-0 placeholder:text-[#9CA3AF]"
             />
 
-            <div className={styles.compactAiActions}>
+            <div className="flex items-center gap-[6px] shrink-0">
               <button
                 type="button"
                 onClick={handleMicToggle}
                 aria-label="Voice microphone input"
-                className={`${styles.compactMicBtn} ${isListening ? styles.listening : ''}`}
+                className={`bg-transparent border-none w-[32px] h-[32px] p-0 rounded-full flex items-center justify-center text-[#6B7280] cursor-pointer transition-all duration-150 shrink-0 hover:text-[#1e1e22] hover:bg-[#F3F4F6] ${isListening ? "bg-[#d22c23] text-white animate-[pulseListening_1.2s_infinite] hover:bg-[#d22c23] hover:text-white" : ""}`}
                 title={isListening ? 'Listening...' : 'Voice Input'}
               >
                 <Mic size={15} />
@@ -288,7 +303,7 @@ export const RecommendedProperties = ({
               <button
                 type="submit"
                 aria-label="Send query to Pando AI"
-                className={styles.compactSendBtn}
+                className="bg-[#d22c23] text-white border-none w-[34px] h-[34px] rounded-full flex items-center justify-center cursor-pointer shadow-[0_2px_6px_rgba(210,44,35,0.25)] transition-all duration-150 shrink-0 hover:bg-[#1e1e22] hover:scale-105 active:scale-95"
                 title="Ask Pando"
               >
                 <ArrowUp size={14} strokeWidth={2.5} />
@@ -297,6 +312,20 @@ export const RecommendedProperties = ({
           </form>
         </div>
       </div>
+
+      {/* Auth Modal Popup for Guest Users */}
+      {authModalOpen && (
+        <AuthForm 
+          mode={authMode} 
+          onSwitchMode={setAuthMode} 
+          onClose={() => setAuthModalOpen(false)}
+          onSuccess={() => {
+            if (pendingPropertyId) {
+              router.push(`/property/${pendingPropertyId}`);
+            }
+          }}
+        />
+      )}
     </section>
   );
 };

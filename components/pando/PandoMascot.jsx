@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
+import { getPandoVoice, PANDO_VOICE_SETTINGS } from '@/lib/pandoVoice';
 import './pando-mascot.css';
 
 const DEFAULT_MASCOT_URL = '/images/pando/pando.png';
@@ -58,16 +59,11 @@ export function PandoMascot({
 
     try {
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.96;
-      utterance.pitch = 1.06;
+      utterance.rate = PANDO_VOICE_SETTINGS.rate;
+      utterance.pitch = PANDO_VOICE_SETTINGS.pitch;
 
-      const voices = window.speechSynthesis.getVoices();
-      const naturalVoice =
-        voices.find((v) => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel') || v.name.includes('Alex'))) ||
-        voices.find((v) => v.lang.startsWith('en')) ||
-        voices[0];
-
-      if (naturalVoice) utterance.voice = naturalVoice;
+      const voice = getPandoVoice();
+      if (voice) utterance.voice = voice;
 
       utterance.onstart = () => {
         setInternalSpeaking(true);
