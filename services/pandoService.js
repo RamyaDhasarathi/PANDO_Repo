@@ -2,6 +2,26 @@ import { PROPERTIES_DATA } from '@/data/quantumProperties';
 
 export class PandoService {
   /**
+   * Greeting shown in Pando's bubble when the results page first loads (or
+   * filters/page change) — a short, curiosity-driving teaser built purely
+   * from stats and standout features of the residences on screen. Never
+   * names a property or its location — that's the reveal you get by
+   * hovering or opening a card — so it stays a hook, not a recap.
+   */
+  static getSummaryMessage(pageProperties = []) {
+    if (!pageProperties.length) {
+      return "No matches yet — try widening your filters.";
+    }
+
+    const maxBedrooms = Math.max(...pageProperties.map((p) => p.bedrooms));
+    const maxYield = Math.max(...pageProperties.map((p) => p.yield));
+    const hooks = [...new Set(pageProperties.flatMap((p) => p.tags || []))].slice(0, 2);
+    const hookSummary = hooks.length ? hooks.join(' and ').toLowerCase() : 'standout amenities';
+
+    return `Up to ${maxBedrooms} bedrooms, ${maxYield}% net yield, and ${hookSummary} — take a closer look.`;
+  }
+
+  /**
    * Generate property-specific speech explanation when a user clicks a property card.
    */
   static getPropertyExplanation(property) {

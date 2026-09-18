@@ -1,8 +1,9 @@
 'use client'
 
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import { ArrowUpRight, Mic, Volume2, VolumeX } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { usePandoTTS } from '@/hooks/usePandoTTS'
 
 const mascotUrl =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png'
@@ -17,9 +18,9 @@ export default function Page() {
   const router = useRouter()
   const [prompt, setPrompt] = useState('')
   const [reply, setReply] = useState(replies[0])
-  const [muted, setMuted] = useState(false)
-  const [isSpeaking, setIsSpeaking] = useState(false)
+  const { muted, isSpeaking, isSpeakingRef, speak, toggleMute: toggleTTSMute } = usePandoTTS()
   const [mascotMove, setMascotMove] = useState('')
+  const hasSpokenRef = useRef(false)
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>
@@ -38,19 +39,30 @@ export default function Page() {
     return () => clearTimeout(timeoutId)
   }, [])
 
-  const speak = (text: string) => {
-    if (muted || typeof window === 'undefined' || !('speechSynthesis' in window)) return
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.rate = 0.96
-    utterance.pitch = 1.08
-    utterance.onstart = () => setIsSpeaking(true)
-    utterance.onend = () => setIsSpeaking(false)
-    window.speechSynthesis.speak(utterance)
-  }
-
+  // Speak immediately on landing. Browsers may block audio before any user
+  // gesture on the page, so we also retry on the first click/keydown/touch.
   useEffect(() => {
-    return () => window.speechSynthesis?.cancel()
+    if (!muted && !hasSpokenRef.current) {
+      hasSpokenRef.current = true
+      speak(reply)
+    }
+
+    const handleFirstInteraction = () => {
+      if (!muted && !isSpeakingRef.current) {
+        speak(reply)
+      }
+    }
+
+    window.addEventListener('click', handleFirstInteraction, { once: true })
+    window.addEventListener('keydown', handleFirstInteraction, { once: true })
+    window.addEventListener('touchstart', handleFirstInteraction, { once: true })
+
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction)
+      window.removeEventListener('keydown', handleFirstInteraction)
+      window.removeEventListener('touchstart', handleFirstInteraction)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const submitPrompt = (event?: FormEvent) => {
@@ -64,11 +76,7 @@ export default function Page() {
     speak(nextReply)
   }
 
-  const toggleMute = () => {
-    if (!muted) window.speechSynthesis?.cancel()
-    setIsSpeaking(false)
-    setMuted((current) => !current)
-  }
+  const toggleMute = () => toggleTTSMute()
 
   return (
     <main className="pando-shell">

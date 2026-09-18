@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bookmark, ArrowRight } from 'lucide-react';
-import { StatusBadge } from './StatusBadge';
+import { Bookmark } from 'lucide-react';
+import styles from './pando-properties.module.css';
 
 export const PropertyCard = ({
   property,
@@ -12,63 +12,41 @@ export const PropertyCard = ({
   onSelect,
 }) => {
   const [imageError, setImageError] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   // Format currency
   const formatAed = (val) => 'AED ' + (val?.toLocaleString('en-US') ?? '');
   const formatUsd = (val) => '~$' + (val?.toLocaleString('en-US') ?? '') + ' USD';
 
-  const handleClick = () => {
+  const handleActivate = () => {
     onSelect?.(property);
     onOpenDetails?.(property);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleActivate();
+    }
+  };
+
+  // The one standout differentiator, told as a plain line rather than a tag cluster
+  const differentiator = property.tags?.[0];
+
   return (
     <div
-      onClick={handleClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        cursor: 'pointer',
-        borderRadius: '16px',
-        border: isHovered ? '1px solid #D1D5DB' : '1px solid #E5E7EB',
-        backgroundColor: '#FFFFFF',
-        padding: '12px',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        boxSizing: 'border-box',
-        boxShadow: isHovered
-          ? '0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)'
-          : '0 1px 3px rgba(0, 0, 0, 0.04)',
-        transition: 'all 0.2s ease',
-      }}
-      className="pando-property-card-item"
+      role="button"
+      tabIndex={0}
+      onClick={handleActivate}
+      onKeyDown={handleKeyDown}
+      className={styles.card}
+      aria-label={`View ${property.name}, ${property.propertyType}, ${formatAed(property.price)}`}
     >
-      {/* Property Image & Overlays */}
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '210px',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          backgroundColor: '#F3F4F6',
-          marginBottom: '12px',
-        }}
-      >
+      <div className={styles.cardImageWrap}>
         <img
           src={imageError ? 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80' : property.image}
-          alt={property.name}
+          alt=""
           onError={() => setImageError(true)}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            transform: isHovered ? 'scale(1.03)' : 'scale(1)',
-            transition: 'transform 0.4s ease',
-          }}
-          className="pando-card-img"
+          className={styles.cardImage}
         />
 
         {/* Top Left: Index Overlay Pill matching Image 1 */}
@@ -108,41 +86,18 @@ export const PropertyCard = ({
             {property.indexLabel || property.category || 'Prime'}
           </span>
         </div>
-
-        {/* Top Right: Save Bookmark Icon */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onToggleSave?.(property.id);
           }}
-          aria-label={isSaved ? 'Remove from saved' : 'Save property'}
-          style={{
-            position: 'absolute',
-            top: '10px',
-            right: '10px',
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            backdropFilter: 'blur(6px)',
-            color: '#FFFFFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: 'none',
-            cursor: 'pointer',
-            zIndex: 10,
-            transition: 'transform 0.2s ease',
-          }}
-          title={isSaved ? 'Saved in Portfolio' : 'Save Property'}
+          onKeyDown={(e) => e.stopPropagation()}
+          aria-label={isSaved ? `Remove ${property.name} from saved` : `Save ${property.name}`}
+          aria-pressed={isSaved}
+          className={styles.saveBtn}
         >
-          <Bookmark
-            size={13}
-            color="#FFFFFF"
-            fill={isSaved ? '#FFFFFF' : 'none'}
-          />
+          <Bookmark size={15} color="#FFFFFF" fill={isSaved ? '#FFFFFF' : 'none'} />
         </button>
-
         {/* Bottom Right: Sector Badge */}
         <div
           style={{
@@ -165,7 +120,7 @@ export const PropertyCard = ({
       </div>
 
       {/* Title, Status Badge, Specs & Feature Tags */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '16px' }}>
         <div>
           {/* Title & Badge Row */}
           <div
@@ -181,7 +136,7 @@ export const PropertyCard = ({
               style={{
                 margin: 0,
                 fontSize: '17px',
-                fontWeight: 500, // Non-bold property names per user instruction
+                fontWeight: 500,
                 color: '#111827',
                 letterSpacing: '-0.01em',
                 whiteSpace: 'nowrap',
@@ -190,21 +145,8 @@ export const PropertyCard = ({
                 fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
               }}
             >
-              {property.name}
+              {property.name || property.title}
             </h3>
-            <div style={{ flexShrink: 0 }}>
-              {property.statusBadge ? (
-                <StatusBadge
-                  label={property.statusBadge.label}
-                  variant={property.statusBadge.variant}
-                />
-              ) : (
-                <StatusBadge
-                  label={property.purpose === 'rent' ? 'For Rent' : 'For Sale'}
-                  variant="exclusive"
-                />
-              )}
-            </div>
           </div>
 
           {/* Specs Text Line */}
@@ -273,7 +215,7 @@ export const PropertyCard = ({
             <div
               style={{
                 fontSize: '17px',
-                fontWeight: 600, // Medium font weight for budget per user instruction
+                fontWeight: 600,
                 color: '#111827',
                 letterSpacing: '-0.02em',
                 lineHeight: 1.1,
@@ -295,24 +237,29 @@ export const PropertyCard = ({
             </span>
           </div>
 
-          {/* Arrow Button */}
-          <div
+          <button
+            type="button"
             style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              border: '1px solid #E5E7EB',
-              backgroundColor: '#FFFFFF',
+              backgroundColor: '#d22c23',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '9999px',
+              padding: '8px 16px',
+              fontSize: '12px',
+              fontWeight: 500,
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              color: '#374151',
-              transition: 'all 0.2s ease',
-              flexShrink: 0,
+              gap: '6px'
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleActivate();
             }}
           >
-            <ArrowRight size={15} />
-          </div>
+            <span>View</span>
+            <span aria-hidden="true">→</span>
+          </button>
         </div>
       </div>
     </div>

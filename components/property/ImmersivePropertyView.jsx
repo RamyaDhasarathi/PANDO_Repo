@@ -7,21 +7,18 @@ import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
 import styles from "./ImmersivePropertyView.module.css";
 import { formatAED, formatPrice, bedroomLabel } from "@/lib/format";
 import { explainProperty, answerPropertyQuestion } from "@/lib/propertyAssistant";
-import { getPandoVoice, PANDO_VOICE_SETTINGS } from "@/lib/pandoVoice";
+import { usePandoTTS } from "@/hooks/usePandoTTS";
 
 export default function ImmersivePropertyView({ property }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [pandoMessage, setPandoMessage] = useState("");
   const [inputQuery, setInputQuery] = useState("");
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const { muted, isSpeaking, speak: speakText, stop: stopSpeaking, toggleMute: toggleTTSMute } = usePandoTTS();
   const [isListening, setIsListening] = useState(false);
-  const [muted, setMuted] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
 
   const recognitionRef = useRef(null);
-  const mutedRef = useRef(false);
-  const isSpeakingRef = useRef(false);
 
   const images = useMemo(() => {
     return property.images && property.images.length > 0 ? property.images : ["/images/pando-agent.png"];
@@ -33,70 +30,23 @@ export default function ImmersivePropertyView({ property }) {
     setPandoMessage(intro);
   }, [property]);
 
-  // Speech Synthesis (Text-to-Speech)
-  const speakText = useCallback((text) => {
-    if (mutedRef.current || !("speechSynthesis" in window)) return;
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    utterance.rate = PANDO_VOICE_SETTINGS.rate;
-    utterance.pitch = PANDO_VOICE_SETTINGS.pitch;
-
-    const voice = getPandoVoice();
-    if (voice) utterance.voice = voice;
-
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-      isSpeakingRef.current = true;
-    };
-
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      isSpeakingRef.current = false;
-    };
-
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-      isSpeakingRef.current = false;
-    };
-
-    window.speechSynthesis.speak(utterance);
-  }, []);
-
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
     setSpeechSupported(true);
 
     const timer = setTimeout(() => {
-      if (!mutedRef.current) {
-        const intro = explainProperty(property);
-        speakText(intro);
-      }
+      const intro = explainProperty(property);
+      speakText(intro);
     }, 450);
 
     return () => {
       clearTimeout(timer);
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
     };
-  }, [property, speakText]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [property]);
 
   const toggleVoiceAudio = () => {
-    const next = !muted;
-    setMuted(next);
-    mutedRef.current = next;
-
-    if (next) {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-      setIsSpeaking(false);
-      isSpeakingRef.current = false;
-    } else {
-      speakText(pandoMessage || explainProperty(property));
-    }
+    toggleTTSMute(pandoMessage || explainProperty(property));
   };
 
   const handleAskPando = useCallback((questionText) => {
@@ -167,10 +117,7 @@ export default function ImmersivePropertyView({ property }) {
       setIsListening(false);
     } else {
       try {
-        if ("speechSynthesis" in window) {
-          window.speechSynthesis.cancel();
-        }
-        setIsSpeaking(false);
+        stopSpeaking();
         recognitionRef.current.start();
         setIsListening(true);
       } catch (err) {

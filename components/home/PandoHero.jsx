@@ -7,6 +7,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import AuthForm from '@/components/AuthForm';
 import ProfilePopup from '@/components/ProfilePopup';
 import { getPandoVoice, PANDO_VOICE_SETTINGS } from '@/lib/pandoVoice';
+import { usePandoTTS } from '@/hooks/usePandoTTS';
 
 const mascotUrl =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png';
@@ -22,9 +23,7 @@ export default function PandoHero() {
   const { user } = useAuth();
   const [prompt, setPrompt] = useState('');
   const [reply, setReply] = useState(replies[0]);
-  const [isPersonalized, setIsPersonalized] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const { muted, isSpeaking, isSpeakingRef, speak, toggleMute } = usePandoTTS();
   const [mascotMove, setMascotMove] = useState('');
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -49,85 +48,16 @@ export default function PandoHero() {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  // Fetch AI preferences to personalize greeting
+  // Speak immediately on landing. Browsers may block audio before any user
+  // gesture on the page, so we also retry on the first click/keydown/touch.
   useEffect(() => {
-    async function loadPreferences() {
-      if (!user) {
-        setReply(replies[0]);
-        setIsPersonalized(false);
-        return;
-      }
-      try {
-        const res = await fetch('/api/buyer/profile');
-        const data = await res.json();
-        if (data.success && data.profile) {
-          const { purchasingGoal, budgetRange, preferredTypology, preferredLocations } = data.profile;
-          
-          let greeting = `Welcome back, ${user.name || 'friend'}. `;
-          if (purchasingGoal === 'Investor') {
-            greeting += `I've prepared the latest high-yield investment data `;
-            if (budgetRange) greeting += `for the ${budgetRange} bracket.`;
-            else greeting += `for you today.`;
-          } else if (purchasingGoal === 'End-User') {
-            greeting += `Ready to find your perfect home? `;
-            if (preferredTypology && preferredLocations?.length > 0) {
-              greeting += `I've shortlisted some incredible ${preferredTypology.toLowerCase()}s in ${preferredLocations[0]}.`;
-            } else if (preferredTypology) {
-              greeting += `I have some amazing ${preferredTypology.toLowerCase()}s to show you.`;
-            }
-          } else {
-            greeting += `I'm ready to help you find your next place.`;
-          }
-          
-          setReply(greeting);
-          setIsPersonalized(true);
-        }
-      } catch (err) {
-        console.error("Failed to fetch preferences for hero", err);
-      }
+    if (!muted && !hasSpokenRef.current) {
+      hasSpokenRef.current = true;
+      speak(reply);
     }
-    loadPreferences();
-  }, [user]);
 
-  const speak = (text) => {
-    if (muted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voice = getPandoVoice();
-      if (voice) utterance.voice = voice;
-      utterance.rate = PANDO_VOICE_SETTINGS.rate;
-      utterance.pitch = PANDO_VOICE_SETTINGS.pitch;
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn('Speech synthesis error:', e);
-      setIsSpeaking(false);
-    }
-  };
-
-  // Pre-load voices on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
-    }
-    return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, []);
-
-  // Auto-speak on first user interaction (click, touch, keydown)
-  useEffect(() => {
     const handleFirstInteraction = () => {
-      if (!muted && !hasSpokenRef.current) {
-        hasSpokenRef.current = true;
+      if (!muted && !isSpeakingRef.current) {
         speak(reply);
       }
     };
@@ -141,7 +71,8 @@ export default function PandoHero() {
       window.removeEventListener('keydown', handleFirstInteraction);
       window.removeEventListener('touchstart', handleFirstInteraction);
     };
-  }, [reply, muted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const submitPrompt = (event) => {
     event?.preventDefault();
@@ -154,20 +85,10 @@ export default function PandoHero() {
     speak(nextReply);
   };
 
-  const toggleMute = () => {
-    if (!muted) {
-      window.speechSynthesis?.cancel();
-      setIsSpeaking(false);
-      setMuted(true);
-    } else {
-      setMuted(false);
-      speak(reply);
-    }
-  };
+  const handleToggleMute = () => toggleMute(reply);
 
   const handleMascotOrBubbleClick = () => {
-    if (muted) setMuted(false);
-    speak(reply);
+    speak(reply, { force: true });
   };
 
   return (
@@ -255,7 +176,7 @@ export default function PandoHero() {
                 className={`bubble-mute-btn ${muted ? 'is-muted' : 'is-active'}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleMute();
+                  handleToggleMute();
                 }}
                 aria-label={muted ? 'Unmute Pando' : 'Mute Pando'}
                 aria-pressed={muted}
