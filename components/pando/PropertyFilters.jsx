@@ -79,33 +79,33 @@ export const PropertyFilters = ({
   };
 
   const getActiveLocationLabel = () => {
-    if (selectedLocation === 'all') return 'Waterfront & Skyline';
+    if (selectedLocation === 'all') return 'All locations';
     const found = locations.find((l) => l.value === selectedLocation);
-    return found ? found.label : 'Location';
+    return found ? found.label : 'All locations';
   };
 
   const listButtonStyle = (active) => ({
     width: '100%',
     textAlign: 'left',
-    padding: '6px 4px',
-    borderRadius: 0,
-    fontSize: '12.5px',
+    padding: '7px 8px',
+    borderRadius: '6px',
+    fontSize: '13px',
     border: 'none',
-    borderBottom: '1px solid transparent',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'transparent',
+    backgroundColor: active ? '#F6F1E8' : 'transparent',
     color: active ? 'var(--p-ink)' : 'var(--p-stone)',
-    fontWeight: active ? 500 : 400,
+    fontWeight: active ? 600 : 400,
+    transition: 'background-color 0.15s ease',
   });
 
   return (
-    <div ref={containerRef} style={{ position: 'relative' }}>
-      {/* Primary Pill Filter Buttons */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        {/* Waterfront & Skyline Pill Dropdown Button */}
+    <div ref={containerRef} style={{ position: 'relative', zIndex: 10000 }}>
+      {/* Primary Filter Row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* All locations Pill Dropdown Button */}
         <div style={{ position: 'relative' }}>
           <button
             onClick={() => {
@@ -117,9 +117,9 @@ export const PropertyFilters = ({
               border: 'none',
               borderBottom: '1px solid var(--p-hairline)',
               color: 'var(--p-ink)',
-              padding: '0 0 6px',
-              fontSize: '13px',
-              fontWeight: 400,
+              padding: '2px 0 6px',
+              fontSize: '13.5px',
+              fontWeight: 500,
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
@@ -127,7 +127,7 @@ export const PropertyFilters = ({
             }}
           >
             <span style={{ whiteSpace: 'nowrap' }}>{getActiveLocationLabel()}</span>
-            <ChevronDown size={13} color="var(--p-stone)" />
+            <ChevronDown size={14} color="var(--p-stone)" />
           </button>
 
           {isLocationDropdownOpen && (
@@ -136,12 +136,12 @@ export const PropertyFilters = ({
                 position: 'absolute',
                 top: 'calc(100% + 10px)',
                 right: 0,
-                width: '220px',
-                backgroundColor: 'var(--p-surface)',
+                width: '230px',
+                backgroundColor: '#FFFFFF',
                 border: '1px solid var(--p-hairline)',
-                borderRadius: '6px',
-                boxShadow: '0 12px 28px rgba(30,30,34,0.10)',
-                zIndex: 60,
+                borderRadius: '10px',
+                boxShadow: '0 16px 36px rgba(30,30,34,0.16)',
+                zIndex: 10001,
                 padding: '10px 12px',
               }}
             >
@@ -162,16 +162,16 @@ export const PropertyFilters = ({
           )}
         </div>
 
-        {/* Refine — quiet ghost text button, not a filled pill */}
+        {/* Refine Button */}
         <button
           onClick={() => {
             setIsRefineOpen(!isRefineOpen);
             setIsLocationDropdownOpen(false);
           }}
           style={{
-            padding: '0',
-            fontSize: '13px',
-            fontWeight: 400,
+            padding: '2px 0 6px',
+            fontSize: '13.5px',
+            fontWeight: 500,
             display: 'flex',
             alignItems: 'center',
             gap: '7px',
@@ -181,67 +181,71 @@ export const PropertyFilters = ({
             color: 'var(--p-ink)',
           }}
         >
-          <SlidersHorizontal size={13} />
+          <SlidersHorizontal size={14} />
           <span>Refine</span>
           {hasActiveFilters && (
             <span
               style={{
-                width: '5px',
-                height: '5px',
+                width: '6px',
+                height: '6px',
                 borderRadius: '50%',
                 backgroundColor: 'var(--p-bronze)',
+                display: 'inline-block',
               }}
             />
           )}
         </button>
       </div>
 
-      {/* Expanded refine panel */}
+      {/* Expanded Refine Panel */}
       {isRefineOpen && (
         <div
           style={{
             position: 'absolute',
-            top: 'calc(100% + 14px)',
+            top: 'calc(100% + 12px)',
             right: 0,
-            width: 'min(92vw, 480px)',
-            backgroundColor: 'var(--p-surface)',
+            width: 'min(92vw, 520px)',
+            maxHeight: 'calc(100vh - 160px)',
+            overflowY: 'auto',
+            backgroundColor: '#FFFFFF',
             border: '1px solid var(--p-hairline)',
-            borderRadius: '8px',
-            boxShadow: '0 20px 44px rgba(30,30,34,0.12)',
-            zIndex: 60,
-            padding: '20px',
+            borderRadius: '14px',
+            boxShadow: '0 24px 52px rgba(0, 0, 0, 0.22)',
+            zIndex: 10001,
+            padding: '22px 24px',
             boxSizing: 'border-box',
           }}
         >
           <div
             style={{
               display: 'flex',
-              alignItems: 'baseline',
+              alignItems: 'center',
               justifyContent: 'space-between',
               paddingBottom: '14px',
               borderBottom: '1px solid var(--p-hairline)',
-              marginBottom: '16px',
+              marginBottom: '18px',
             }}
           >
             <span
               style={{
                 fontFamily: 'var(--p-serif)',
-                fontSize: '16px',
-                fontWeight: 500,
+                fontSize: '18px',
+                fontWeight: 600,
                 color: 'var(--p-ink)',
               }}
             >
               Refine your brief
             </span>
-            <span style={{ fontSize: '12px', color: 'var(--p-stone)' }}>{totalMatches} matched</span>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--p-stone)' }}>{totalMatches} matched</span>
           </div>
 
-          <div style={{ position: 'relative', marginBottom: '18px' }}>
+          {/* Search Box */}
+          <div style={{ position: 'relative', marginBottom: '20px' }}>
             <Search
-              size={14}
+              size={15}
               style={{
                 position: 'absolute',
-                left: '2px',
+                left: '10px',
                 top: '50%',
                 transform: 'translateY(-50%)',
                 color: 'var(--p-stone)',
@@ -249,61 +253,80 @@ export const PropertyFilters = ({
             />
             <input
               type="text"
-              placeholder="Palm, Marina, Burj, 5-bed, superyacht…"
+              placeholder="Palm, Marina, Burj, 5-bed, villa..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               style={{
                 width: '100%',
-                background: 'transparent',
-                border: 'none',
-                borderBottom: '1px solid var(--p-hairline)',
-                padding: '4px 4px 8px 22px',
+                background: '#F9F8F5',
+                border: '1px solid var(--p-hairline)',
+                borderRadius: '8px',
+                padding: '8px 12px 8px 32px',
                 fontSize: '13px',
                 color: 'var(--p-ink)',
                 outline: 'none',
                 boxSizing: 'border-box',
               }}
             />
+            {searchQuery && (
+              <button
+                onClick={() => onSearchChange('')}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  color: 'var(--p-stone)',
+                }}
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
 
+          {/* 3-Column Filter Options */}
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-              gap: '20px',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '16px',
             }}
           >
             <div>
-              <p style={{ margin: '0 0 8px 0', fontSize: '11px', color: 'var(--p-stone)' }}>Typology</p>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <p style={{ margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--p-stone)' }}>Typology</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {propertyTypes.map((t) => (
                   <button key={t.value} onClick={() => onSelectType(t.value)} style={listButtonStyle(selectedType === t.value)}>
                     <span>{t.label}</span>
-                    {selectedType === t.value && <Check size={12} color="var(--p-bronze)" />}
+                    {selectedType === t.value && <Check size={13} color="var(--p-bronze)" />}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <p style={{ margin: '0 0 8px 0', fontSize: '11px', color: 'var(--p-stone)' }}>Valuation</p>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <p style={{ margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--p-stone)' }}>Valuation</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {priceRanges.map((p) => (
                   <button key={p.value} onClick={() => onSelectPrice(p.value)} style={listButtonStyle(selectedPrice === p.value)}>
                     <span>{p.label}</span>
-                    {selectedPrice === p.value && <Check size={12} color="var(--p-bronze)" />}
+                    {selectedPrice === p.value && <Check size={13} color="var(--p-bronze)" />}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <p style={{ margin: '0 0 8px 0', fontSize: '11px', color: 'var(--p-stone)' }}>Sort</p>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <p style={{ margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--p-stone)' }}>Sort</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {sortOptions.map((s) => (
                   <button key={s.value} onClick={() => onSelectSort(s.value)} style={listButtonStyle(selectedSort === s.value)}>
                     <span>{s.label}</span>
-                    {selectedSort === s.value && <Check size={12} color="var(--p-bronze)" />}
+                    {selectedSort === s.value && <Check size={13} color="var(--p-bronze)" />}
                   </button>
                 ))}
               </div>
@@ -311,24 +334,26 @@ export const PropertyFilters = ({
           </div>
 
           {hasActiveFilters && (
-            <button
-              onClick={resetFilters}
-              style={{
-                marginTop: '18px',
-                fontSize: '12px',
-                color: 'var(--p-stone)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: 0,
-              }}
-            >
-              <X size={12} />
-              <span>Reset all</span>
-            </button>
+            <div style={{ marginTop: '20px', paddingTop: '14px', borderTop: '1px solid var(--p-hairline)', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={resetFilters}
+                style={{
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  color: '#d22c23',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: 0,
+                }}
+              >
+                <X size={13} />
+                <span>Reset all filters</span>
+              </button>
+            </div>
           )}
         </div>
       )}

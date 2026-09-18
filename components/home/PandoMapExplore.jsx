@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Volume2, VolumeX } from 'lucide-react';
 import { properties as rawDatasetProperties } from '@/data/properties';
 
+const UNIFIED_PROPERTIES = rawDatasetProperties;
+
 const MASCOT_URL =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png';
 
@@ -97,13 +99,46 @@ export default function PandoMapExplore({ dbProperties = [] }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   const mutedRef = useRef(false);
+  const isSpeakingRef = useRef(false);
+  const hasSpokenRef = useRef(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechText, setSpeechText] = useState(
     'Click on any property pin to explore details, or search any area or project in Dubai!'
   );
+  const speechTextRef = useRef(speechText);
+  // Live properties from MongoDB — used for map pins
+  const [liveProperties, setLiveProperties] = useState([]);
+  const [apiSearchResults, setApiSearchResults] = useState(null);
+
+  useEffect(() => {
+    speechTextRef.current = speechText;
+  }, [speechText]);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   // Increments each time a filter/tab is clicked — signals PandoMapInner to fly to Dubai
   const [filterZoomKey, setFilterZoomKey] = useState(0);
+
+  // Fetch all properties from MongoDB on mount for map pins
+  useEffect(() => {
+    fetch('/api/properties')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          // Normalize: MongoDB stores coordinates as { lat, lng };
+          // PandoMapInner expects top-level .lat and .lng
+          const normalized = data.data.map((p) => ({
+            ...p,
+            // Use DB coordinates if present, otherwise fall back to COMMUNITY_COORDS
+            lat: p.coordinates?.lat ?? COMMUNITY_COORDS[p.community]?.lat ?? null,
+            lng: p.coordinates?.lng ?? COMMUNITY_COORDS[p.community]?.lng ?? null,
+            // Normalise image field
+            image: p.image || (p.images && p.images[0]) || null,
+          }));
+          setLiveProperties(normalized);
+        }
+      })
+      .catch((err) => console.error('Map properties fetch error:', err));
+  }, []);
+
 
   // Read URL query on mount
   useEffect(() => {
@@ -122,19 +157,8 @@ export default function PandoMapExplore({ dbProperties = [] }) {
 
     if (q) {
       setSearchQuery(q);
-      const queryLower = q.toLowerCase();
-      const match = UNIFIED_PROPERTIES.find(
-        (p) =>
-          p.title.toLowerCase().includes(queryLower) ||
-          p.community.toLowerCase().includes(queryLower) ||
-          p.location.toLowerCase().includes(queryLower) ||
-          p.description.toLowerCase().includes(queryLower) ||
-          p.id.toLowerCase() === queryLower
-      );
-      if (match) {
-        setSelectedProperty(match);
-        setSpeechText(`Found ${match.title} in ${match.location}: ${match.price}. ${match.description}`);
-      }
+      // Attempt to find a match in liveProperties (populated async after mount)
+      // The filteredProperties useMemo will handle the actual filtering
     }
   }, [searchParams]);
 
@@ -165,13 +189,23 @@ export default function PandoMapExplore({ dbProperties = [] }) {
       if (voice) utterance.voice = voice;
       utterance.rate = 0.95;
       utterance.pitch = 1.05;
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+        isSpeakingRef.current = true;
+      };
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+      };
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+      };
       window.speechSynthesis.speak(utterance);
     } catch (e) {
       console.warn(e);
       setIsSpeaking(false);
+      isSpeakingRef.current = false;
     }
   };
 
@@ -250,7 +284,8 @@ export default function PandoMapExplore({ dbProperties = [] }) {
       
       if (data.success && data.data && data.data.length > 0) {
         setApiSearchResults(data.data.map(d => d.id));
-        const match = UNIFIED_PROPERTIES.find(p => p.id === data.data[0].id) || data.data[0];
+        // Find the first match in liveProperties or fall back to raw API data
+        const match = liveProperties.find(p => p.id === data.data[0].id) || data.data[0];
         setSelectedProperty(match);
         const msg = `Found ${data.data.length} matching properties in Dubai! Displaying ${match.title || match.name} in ${match.location || match.community}.`;
         setSpeechText(msg);
@@ -266,35 +301,48 @@ export default function PandoMapExplore({ dbProperties = [] }) {
     }
   };
 
-  // Filter properties
+  // Filter properties using live DB data (has coordinates for map pins)
   const filteredProperties = useMemo(() => {
-    return UNIFIED_PROPERTIES.filter((p) => {
-      // 1. Search Query Filter
-      if (searchQuery.trim()) {
+    // Use apiSearchResults IDs if a text search was submitted
+    const pool = apiSearchResults !== null
+      ? liveProperties.filter((p) => apiSearchResults.includes(p.id))
+      : liveProperties;
+
+    return pool.filter((p) => {
+      // 1. Search Query Filter (client-side refinement)
+      if (searchQuery.trim() && apiSearchResults === null) {
         const q = searchQuery.toLowerCase().trim();
+        const title = (p.title || '').toLowerCase();
+        const community = (p.community || p.location || '').toLowerCase();
+        const desc = (p.description || '').toLowerCase();
+        const cat = (p.category || p.propertyType || '').toLowerCase();
         const matchesQuery =
-          p.title.toLowerCase().includes(q) ||
-          p.community.toLowerCase().includes(q) ||
-          p.location.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.id.toLowerCase() === q;
+          title.includes(q) ||
+          community.includes(q) ||
+          desc.includes(q) ||
+          cat.includes(q) ||
+          (p.id || '').toLowerCase() === q;
         if (!matchesQuery) return false;
       }
 
       // 2. Category Filter
-      if (activeCategory !== 'All' && p.category !== activeCategory) {
-        return false;
+      if (activeCategory !== 'All') {
+        const cat = (p.category || p.propertyType || '').toLowerCase();
+        const target = activeCategory.toLowerCase();
+        if (!cat.includes(target.replace(/s$/, ''))) return false;
       }
 
       // 3. Header Tab (Buy / Rent / Off-Plan)
-      if (activeNavTab === 'Buy') return p.type === 'Buy';
-      if (activeNavTab === 'Rent') return p.type === 'Rent';
-      if (activeNavTab === 'Off-Plan') return p.category === 'Off-Plan' || p.category === 'Plots';
+      if (activeNavTab === 'Buy') return p.purpose === 'sale';
+      if (activeNavTab === 'Rent') return p.purpose === 'rent';
+      if (activeNavTab === 'Off-Plan') {
+        const cat = (p.category || '').toLowerCase();
+        return cat.includes('off-plan') || cat.includes('plot');
+      }
 
       return true;
     });
-  }, [searchQuery, activeCategory, activeNavTab]);
+  }, [searchQuery, activeCategory, activeNavTab, liveProperties, apiSearchResults]);
 
   return (
     <div className="pando-app">

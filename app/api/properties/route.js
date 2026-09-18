@@ -133,7 +133,9 @@ export async function GET(request) {
         id: obj._id.toString(),
         name: obj.title, // SearchResults expects 'name' for toasts
         location: obj.community,
-        image: obj.images && obj.images.length > 0 ? obj.images[0] : null
+        image: obj.images && obj.images.length > 0 ? obj.images[0] : null,
+        // Expose coordinates explicitly so the map can use them
+        coordinates: obj.coordinates || null,
       };
     });
 

@@ -9,6 +9,7 @@ import { Toast } from '@/components/pando/Toast';
 import { PropertyService } from '@/services/propertyService'; // Fallback for local favorites
 import { useAuth } from '@/providers/AuthProvider';
 import PandoLoader from '@/components/PandoLoader';
+import styles from '@/components/pando/pando-properties.module.css';
 
 export default function SearchResults() {
   const searchParams = useSearchParams();
@@ -125,12 +126,12 @@ export default function SearchResults() {
   };
 
   return (
-    <div className="h-screen h-[100dvh] max-h-[100dvh] flex flex-col bg-[#f1eef2] text-[#1e1e22] overflow-hidden font-sans box-border">
+    <div className={styles.container}>
       {/* Top Quantum Header */}
       <Header syncedAssetsCount={properties.length} />
 
       {/* Main Single Primary Container Canvas */}
-      <main className="flex-1 min-h-0 w-full p-[12px_18px_18px] overflow-hidden flex flex-col box-border">
+      <main className={styles.mainCanvas}>
         {loading ? (
           <PandoLoader />
         ) : (

@@ -26,24 +26,20 @@
   display: flex;
   justify-content: flex-end;
   pointer-events: none;
-  /* Pull the bubble in and lift it so the tail meets the mascot's raised
-     hand, instead of floating with a gap down by its feet */
-  margin-right: -18px;
-  margin-bottom: 22px;
+  margin-right: -16px;
+  margin-bottom: 20px;
 }
 
-/* Bubble — same gold gradient / hard-edge-shadow language as .speech-bubble
-   in globals.css. Sized up and weighted heavier (thicker border, deeper
-   shadow) so it reads as an authoritative statement, not a passing note. */
+/* Bubble — same gold gradient / hard-edge-shadow language as .speech-bubble */
 .pando-bubble {
   position: relative;
-  width: min(460px, 100%);
-  padding: 24px 28px 26px;
+  width: min(350px, 92vw);
+  padding: 16px 18px 16px;
   background: linear-gradient(145deg, rgba(255, 231, 181, 0.97), rgba(197, 160, 89, 0.94));
-  border: 3px solid var(--ink, #1e1e22);
-  border-radius: 24px 8px 24px 24px;
-  box-shadow: 9px 10px 0 rgba(30, 30, 34, 0.3), inset 2px 2px 0 rgba(255, 255, 255, 0.42),
-    inset -5px -6px 12px rgba(104, 73, 33, 0.2);
+  border: 2.5px solid var(--ink, #1e1e22);
+  border-radius: 20px 8px 20px 20px;
+  box-shadow: 7px 8px 0 rgba(30, 30, 34, 0.28), inset 2px 2px 0 rgba(255, 255, 255, 0.42),
+    inset -4px -5px 10px rgba(104, 73, 33, 0.18);
   transform: rotate(-1deg);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   pointer-events: auto;
@@ -52,8 +48,8 @@
 
 .pando-bubble.is-speaking {
   transform: rotate(-0.3deg) translateY(-3px);
-  box-shadow: 10px 12px 0 rgba(30, 30, 34, 0.32), inset 2px 2px 0 rgba(255, 255, 255, 0.5),
-    inset -5px -6px 14px rgba(104, 73, 33, 0.22);
+  box-shadow: 8px 10px 0 rgba(30, 30, 34, 0.3), inset 2px 2px 0 rgba(255, 255, 255, 0.5),
+    inset -4px -5px 12px rgba(104, 73, 33, 0.2);
 }
 
 @keyframes speechAppear {
@@ -64,8 +60,8 @@
 .pando-bubble-header {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin-bottom: 11px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .pando-bubble-dot {
@@ -79,9 +75,9 @@
 
 .pando-bubble-label {
   font-family: 'Plus Jakarta Sans', Arial, sans-serif;
-  font-size: 11.5px;
+  font-size: 10.5px;
   font-weight: 800;
-  letter-spacing: 0.13em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--signal, #d22c23);
 }
@@ -91,8 +87,8 @@
   display: grid;
   place-items: center;
   box-sizing: border-box;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 2px solid var(--ink, #1e1e22);
   border-radius: 50%;
@@ -118,53 +114,53 @@
 }
 
 .pando-bubble-quote {
-  margin: 0 0 13px 0;
+  margin: 0 0 10px 0;
   font-family: 'Plus Jakarta Sans', Arial, sans-serif;
-  font-size: 17.5px;
+  font-size: 13.5px;
   font-weight: 700;
-  line-height: 1.32;
+  line-height: 1.35;
   letter-spacing: -0.01em;
   color: var(--ink, #1e1e22);
 }
 
 .pando-bubble-tail {
   position: absolute;
-  width: 20px;
-  height: 20px;
-  right: -11px;
-  top: 28px;
+  width: 18px;
+  height: 18px;
+  right: -10px;
+  top: 24px;
   background: var(--acid, #c5a059);
-  border-right: 3px solid var(--ink, #1e1e22);
-  border-top: 3px solid var(--ink, #1e1e22);
-  box-shadow: 4px -4px 0 rgba(30, 30, 34, 0.2);
+  border-right: 2.5px solid var(--ink, #1e1e22);
+  border-top: 2.5px solid var(--ink, #1e1e22);
+  box-shadow: 3px -3px 0 rgba(30, 30, 34, 0.2);
   transform: rotate(45deg);
 }
 
-/* Ask row — the single input for talking to Pando, styled as part of the
-   same bubble card rather than a separate bar */
+/* Ask row — compact single input bar */
 .pando-ask-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.55);
-  border: 2px solid var(--ink, #1e1e22);
+  border: 1.5px solid var(--ink, #1e1e22);
   border-radius: 999px;
-  padding: 5px 5px 5px 16px;
+  padding: 3px 3px 3px 12px;
 }
 
 .pando-ask-row:focus-within {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .pando-ask-input {
   flex: 1;
   min-width: 0;
-  background: transparent;
-  border: none;
-  outline: none;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   color: var(--ink, #1e1e22);
   font-family: 'Plus Jakarta Sans', Arial, sans-serif;
-  font-size: 14.5px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -227,11 +223,34 @@
   transform: scale(0.94);
 }
 
-.pando-ask-input:focus-visible,
 .pando-ask-mic:focus-visible,
 .pando-ask-send:focus-visible {
   outline: 2px solid var(--ink, #1e1e22);
   outline-offset: 2px;
+}
+
+.pando-show-more-btn {
+  width: 100%;
+  margin-top: 12px;
+  background: #ffffff;
+  border: 1.5px solid var(--ink, #1e1e22);
+  padding: 9px 20px;
+  border-radius: 999px;
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink, #1e1e22);
+  cursor: pointer;
+  display: block;
+  text-align: center;
+  transition: all 0.15s ease;
+  box-shadow: 2px 2px 0 rgba(30, 30, 34, 0.15);
+}
+
+.pando-show-more-btn:hover {
+  background: #fcf9f2;
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 rgba(30, 30, 34, 0.22);
 }
 
 /* Character — the virtual agent. Two twinkling sparkle accents keep it

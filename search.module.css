@@ -1,0 +1,153 @@
+.topBar {
+  position: sticky;
+  top: 72px;
+  z-index: 40;
+  background: var(--hp-bg);
+  border-bottom: 1px solid var(--hp-line-soft);
+  padding: var(--hp-space-4) 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--hp-space-6);
+  padding: var(--hp-space-6) 0 var(--hp-space-8);
+  align-items: start;
+}
+
+.sidebar {
+  position: sticky;
+  top: 160px;
+}
+
+.resultsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--hp-space-5);
+  flex-wrap: wrap;
+  gap: var(--hp-space-3);
+}
+
+.resultsCount {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--hp-ink);
+}
+
+.resultsSub {
+  font-size: 0.85rem;
+  color: var(--hp-slate);
+  font-weight: 500;
+}
+
+.sortSelect {
+  border: 1.5px solid var(--hp-line);
+  border-radius: var(--hp-radius-md);
+  padding: 9px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--hp-charcoal);
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--hp-space-5);
+}
+
+.mobileFilterBtn {
+  display: none;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--hp-space-8) var(--hp-space-4);
+  background: var(--hp-surface);
+  border-radius: var(--hp-radius-lg);
+  border: 1px dashed var(--hp-line);
+  gap: var(--hp-space-3);
+}
+
+.emptyIcon {
+  font-size: 2.6rem;
+}
+
+.emptyTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--hp-ink);
+}
+
+.emptyText {
+  color: var(--hp-slate);
+  font-size: 0.9rem;
+  max-width: 360px;
+}
+
+.loadMoreWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--hp-space-6);
+}
+
+.drawerOverlay {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    display: none;
+  }
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .mobileFilterBtn {
+    display: inline-flex;
+  }
+  .drawerOverlay.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(16, 35, 29, 0.45);
+    z-index: 60;
+  }
+  .drawerPanel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(340px, 88vw);
+    background: var(--hp-bg);
+    z-index: 61;
+    overflow-y: auto;
+    padding: var(--hp-space-5);
+    box-shadow: var(--hp-shadow-lg);
+  }
+  .drawerClose {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--hp-space-3);
+  }
+}
+
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .topBar {
+    top: 0;
+  }
+  .sidebar {
+    top: 0;
+  }
+}

@@ -32,12 +32,12 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  padding: 28px clamp(20px, 4vw, 56px) 32px;
+  padding: 16px clamp(16px, 3vw, 48px) 20px;
   box-sizing: border-box;
 }
 
 .workspaceCard {
-  max-width: 1440px;
+  max-width: 100%;
   width: 100%;
   margin: 0 auto;
   flex: 1;
@@ -53,7 +53,7 @@
   justify-content: flex-end;
   font-size: 12px;
   color: var(--p-stone);
-  margin-bottom: 28px;
+  margin-bottom: 14px;
   flex-shrink: 0;
 }
 
@@ -84,7 +84,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
   flex-shrink: 0;
 }
 
@@ -111,11 +111,11 @@
 }
 
 .subTitle {
-  margin: 6px 0 0 0;
-  font-size: 14px;
+  margin: 4px 0 0 0;
+  font-size: 13.5px;
   font-weight: 400;
   color: var(--p-stone);
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 /* Retired badge — kept as a no-op so nothing breaks if referenced */
@@ -168,6 +168,7 @@
 }
 
 @media (max-width: 768px) {
+
   /* No-scroll holds at every width: the 3 cards stack into a single
      column of 3 equal rows and compress (chrome tightened, images
      shrinking before text) to fit the fixed viewport rather than
@@ -177,15 +178,19 @@
     grid-template-rows: repeat(3, 1fr);
     gap: 8px;
   }
+
   .mainCanvas {
     padding: 12px 14px 10px;
   }
+
   .sectorHeader {
     margin-bottom: 10px;
   }
+
   .titleRow {
     margin-bottom: 10px;
   }
+
   .subTitle {
     margin-top: 2px;
     font-size: 12.5px;
@@ -196,6 +201,7 @@
   .mainTitle {
     font-size: 22px;
   }
+
   .sectorRight {
     font-size: 11px;
   }
@@ -234,10 +240,9 @@
 .cardImageWrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
-  flex: 1 1 auto;
+  flex: 1 1 0%;
   min-width: 0;
-  min-height: 0;
+  min-height: 150px;
   overflow: hidden;
   background-color: #EDE7DC;
 }
@@ -394,6 +399,7 @@
 }
 
 @media (max-width: 768px) {
+
   /* Compressed spacing so 3 stacked cards keep full price/spec text
      legible while the fixed viewport still holds all three without
      scrolling — the image is what gives way, not the text. */
@@ -401,23 +407,29 @@
     aspect-ratio: auto;
     min-height: 34px;
   }
+
   .cardBody {
     padding: 10px 12px 10px;
   }
+
   .cardLocation {
     margin-bottom: 2px;
   }
+
   .cardTitle {
     margin-bottom: 4px;
     line-height: 1.15;
   }
+
   .cardPriceRow {
     margin-bottom: 2px;
   }
+
   .cardDifferentiator {
     margin: 0 0 4px 0;
     line-height: 1.2;
   }
+
   .cardFootRow {
     padding-top: 6px;
   }

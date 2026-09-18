@@ -48,44 +48,6 @@ export const PropertyCard = ({
           onError={() => setImageError(true)}
           className={styles.cardImage}
         />
-
-        {/* Top Left: Index Overlay Pill matching Image 1 */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '10px',
-            left: '10px',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(6px)',
-            border: '1px solid rgba(255, 255, 255, 0.8)',
-            borderRadius: '9999px',
-            padding: '3px 10px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            zIndex: 10,
-            boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
-          }}
-        >
-          <span
-            style={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              backgroundColor: '#DC2626',
-            }}
-          />
-          <span
-            style={{
-              fontSize: '11px',
-              fontWeight: 500,
-              color: '#111827',
-              letterSpacing: '-0.01em',
-            }}
-          >
-            {property.indexLabel || property.category || 'Prime'}
-          </span>
-        </div>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -98,167 +60,36 @@ export const PropertyCard = ({
         >
           <Bookmark size={15} color="#FFFFFF" fill={isSaved ? '#FFFFFF' : 'none'} />
         </button>
-        {/* Bottom Right: Sector Badge */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '10px',
-            right: '10px',
-            backgroundColor: 'rgba(30, 41, 59, 0.85)',
-            backdropFilter: 'blur(4px)',
-            borderRadius: '6px',
-            padding: '3px 8px',
-            fontSize: '9.5px',
-            fontWeight: 600,
-            letterSpacing: '0.02em',
-            color: '#FFFFFF',
-            zIndex: 10,
-          }}
-        >
-          {property.sectorBadge || 'Sector 01'}
-        </div>
       </div>
 
-      {/* Title, Status Badge, Specs & Feature Tags */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '16px' }}>
-        <div>
-          {/* Title & Badge Row */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '8px',
-              marginBottom: '4px',
-            }}
-          >
-            <h3
-              style={{
-                margin: 0,
-                fontSize: '17px',
-                fontWeight: 500,
-                color: '#111827',
-                letterSpacing: '-0.01em',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-              }}
-            >
-              {property.name || property.title}
-            </h3>
+      <div className={styles.cardBody}>
+        <div className={styles.cardLocation}>
+          {property.location || property.community || 'Dubai'}
+        </div>
+        <h3 className={styles.cardTitle}>
+          {property.name || property.title}
+        </h3>
+        
+        <div className={styles.cardPriceRow}>
+          <div className={styles.cardPrice}>
+            {formatAed(property.price)}
           </div>
-
-          {/* Specs Text Line */}
-          <p
-            style={{
-              margin: '0 0 8px 0',
-              fontSize: '12px',
-              fontWeight: 400,
-              color: '#6B7280',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {`${property.propertyType || property.category} • ${property.bedrooms || 0} Beds • ${(property.area || property.areaSqft || 0).toLocaleString('en-US')} sq.ft`}
-          </p>
-
-          {/* Feature Tags Row */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
-            {(property.tags || property.amenities || []).slice(0, 2).map((tag) => (
-              <span
-                key={tag}
-                style={{
-                  backgroundColor: '#F3F4F6',
-                  border: '1px solid #E5E7EB',
-                  color: '#374151',
-                  fontSize: '11px',
-                  fontWeight: 400,
-                  padding: '3px 9px',
-                  borderRadius: '9999px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-            {(property.tags || property.amenities || []).length > 2 && (
-              <span
-                style={{
-                  backgroundColor: '#F3F4F6',
-                  border: '1px solid #E5E7EB',
-                  color: '#6B7280',
-                  fontSize: '11px',
-                  fontWeight: 400,
-                  padding: '3px 8px',
-                  borderRadius: '9999px',
-                }}
-              >
-                +{(property.tags || property.amenities || []).length - 2}
-              </span>
-            )}
+          <div className={styles.cardPriceUsd}>
+            {formatUsd(property.priceUsd || (property.price * 0.27))}
           </div>
         </div>
+        
+        <div className={styles.cardDifferentiator}>
+          — {differentiator || property.propertyType}
+        </div>
 
-        {/* Valuation & Action Arrow Row */}
-        <div
-          style={{
-            paddingTop: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '8px',
-          }}
-        >
-          <div>
-            <div
-              style={{
-                fontSize: '17px',
-                fontWeight: 600,
-                color: '#111827',
-                letterSpacing: '-0.02em',
-                lineHeight: 1.1,
-              }}
-            >
-              {formatAed(property.price)}
-            </div>
-            <span
-              style={{
-                display: 'block',
-                fontSize: '11.5px',
-                fontWeight: 400,
-                color: '#6B7280',
-                marginTop: '2px',
-                lineHeight: 1.1,
-              }}
-            >
-              {formatUsd(property.priceUsd || (property.price * 0.27))}
-            </span>
+        <div className={styles.cardFootRow}>
+          <div className={styles.cardSpecs}>
+            {`${property.bedrooms || 0}-bed residence, ${(property.area || property.areaSqft || 0).toLocaleString('en-US')} sq ft`}
           </div>
-
-          <button
-            type="button"
-            style={{
-              backgroundColor: '#d22c23',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '9999px',
-              padding: '8px 16px',
-              fontSize: '12px',
-              fontWeight: 500,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleActivate();
-            }}
-          >
-            <span>View</span>
-            <span aria-hidden="true">→</span>
+          <button className={styles.cardLink} onClick={(e) => { e.stopPropagation(); handleActivate(); }}>
+            <span>View residence</span>
+            <span className={styles.cardArrow} aria-hidden="true">→</span>
           </button>
         </div>
       </div>
