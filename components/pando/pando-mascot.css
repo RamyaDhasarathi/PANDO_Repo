@@ -10,14 +10,14 @@
 
 .pando-floating-agent {
   position: fixed;
-  right: clamp(20px, 4vw, 56px);
-  bottom: 20px;
+  right: 0px;
+  bottom: 4px;
   z-index: 200;
   display: flex;
   align-items: flex-end;
   gap: 0;
   pointer-events: none;
-  max-width: min(94vw, 700px);
+  max-width: min(96vw, 820px);
 }
 
 .pando-bubble-col {
@@ -29,7 +29,7 @@
   /* Pull the bubble in and lift it so the tail meets the mascot's raised
      hand, instead of floating with a gap down by its feet */
   margin-right: -18px;
-  margin-bottom: 88px;
+  margin-bottom: 22px;
 }
 
 /* Bubble — same gold gradient / hard-edge-shadow language as .speech-bubble
@@ -37,11 +37,11 @@
    shadow) so it reads as an authoritative statement, not a passing note. */
 .pando-bubble {
   position: relative;
-  width: min(380px, 100%);
-  padding: 20px 24px 22px;
+  width: min(460px, 100%);
+  padding: 24px 28px 26px;
   background: linear-gradient(145deg, rgba(255, 231, 181, 0.97), rgba(197, 160, 89, 0.94));
   border: 3px solid var(--ink, #1e1e22);
-  border-radius: 24px 24px 8px 24px;
+  border-radius: 24px 8px 24px 24px;
   box-shadow: 9px 10px 0 rgba(30, 30, 34, 0.3), inset 2px 2px 0 rgba(255, 255, 255, 0.42),
     inset -5px -6px 12px rgba(104, 73, 33, 0.2);
   transform: rotate(-1deg);
@@ -120,7 +120,7 @@
 .pando-bubble-quote {
   margin: 0 0 13px 0;
   font-family: 'Plus Jakarta Sans', Arial, sans-serif;
-  font-size: 16px;
+  font-size: 17.5px;
   font-weight: 700;
   line-height: 1.32;
   letter-spacing: -0.01em;
@@ -132,12 +132,12 @@
   width: 20px;
   height: 20px;
   right: -11px;
-  bottom: 24px;
+  top: 28px;
   background: var(--acid, #c5a059);
   border-right: 3px solid var(--ink, #1e1e22);
-  border-bottom: 3px solid var(--ink, #1e1e22);
-  box-shadow: 4px 4px 0 rgba(30, 30, 34, 0.2);
-  transform: rotate(-45deg);
+  border-top: 3px solid var(--ink, #1e1e22);
+  box-shadow: 4px -4px 0 rgba(30, 30, 34, 0.2);
+  transform: rotate(45deg);
 }
 
 /* Ask row — the single input for talking to Pando, styled as part of the
@@ -238,7 +238,7 @@
    reading as the active AI presence, without a glow washing out behind it. */
 .pando-character-wrap {
   position: relative;
-  width: clamp(200px, 20vw, 320px);
+  width: clamp(240px, 24vw, 380px);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -246,6 +246,7 @@
   cursor: pointer;
   border-radius: 50%;
   pointer-events: auto;
+  transform: translate(6px, 0px);
 }
 
 .pando-character-wrap:focus-visible {
@@ -324,21 +325,31 @@
 /* RESPONSIVE SCALING */
 @media (max-width: 1080px) {
   .pando-floating-agent {
-    bottom: 16px;
+    bottom: 4px;
   }
   .pando-character-wrap {
-    width: clamp(150px, 19vw, 215px);
+    width: clamp(120px, 15vw, 180px);
+    transform: translate(0px, 0px);
   }
   .pando-bubble-col {
     margin-right: -14px;
-    margin-bottom: 78px;
+    margin-bottom: 0px;
   }
   .pando-bubble {
-    width: min(300px, 100%);
-    padding: 14px 17px 15px;
+    width: min(260px, 100%);
+    padding: 9px 12px 10px;
   }
   .pando-bubble-quote {
-    font-size: 14px;
+    font-size: 11.5px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+    -webkit-line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .pando-bubble-header {
+    margin-bottom: 6px;
   }
 }
 
@@ -396,6 +407,6 @@
     width: 12px;
     height: 12px;
     right: -6px;
-    bottom: 12px;
+    top: 14px;
   }
 }

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Volume2, VolumeX } from 'lucide-react';
 import { properties as rawDatasetProperties } from '@/data/properties';
+import { usePandoTTS } from '@/hooks/usePandoTTS';
 
 const MASCOT_URL =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png';
@@ -153,6 +154,43 @@ const UNIFIED_PROPERTIES = [
 const CATEGORIES = ['All', 'Apartments', 'Villas', 'Off-Plan', 'Penthouses', 'Townhouses'];
 const NAV_TABS = ['Buy', 'Rent', 'Off-Plan', 'Explore'];
 
+const formatAedShort = (value) => {
+  if (value >= 1_000_000) return `AED ${(value / 1_000_000).toFixed(value % 1_000_000 === 0 ? 0 : 1)}M`;
+  if (value >= 1_000) return `AED ${Math.round(value / 1_000)}K`;
+  return `AED ${value.toLocaleString()}`;
+};
+
+// Builds a live stats summary of whatever properties are currently on screen,
+// so Pando's bubble always reflects the active filters instead of a static hint.
+function buildResultsSummary(results, { activeCategory, activeNavTab, searchQuery }) {
+  const verb = activeNavTab === 'Rent' ? 'to rent' : activeNavTab === 'Off-Plan' ? 'off-plan' : 'for sale';
+  const categoryLabel = activeCategory !== 'All' ? ` ${activeCategory.toLowerCase()}` : '';
+  const queryLabel = searchQuery.trim() ? ` matching "${searchQuery.trim()}"` : '';
+
+  if (results.length === 0) {
+    return `No${categoryLabel} properties${queryLabel} found ${verb} right now. Try a different filter or search term.`;
+  }
+
+  const prices = results.map((p) => p.rawPrice).filter((v) => typeof v === 'number');
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  const priceRange =
+    minPrice === maxPrice
+      ? formatAedShort(minPrice)
+      : `${formatAedShort(minPrice)} to ${formatAedShort(maxPrice)}`;
+
+  const communityCounts = results.reduce((acc, p) => {
+    acc[p.community] = (acc[p.community] || 0) + 1;
+    return acc;
+  }, {});
+  const topCommunity = Object.entries(communityCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
+
+  const propertyWord = categoryLabel ? '' : results.length === 1 ? ' property' : ' properties';
+  const communityNote = topCommunity ? `, mostly around ${topCommunity}` : '';
+
+  return `I found ${results.length}${categoryLabel}${propertyWord}${queryLabel} ${verb}${communityNote}, ranging from ${priceRange}. Click any pin to explore.`;
+}
+
 const PANDO_TIPS = [
   'Did you know Palm Jumeirah properties have seen a 14% ROI increase this year?',
   'Downtown Dubai units offer strong capital appreciation and high tourist rental demand!',
@@ -168,15 +206,54 @@ export default function PandoMapExplore() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeNavTab, setActiveNavTab] = useState('Buy');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isMuted, setIsMuted] = useState(false);
-  const mutedRef = useRef(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [speechText, setSpeechText] = useState(
-    'Click on any property pin to explore details, or search any area or project in Dubai!'
-  );
+  const { muted: isMuted, isSpeaking, isSpeakingRef, speak, toggleMute } = usePandoTTS();
+  const [speechText, setSpeechText] = useState('');
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   // Increments each time a filter/tab is clicked — signals PandoMapInner to fly to Dubai
   const [filterZoomKey, setFilterZoomKey] = useState(0);
+  const hasSpokenRef = useRef(false);
+  const speechTextRef = useRef('');
+  speechTextRef.current = speechText;
+
+  // Filter properties
+  const filteredProperties = useMemo(() => {
+    return UNIFIED_PROPERTIES.filter((p) => {
+      // 1. Search Query Filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesQuery =
+          p.title.toLowerCase().includes(q) ||
+          p.community.toLowerCase().includes(q) ||
+          p.location.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          p.id.toLowerCase() === q;
+        if (!matchesQuery) return false;
+      }
+
+      // 2. Category Filter
+      if (activeCategory !== 'All' && p.category !== activeCategory) {
+        return false;
+      }
+
+      // 3. Header Tab (Buy / Rent / Off-Plan)
+      if (activeNavTab === 'Buy') return p.type === 'Buy';
+      if (activeNavTab === 'Rent') return p.type === 'Rent';
+      if (activeNavTab === 'Off-Plan') return p.category === 'Off-Plan' || p.category === 'Plots';
+
+      return true;
+    });
+  }, [searchQuery, activeCategory, activeNavTab]);
+
+  // Keep Pando's bubble in sync with whatever is currently on screen —
+  // recomputes any time the category, tab, or search filters change.
+  // A specific property selection (pin click / search match) takes priority
+  // and is left alone here.
+  useEffect(() => {
+    if (selectedProperty) return;
+    const summary = buildResultsSummary(filteredProperties, { activeCategory, activeNavTab, searchQuery });
+    setSpeechText(summary);
+  }, [filteredProperties, activeCategory, activeNavTab, searchQuery, selectedProperty]);
 
   // Read URL query on mount
   useEffect(() => {
@@ -211,48 +288,41 @@ export default function PandoMapExplore() {
     }
   }, [searchParams]);
 
-  // Voice synthesis
-  const getVoice = () => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return null;
-    const voices = window.speechSynthesis.getVoices();
-    return (
-      voices.find(
-        (v) =>
-          v.lang.startsWith('en') &&
-          (v.name.includes('Natural') ||
-            v.name.includes('Google') ||
-            v.name.includes('Samantha') ||
-            v.name.includes('Daniel'))
-      ) ||
-      voices.find((v) => v.lang.startsWith('en')) ||
-      voices[0]
-    );
-  };
-
-  const speak = (text) => {
-    if (mutedRef.current || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voice = getVoice();
-      if (voice) utterance.voice = voice;
-      utterance.rate = 0.95;
-      utterance.pitch = 1.05;
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn(e);
-      setIsSpeaking(false);
-    }
-  };
-
   useEffect(() => {
     if (hasUserInteracted) {
       speak(speechText);
     }
-  }, [speechText, isMuted, hasUserInteracted]);
+  }, [speechText, isMuted, hasUserInteracted, speak]);
+
+  // Speak the initial summary immediately on landing. Browsers may block audio
+  // before any user gesture on the page, so we also retry on the first
+  // click/keydown/touch.
+  useEffect(() => {
+    if (!speechText || hasSpokenRef.current) return;
+    hasSpokenRef.current = true;
+    speak(speechText);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speechText]);
+
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      setHasUserInteracted(true);
+      if (!isSpeakingRef.current) {
+        speak(speechTextRef.current);
+      }
+    };
+
+    window.addEventListener('click', handleFirstInteraction, { once: true });
+    window.addEventListener('keydown', handleFirstInteraction, { once: true });
+    window.addEventListener('touchstart', handleFirstInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSelectProperty = (prop) => {
     setHasUserInteracted(true);
@@ -299,36 +369,6 @@ export default function PandoMapExplore() {
     }
   };
 
-  // Filter properties
-  const filteredProperties = useMemo(() => {
-    return UNIFIED_PROPERTIES.filter((p) => {
-      // 1. Search Query Filter
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const matchesQuery =
-          p.title.toLowerCase().includes(q) ||
-          p.community.toLowerCase().includes(q) ||
-          p.location.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.id.toLowerCase() === q;
-        if (!matchesQuery) return false;
-      }
-
-      // 2. Category Filter
-      if (activeCategory !== 'All' && p.category !== activeCategory) {
-        return false;
-      }
-
-      // 3. Header Tab (Buy / Rent / Off-Plan)
-      if (activeNavTab === 'Buy') return p.type === 'Buy';
-      if (activeNavTab === 'Rent') return p.type === 'Rent';
-      if (activeNavTab === 'Off-Plan') return p.category === 'Off-Plan' || p.category === 'Plots';
-
-      return true;
-    });
-  }, [searchQuery, activeCategory, activeNavTab]);
-
   return (
     <div className="pando-app">
       {/* ── HEADER BAR ─────────────────────────────────────────── */}
@@ -338,7 +378,6 @@ export default function PandoMapExplore() {
           className="brand"
           onClick={() => {
             setSelectedProperty(null);
-            setSpeechText('Click on any property pin to explore details, or search any area or project in Dubai!');
           }}
           style={{ textDecoration: 'none' }}
         >
@@ -387,9 +426,10 @@ export default function PandoMapExplore() {
               key={tab}
               className={activeNavTab === tab ? 'active' : ''}
               onClick={() => {
+                setHasUserInteracted(true);
+                setSelectedProperty(null);
                 setActiveNavTab(tab);
                 setFilterZoomKey((k) => k + 1);
-                setSpeechText(`Viewing top ${tab} properties in Dubai! Click any pin to inspect.`);
               }}
             >
               {tab}
@@ -577,16 +617,7 @@ export default function PandoMapExplore() {
                 onClick={(e) => {
                   e.stopPropagation();
                   setHasUserInteracted(true);
-                  if (!isMuted) {
-                    mutedRef.current = true;
-                    window.speechSynthesis?.cancel();
-                    setIsSpeaking(false);
-                    setIsMuted(true);
-                  } else {
-                    mutedRef.current = false;
-                    setIsMuted(false);
-                    speak(speechText);
-                  }
+                  toggleMute(speechText);
                 }}
                 title={isMuted ? 'Unmute Pando' : 'Mute Pando'}
               >
@@ -668,18 +699,10 @@ export default function PandoMapExplore() {
             <button
               key={cat}
               onClick={() => {
+                setHasUserInteracted(true);
+                setSelectedProperty(null);
                 setActiveCategory(cat);
                 setFilterZoomKey((k) => k + 1);
-                const count = UNIFIED_PROPERTIES.filter((p) => {
-                  if (cat !== 'All' && p.category !== cat) return false;
-                  if (activeNavTab === 'Buy') return p.type === 'Buy';
-                  if (activeNavTab === 'Rent') return p.type === 'Rent';
-                  if (activeNavTab === 'Off-Plan') return p.category === 'Off-Plan' || p.category === 'Plots';
-                  return true;
-                }).length;
-                const msg = `Showing ${count} ${cat} properties in Dubai. Click any pin to inspect.`;
-                setSpeechText(msg);
-                speak(msg);
               }}
               style={{
                 width: '100%',

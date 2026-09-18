@@ -1,6 +1,7 @@
 import { Plus_Jakarta_Sans, Fraunces } from "next/font/google";
 import "@/styles/globals.css";
 import TopNav from "@/components/TopNav";
+import PandoTTSRouteGuard from "@/components/PandoTTSRouteGuard";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${plusJakarta.variable} ${fraunces.variable}`}>
       <body>
+        <PandoTTSRouteGuard />
         <TopNav />
         {children}
       </body>

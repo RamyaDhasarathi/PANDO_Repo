@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Volume2, VolumeX } from 'lucide-react';
 import AuthForm from '@/components/AuthForm';
+import { usePandoTTS } from '@/hooks/usePandoTTS';
 
 const mascotUrl =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png';
@@ -18,8 +19,7 @@ export default function PandoHero() {
   const router = useRouter();
   const [prompt, setPrompt] = useState('');
   const [reply, setReply] = useState(replies[0]);
-  const [muted, setMuted] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const { muted, isSpeaking, isSpeakingRef, speak, toggleMute } = usePandoTTS();
   const [mascotMove, setMascotMove] = useState('');
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState('sign-in');
@@ -43,64 +43,16 @@ export default function PandoHero() {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  // Voice synthesis helper
-  const getVoice = () => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return null;
-    const voices = window.speechSynthesis.getVoices();
-    return (
-      voices.find(
-        (v) =>
-          v.lang.startsWith('en') &&
-          (v.name.includes('Natural') ||
-            v.name.includes('Google') ||
-            v.name.includes('Samantha') ||
-            v.name.includes('Daniel') ||
-            v.name.includes('Alex'))
-      ) ||
-      voices.find((v) => v.lang.startsWith('en')) ||
-      voices[0]
-    );
-  };
-
-  const speak = (text) => {
-    if (muted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voice = getVoice();
-      if (voice) utterance.voice = voice;
-      utterance.rate = 0.96;
-      utterance.pitch = 1.08;
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn('Speech synthesis error:', e);
-      setIsSpeaking(false);
-    }
-  };
-
-  // Pre-load voices on mount
+  // Speak immediately on landing. Browsers may block audio before any user
+  // gesture on the page, so we also retry on the first click/keydown/touch.
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
+    if (!muted && !hasSpokenRef.current) {
+      hasSpokenRef.current = true;
+      speak(reply);
     }
-    return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, []);
 
-  // Auto-speak on first user interaction (click, touch, keydown)
-  useEffect(() => {
     const handleFirstInteraction = () => {
-      if (!muted && !hasSpokenRef.current) {
-        hasSpokenRef.current = true;
+      if (!muted && !isSpeakingRef.current) {
         speak(reply);
       }
     };
@@ -114,7 +66,8 @@ export default function PandoHero() {
       window.removeEventListener('keydown', handleFirstInteraction);
       window.removeEventListener('touchstart', handleFirstInteraction);
     };
-  }, [reply, muted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const submitPrompt = (event) => {
     event?.preventDefault();
@@ -127,20 +80,10 @@ export default function PandoHero() {
     speak(nextReply);
   };
 
-  const toggleMute = () => {
-    if (!muted) {
-      window.speechSynthesis?.cancel();
-      setIsSpeaking(false);
-      setMuted(true);
-    } else {
-      setMuted(false);
-      speak(reply);
-    }
-  };
+  const handleToggleMute = () => toggleMute(reply);
 
   const handleMascotOrBubbleClick = () => {
-    if (muted) setMuted(false);
-    speak(reply);
+    speak(reply, { force: true });
   };
 
   return (
@@ -215,7 +158,7 @@ export default function PandoHero() {
                 className={`bubble-mute-btn ${muted ? 'is-muted' : 'is-active'}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleMute();
+                  handleToggleMute();
                 }}
                 aria-label={muted ? 'Unmute Pando' : 'Mute Pando'}
                 aria-pressed={muted}

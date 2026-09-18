@@ -1,0 +1,109 @@
+/* ================================================================
+   PROPERTY DNA — small stat chips shown inside Pando's speech bubble,
+   between the quote and the ask row. Values switch live to whichever
+   property card the mouse is hovering, with a bronze highlight while
+   hovering so the update reads as reactive.
+   ================================================================ */
+
+.dna-chip-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin: 2px 0 14px 0;
+}
+
+.dna-chip {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid var(--ink, #1e1e22);
+  border-radius: 12px;
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
+}
+
+.dna-chip-row.is-hovering .dna-chip {
+  border-color: var(--signal, #d22c23);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.dna-chip-heading {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.dna-chip-icon {
+  font-size: 12px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.dna-chip-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(30, 30, 34, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dna-chip-value {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink, #1e1e22);
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: break-word;
+  animation: dnaValueSwap 0.25s ease;
+}
+
+@keyframes dnaValueSwap {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dna-chip-value {
+    animation: none;
+  }
+}
+
+@media (max-width: 1080px) {
+  .dna-chip-row {
+    margin: 0 0 8px 0;
+    gap: 5px;
+  }
+  .dna-chip {
+    padding: 5px 6px;
+    gap: 1px;
+    border-radius: 8px;
+  }
+  .dna-chip-heading {
+    gap: 3px;
+  }
+  .dna-chip-icon {
+    font-size: 10px;
+  }
+  .dna-chip-label {
+    font-size: 7.5px;
+  }
+  .dna-chip-value {
+    font-size: 10.5px;
+    line-height: 1.1;
+  }
+}
+
+@media (max-width: 639px) {
+  .dna-chip-row {
+    display: none;
+  }
+}

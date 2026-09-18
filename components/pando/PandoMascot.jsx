@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
+import { usePandoTTS } from '@/hooks/usePandoTTS';
 import './pando-mascot.css';
 
 const DEFAULT_MASCOT_URL = '/images/pando/pando.png';
@@ -22,71 +23,21 @@ export function PandoMascot({
   children,
 }) {
   const finalMascotUrl = mascotUrl || src || DEFAULT_MASCOT_URL;
-  const [muted, setMuted] = useState(!enableVoice);
-  const [internalSpeaking, setInternalSpeaking] = useState(false);
+  const { muted, isSpeaking: internalSpeaking, speak, toggleMute: toggleTTSMute } = usePandoTTS({ enabled: enableVoice });
   const isSpeaking = externalIsSpeaking ?? internalSpeaking;
-  const utteranceRef = useRef(null);
-
-  // Web Speech API synthesis with strict single-playback cancellation
-  const speakText = (text) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-
-    window.speechSynthesis.cancel();
-
-    if (muted || !text) {
-      setInternalSpeaking(false);
-      return;
-    }
-
-    try {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.96;
-      utterance.pitch = 1.06;
-
-      const voices = window.speechSynthesis.getVoices();
-      const naturalVoice =
-        voices.find((v) => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel') || v.name.includes('Alex'))) ||
-        voices.find((v) => v.lang.startsWith('en')) ||
-        voices[0];
-
-      if (naturalVoice) utterance.voice = naturalVoice;
-
-      utterance.onstart = () => setInternalSpeaking(true);
-      utterance.onend = () => setInternalSpeaking(false);
-      utterance.onerror = () => setInternalSpeaking(false);
-
-      utteranceRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
-    } catch {
-      setInternalSpeaking(false);
-    }
-  };
 
   // Trigger speech whenever message updates
   useEffect(() => {
-    if (message && !muted) {
-      speakText(message);
+    if (message) {
+      speak(message);
     }
-    return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [message, muted]);
+  }, [message]);
 
   const toggleMute = (e) => {
     e?.stopPropagation();
-    const nextMuted = !muted;
-    if (nextMuted && typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    setInternalSpeaking(false);
-    setMuted(nextMuted);
-    onVoiceToggle?.(nextMuted);
-    if (!nextMuted && message) {
-      speakText(message);
-    }
+    toggleTTSMute(message);
+    onVoiceToggle?.(!muted);
   };
 
   return (

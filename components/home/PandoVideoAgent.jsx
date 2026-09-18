@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./PandoVideoAgent.module.css";
+import { speakPando, stopPandoSpeech } from "@/lib/ttsService";
 
 // Bump this whenever /public/videos/pando-speaking.webm is replaced —
 // browsers cache <video src> aggressively by URL, so the query string
@@ -30,42 +31,24 @@ export default function PandoVideoAgent() {
     if (!("speechSynthesis" in window)) return;
     setSpeechSupported(true);
 
-    function pickVoice() {
-      const voices = window.speechSynthesis.getVoices();
-      return (
-        voices.find((v) => v.lang === "en-US") ||
-        voices.find((v) => v.lang?.startsWith("en")) ||
-        voices[0] ||
-        null
-      );
-    }
-
     function speakCurrentLine() {
       if (mutedRef.current) return;
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(SCRIPT_LINES[lineIndexRef.current]);
-      utterance.lang = "en-US";
-      utterance.rate = 0.98;
-      const voice = pickVoice();
-      if (voice) utterance.voice = voice;
-      utterance.onend = () => {
-        lineIndexRef.current = (lineIndexRef.current + 1) % SCRIPT_LINES.length;
-        setLineIndex(lineIndexRef.current);
-        speakCurrentLine();
-      };
-      window.speechSynthesis.speak(utterance);
+      speakPando(SCRIPT_LINES[lineIndexRef.current], {
+        onEnd: () => {
+          lineIndexRef.current = (lineIndexRef.current + 1) % SCRIPT_LINES.length;
+          setLineIndex(lineIndexRef.current);
+          speakCurrentLine();
+        },
+      });
     }
 
     speakCurrentLineRef.current = speakCurrentLine;
 
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = speakCurrentLine;
-    }
     const timeout = setTimeout(speakCurrentLine, 200);
 
     return () => {
       clearTimeout(timeout);
-      window.speechSynthesis.cancel();
+      stopPandoSpeech();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -75,7 +58,7 @@ export default function PandoVideoAgent() {
     setMuted(next);
     mutedRef.current = next;
     if (next) {
-      window.speechSynthesis?.cancel();
+      stopPandoSpeech();
     } else {
       speakCurrentLineRef.current();
     }

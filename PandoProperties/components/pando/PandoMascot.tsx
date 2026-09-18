@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Volume2, VolumeX, Radio, Sparkles } from 'lucide-react';
+import { usePandoTTS } from '@/hooks/usePandoTTS';
 import './pando-mascot.css';
 
 export interface PandoMascotProps {
@@ -34,11 +35,9 @@ export function PandoMascot({
   className = '',
 }: PandoMascotProps) {
   const finalMascotUrl = mascotUrl || src || DEFAULT_MASCOT_URL;
-  const [muted, setMuted] = useState(!enableVoice);
-  const [internalSpeaking, setInternalSpeaking] = useState(false);
+  const { muted, isSpeaking: internalSpeaking, speak, toggleMute: toggleTTSMute } = usePandoTTS({ enabled: enableVoice });
   const isSpeaking = externalIsSpeaking ?? internalSpeaking;
   const [mascotMove, setMascotMove] = useState('');
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   // Periodic subtle idle mascot animations (twist, jump, dance)
   useEffect(() => {
@@ -58,59 +57,17 @@ export function PandoMascot({
     return () => clearTimeout(timeoutId);
   }, []);
 
-  // Web Speech API synthesis with strict single-playback cancellation
-  const speakText = (text: string) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-
-    // CRITICAL: Stop previous speech immediately
-    window.speechSynthesis.cancel();
-
-    if (muted || !text) {
-      setInternalSpeaking(false);
-      return;
-    }
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.96;
-    utterance.pitch = 1.08;
-
-    utterance.onstart = () => {
-      setInternalSpeaking(true);
-    };
-    utterance.onend = () => {
-      setInternalSpeaking(false);
-    };
-    utterance.onerror = () => {
-      setInternalSpeaking(false);
-    };
-
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  };
-
   // Trigger speech whenever message updates
   useEffect(() => {
     if (message) {
-      speakText(message);
+      speak(message);
     }
-    return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message]);
 
   const toggleMute = () => {
-    const nextMuted = !muted;
-    if (nextMuted && typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    setInternalSpeaking(false);
-    setMuted(nextMuted);
-    onVoiceToggle?.(nextMuted);
-    if (!nextMuted && message) {
-      speakText(message);
-    }
+    toggleTTSMute(message);
+    onVoiceToggle?.(!muted);
   };
 
   return (

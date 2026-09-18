@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import PandoTTSRouteGuard from '@/components/PandoTTSRouteGuard'
 
 export const metadata: Metadata = {
   title: 'Hi Pando — Your Real Estate Advisor',
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className="antialiased" suppressHydrationWarning>
+        <PandoTTSRouteGuard />
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
