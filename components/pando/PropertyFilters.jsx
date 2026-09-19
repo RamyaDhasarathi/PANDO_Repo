@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SlidersHorizontal, ChevronDown, Check, Search, X } from 'lucide-react';
 
 export const PropertyFilters = ({
@@ -18,10 +18,24 @@ export const PropertyFilters = ({
 }) => {
   const [isRefineOpen, setIsRefineOpen] = useState(false);
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsRefineOpen(false);
+        setIsLocationDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const locations = [
-    { label: 'All Locations', value: 'all' },
-    { label: 'Waterfront & Skyline', value: 'waterfront' },
+    { label: 'All locations', value: 'all' },
+    { label: 'Waterfront & skyline', value: 'waterfront' },
     { label: 'Palm Jumeirah', value: 'Palm Jumeirah' },
     { label: 'Dubai Hills Estate', value: 'Dubai Hills Estate' },
     { label: 'Dubai Marina', value: 'Dubai Marina' },
@@ -29,25 +43,25 @@ export const PropertyFilters = ({
   ];
 
   const propertyTypes = [
-    { label: 'All Residences', value: 'all' },
-    { label: 'Beachfront Sanctuary', value: 'Beachfront' },
-    { label: 'Mansion District', value: 'Mansion' },
-    { label: 'Waterfront Penthouse', value: 'Penthouse' },
-    { label: 'Burj Khalifa View', value: 'Burj' },
+    { label: 'All residences', value: 'all' },
+    { label: 'Beachfront sanctuary', value: 'Beachfront' },
+    { label: 'Mansion district', value: 'Mansion' },
+    { label: 'Waterfront penthouse', value: 'Penthouse' },
+    { label: 'Burj Khalifa view', value: 'Burj' },
   ];
 
   const priceRanges = [
-    { label: 'All Valuations', value: 'all' },
+    { label: 'All valuations', value: 'all' },
     { label: 'Under AED 50M', value: 'under-50m' },
     { label: 'AED 50M – 80M', value: '50m-80m' },
     { label: 'AED 80M+', value: '80m-plus' },
   ];
 
   const sortOptions = [
-    { label: 'AI Recommended', value: 'ai-recommended' },
-    { label: 'Price: High to Low', value: 'price-desc' },
-    { label: 'Price: Low to High', value: 'price-asc' },
-    { label: 'Highest Net Yield', value: 'yield' },
+    { label: 'Best fit', value: 'ai-recommended' },
+    { label: 'Price: high to low', value: 'price-desc' },
+    { label: 'Price: low to high', value: 'price-asc' },
+    { label: 'Highest net yield', value: 'yield' },
   ];
 
   const hasActiveFilters =
@@ -65,16 +79,33 @@ export const PropertyFilters = ({
   };
 
   const getActiveLocationLabel = () => {
-    if (selectedLocation === 'all') return 'Waterfront & Skyline';
+    if (selectedLocation === 'all') return 'All locations';
     const found = locations.find((l) => l.value === selectedLocation);
-    return found ? found.label : 'Location';
+    return found ? found.label : 'All locations';
   };
 
+  const listButtonStyle = (active) => ({
+    width: '100%',
+    textAlign: 'left',
+    padding: '7px 8px',
+    borderRadius: '6px',
+    fontSize: '13px',
+    border: 'none',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: active ? '#F6F1E8' : 'transparent',
+    color: active ? 'var(--p-ink)' : 'var(--p-stone)',
+    fontWeight: active ? 600 : 400,
+    transition: 'background-color 0.15s ease',
+  });
+
   return (
-    <div style={{ position: 'relative' }}>
-      {/* Primary Pill Filter Buttons */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        {/* Waterfront & Skyline Pill Dropdown Button */}
+    <div ref={containerRef} style={{ position: 'relative', zIndex: (isRefineOpen || isLocationDropdownOpen) ? 500 : 1 }}>
+      {/* Primary Filter Row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* All locations Pill Dropdown Button */}
         <div style={{ position: 'relative' }}>
           <button
             onClick={() => {
@@ -82,52 +113,38 @@ export const PropertyFilters = ({
               setIsRefineOpen(false);
             }}
             style={{
-              backgroundColor: '#FFFFFF',
-              border: '1px solid #E5E7EB',
-              color: '#111827',
-              padding: '8px 16px',
-              borderRadius: '9999px',
-              fontSize: '13px',
+              background: 'none',
+              border: 'none',
+              borderBottom: '1px solid var(--p-hairline)',
+              color: 'var(--p-ink)',
+              padding: '2px 0 6px',
+              fontSize: '13.5px',
               fontWeight: 500,
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '6px',
               cursor: 'pointer',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
             }}
           >
-            <span style={{ color: '#6B7280', fontSize: '14px' }}>📍</span>
             <span style={{ whiteSpace: 'nowrap' }}>{getActiveLocationLabel()}</span>
-            <ChevronDown size={14} color="#6B7280" />
+            <ChevronDown size={14} color="var(--p-stone)" />
           </button>
 
-          {/* Quick Location Dropdown */}
           {isLocationDropdownOpen && (
             <div
               style={{
                 position: 'absolute',
-                top: 'calc(100% + 8px)',
+                top: 'calc(100% + 10px)',
                 right: 0,
-                width: '220px',
+                width: '230px',
                 backgroundColor: '#FFFFFF',
-                border: '1px solid #E5E7EB',
-                borderRadius: '16px',
-                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-                zIndex: 60,
-                padding: '8px',
+                border: '1px solid var(--p-hairline)',
+                borderRadius: '10px',
+                boxShadow: '0 16px 36px rgba(30,30,34,0.16)',
+                zIndex: 501,
+                padding: '10px 12px',
               }}
             >
-              <div
-                style={{
-                  fontSize: '10px',
-                  textTransform: 'uppercase',
-                  fontWeight: 600,
-                  color: '#9CA3AF',
-                  padding: '6px 10px 4px',
-                }}
-              >
-                Select Corridor
-              </div>
               {locations.map((loc) => (
                 <button
                   key={loc.value}
@@ -135,52 +152,36 @@ export const PropertyFilters = ({
                     onSelectLocation(loc.value);
                     setIsLocationDropdownOpen(false);
                   }}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    fontSize: '12.5px',
-                    fontWeight: selectedLocation === loc.value ? 600 : 400,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    border: 'none',
-                    cursor: 'pointer',
-                    backgroundColor: selectedLocation === loc.value ? '#FEF2F2' : 'transparent',
-                    color: selectedLocation === loc.value ? '#DC2626' : '#111827',
-                  }}
+                  style={listButtonStyle(selectedLocation === loc.value)}
                 >
                   <span>{loc.label}</span>
-                  {selectedLocation === loc.value && <Check size={14} color="#DC2626" />}
+                  {selectedLocation === loc.value && <Check size={13} color="var(--p-bronze)" />}
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Refine Button matching Image 1 */}
+        {/* Refine Button */}
         <button
           onClick={() => {
             setIsRefineOpen(!isRefineOpen);
             setIsLocationDropdownOpen(false);
           }}
           style={{
-            padding: '8px 18px',
-            borderRadius: '9999px',
-            fontSize: '13px',
-            fontWeight: 600,
+            padding: '2px 0 6px',
+            fontSize: '13.5px',
+            fontWeight: 500,
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '7px',
             cursor: 'pointer',
             border: 'none',
-            backgroundColor: '#0F172A',
-            color: '#FFFFFF',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            background: 'none',
+            color: 'var(--p-ink)',
           }}
         >
-          <SlidersHorizontal size={14} color="#FFFFFF" />
+          <SlidersHorizontal size={14} />
           <span>Refine</span>
           {hasActiveFilters && (
             <span
@@ -188,27 +189,30 @@ export const PropertyFilters = ({
                 width: '6px',
                 height: '6px',
                 borderRadius: '50%',
-                backgroundColor: '#EF4444',
+                backgroundColor: 'var(--p-bronze)',
+                display: 'inline-block',
               }}
             />
           )}
         </button>
       </div>
 
-      {/* Expanded Refine Tray Modal / Drawer */}
+      {/* Expanded Refine Panel */}
       {isRefineOpen && (
         <div
           style={{
             position: 'absolute',
-            top: 'calc(100% + 10px)',
+            top: 'calc(100% + 12px)',
             right: 0,
-            width: 'min(92vw, 540px)',
+            width: 'min(92vw, 520px)',
+            maxHeight: 'calc(100vh - 160px)',
+            overflowY: 'auto',
             backgroundColor: '#FFFFFF',
-            border: '1px solid #E8E1D8',
-            borderRadius: '18px',
-            boxShadow: '0 16px 40px rgba(0, 0, 0, 0.14)',
-            zIndex: 60,
-            padding: '16px',
+            border: '1px solid var(--p-hairline)',
+            borderRadius: '14px',
+            boxShadow: '0 24px 52px rgba(0, 0, 0, 0.22)',
+            zIndex: 501,
+            padding: '22px 24px',
             boxSizing: 'border-box',
           }}
         >
@@ -217,225 +221,140 @@ export const PropertyFilters = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              paddingBottom: '12px',
-              borderBottom: '1px solid #F0EAE1',
-              marginBottom: '12px',
+              paddingBottom: '14px',
+              borderBottom: '1px solid var(--p-hairline)',
+              marginBottom: '18px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  color: '#111111',
-                }}
-              >
-                Neural Filter Engine
-              </span>
-              <span
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  color: '#7E7A75',
-                  backgroundColor: '#F7F2E9',
-                  padding: '2px 8px',
-                  borderRadius: '9999px',
-                }}
-              >
-                {totalMatches} matched
-              </span>
-            </div>
-
-            {hasActiveFilters && (
-              <button
-                onClick={resetFilters}
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  color: '#D92828',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                }}
-              >
-                <X size={12} />
-                <span>Reset All</span>
-              </button>
-            )}
+            <span
+              style={{
+                fontFamily: 'var(--p-serif)',
+                fontSize: '18px',
+                fontWeight: 600,
+                color: 'var(--p-ink)',
+              }}
+            >
+              Refine your brief
+            </span>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--p-stone)' }}>{totalMatches} matched</span>
           </div>
 
-          {/* Quick Search */}
-          <div style={{ position: 'relative', marginBottom: '14px' }}>
+          {/* Search Box */}
+          <div style={{ position: 'relative', marginBottom: '20px' }}>
             <Search
-              size={14}
+              size={15}
               style={{
                 position: 'absolute',
                 left: '10px',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#99948D',
+                color: 'var(--p-stone)',
               }}
             />
             <input
               type="text"
-              placeholder="Search Palm, Marina, Burj, 5-bed, superyacht..."
+              placeholder="Palm, Marina, Burj, 5-bed, villa..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               style={{
                 width: '100%',
-                backgroundColor: '#FAF6EE',
-                border: '1px solid #E5DDD2',
-                borderRadius: '10px',
+                background: '#F9F8F5',
+                border: '1px solid var(--p-hairline)',
+                borderRadius: '8px',
                 padding: '8px 12px 8px 32px',
-                fontSize: '11px',
-                color: '#111111',
+                fontSize: '13px',
+                color: 'var(--p-ink)',
                 outline: 'none',
                 boxSizing: 'border-box',
               }}
             />
+            {searchQuery && (
+              <button
+                onClick={() => onSearchChange('')}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  color: 'var(--p-stone)',
+                }}
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
 
+          {/* 3-Column Filter Options */}
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-              gap: '12px',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '16px',
             }}
           >
-            {/* Property Type */}
             <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '9.5px',
-                  fontWeight: 800,
-                  textTransform: 'uppercase',
-                  color: '#88837D',
-                  letterSpacing: '0.06em',
-                  marginBottom: '6px',
-                }}
-              >
-                Property Typology
-              </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <p style={{ margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--p-stone)' }}>Typology</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {propertyTypes.map((t) => (
-                  <button
-                    key={t.value}
-                    onClick={() => onSelectType(t.value)}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '5px 8px',
-                      borderRadius: '6px',
-                      fontSize: '11px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      backgroundColor: selectedType === t.value ? '#111111' : '#FAF6EE',
-                      color: selectedType === t.value ? '#FFFFFF' : '#444444',
-                      fontWeight: selectedType === t.value ? 700 : 500,
-                    }}
-                  >
+                  <button key={t.value} onClick={() => onSelectType(t.value)} style={listButtonStyle(selectedType === t.value)}>
                     <span>{t.label}</span>
-                    {selectedType === t.value && <Check size={12} color="#FFFFFF" />}
+                    {selectedType === t.value && <Check size={13} color="var(--p-bronze)" />}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Price Range */}
             <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '9.5px',
-                  fontWeight: 800,
-                  textTransform: 'uppercase',
-                  color: '#88837D',
-                  letterSpacing: '0.06em',
-                  marginBottom: '6px',
-                }}
-              >
-                Valuation Bracket
-              </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <p style={{ margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--p-stone)' }}>Valuation</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {priceRanges.map((p) => (
-                  <button
-                    key={p.value}
-                    onClick={() => onSelectPrice(p.value)}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '5px 8px',
-                      borderRadius: '6px',
-                      fontSize: '11px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      backgroundColor: selectedPrice === p.value ? '#111111' : '#FAF6EE',
-                      color: selectedPrice === p.value ? '#FFFFFF' : '#444444',
-                      fontWeight: selectedPrice === p.value ? 700 : 500,
-                    }}
-                  >
+                  <button key={p.value} onClick={() => onSelectPrice(p.value)} style={listButtonStyle(selectedPrice === p.value)}>
                     <span>{p.label}</span>
-                    {selectedPrice === p.value && <Check size={12} color="#FFFFFF" />}
+                    {selectedPrice === p.value && <Check size={13} color="var(--p-bronze)" />}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Sort Strategy */}
             <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '9.5px',
-                  fontWeight: 800,
-                  textTransform: 'uppercase',
-                  color: '#88837D',
-                  letterSpacing: '0.06em',
-                  marginBottom: '6px',
-                }}
-              >
-                Curation Sort
-              </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <p style={{ margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--p-stone)' }}>Sort</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {sortOptions.map((s) => (
-                  <button
-                    key={s.value}
-                    onClick={() => onSelectSort(s.value)}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '5px 8px',
-                      borderRadius: '6px',
-                      fontSize: '11px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      backgroundColor: selectedSort === s.value ? '#111111' : '#FAF6EE',
-                      color: selectedSort === s.value ? '#FFFFFF' : '#444444',
-                      fontWeight: selectedSort === s.value ? 700 : 500,
-                    }}
-                  >
+                  <button key={s.value} onClick={() => onSelectSort(s.value)} style={listButtonStyle(selectedSort === s.value)}>
                     <span>{s.label}</span>
-                    {selectedSort === s.value && <Check size={12} color="#FFFFFF" />}
+                    {selectedSort === s.value && <Check size={13} color="var(--p-bronze)" />}
                   </button>
                 ))}
               </div>
             </div>
           </div>
+
+          {hasActiveFilters && (
+            <div style={{ marginTop: '20px', paddingTop: '14px', borderTop: '1px solid var(--p-hairline)', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={resetFilters}
+                style={{
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  color: '#d22c23',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: 0,
+                }}
+              >
+                <X size={13} />
+                <span>Reset all filters</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

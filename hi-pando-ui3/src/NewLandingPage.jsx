@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import RealPandoMap from './RealPandoMap';
 import mascotImage from './mascot.png';
+import { usePandoTTS } from '@/hooks/usePandoTTS';
 import './pando-map-experience.css';
 
 // Multi-category dataset across Dubai real estate master developments
@@ -208,29 +209,16 @@ export default function NewLandingPage() {
   const [activeNavTab, setActiveNavTab] = useState('Buy');
   const [searchQuery, setSearchQuery] = useState('');
   const [zoomLevel, setZoomLevel] = useState(13);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const { muted: isMuted, isSpeaking, speak, toggleMute: toggleTTSMute } = usePandoTTS();
   const [isListening, setIsListening] = useState(false);
   const [speechText, setSpeechText] = useState(
     'Click on any property pin to explore details, or ask me anything about properties in Dubai!'
   );
 
   React.useEffect(() => {
-    if (isMuted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(speechText);
-    utterance.rate = 0.95;
-    utterance.pitch = 1.05;
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
-    
-    return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, [speechText, isMuted]);
+    speak(speechText);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speechText]);
 
   const handleSelectProperty = (prop) => {
     setSelectedProperty(prop);
@@ -391,8 +379,7 @@ export default function NewLandingPage() {
                   className="pando-bubble-action-btn"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setIsMuted(!isMuted);
-                    if (!isMuted) setIsSpeaking(false);
+                    toggleTTSMute();
                   }}
                   title={isMuted ? "Unmute Pando" : "Mute Pando"}
                 >

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import PandoTTSRouteGuard from '@/components/PandoTTSRouteGuard';
 
 export const metadata: Metadata = {
   title: 'Pando AI — Recommended Properties | Dubai Prime Residential Intelligence',
@@ -15,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full overflow-hidden">
       <body className="h-full h-[100dvh] overflow-hidden bg-[#FBF6EE] text-[#111111] antialiased selection:bg-[#F7DDE0] selection:text-[#D92828]">
+        <PandoTTSRouteGuard />
         {children}
       </body>
     </html>

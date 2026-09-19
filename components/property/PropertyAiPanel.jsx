@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import styles from "./PropertyAiPanel.module.css";
 import { answerPropertyQuestion, explainProperty } from "@/lib/propertyAssistant";
+import { usePandoTTS } from "@/hooks/usePandoTTS";
 
 let idCounter = 0;
 function nextId() {
@@ -16,10 +17,9 @@ export default function PropertyAiPanel({ property }) {
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const { muted, speak, toggleMute: toggleTTSMute } = usePandoTTS();
   const [speechSupported, setSpeechSupported] = useState(false);
   const recognitionRef = useRef(null);
-  const mutedRef = useRef(false);
   const logRef = useRef(null);
 
   useEffect(() => {
@@ -48,38 +48,11 @@ export default function PropertyAiPanel({ property }) {
     if (!("speechSynthesis" in window)) return;
     setSpeechSupported(true);
 
-    function pickVoice() {
-      const voices = window.speechSynthesis.getVoices();
-      return (
-        voices.find((v) => v.lang === "en-US") ||
-        voices.find((v) => v.lang?.startsWith("en")) ||
-        voices[0] ||
-        null
-      );
-    }
+    const timeout = setTimeout(() => speak(explainProperty(property)), 300);
 
-    function speakIntro() {
-      if (mutedRef.current) return;
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(explainProperty(property));
-      utterance.lang = "en-US";
-      utterance.rate = 0.98;
-      const voice = pickVoice();
-      if (voice) utterance.voice = voice;
-      window.speechSynthesis.speak(utterance);
-    }
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = speakIntro;
-    }
-    const timeout = setTimeout(speakIntro, 300);
-
-    return () => {
-      clearTimeout(timeout);
-      window.speechSynthesis.cancel();
-    };
+    return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [property]);
 
   useEffect(() => {
     if (logRef.current) {
@@ -87,24 +60,8 @@ export default function PropertyAiPanel({ property }) {
     }
   }, [messages]);
 
-  function speak(text) {
-    if (mutedRef.current || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    utterance.rate = 0.98;
-    window.speechSynthesis.speak(utterance);
-  }
-
   function toggleSpeaker() {
-    const next = !muted;
-    setMuted(next);
-    mutedRef.current = next;
-    if (next) {
-      window.speechSynthesis?.cancel();
-    } else {
-      speak(explainProperty(property));
-    }
+    toggleTTSMute(explainProperty(property));
   }
 
   function sendMessage(text) {

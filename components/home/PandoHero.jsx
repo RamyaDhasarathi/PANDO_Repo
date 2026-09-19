@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Volume2, VolumeX } from 'lucide-react';
+import { useAuth } from '@/providers/AuthProvider';
 import AuthForm from '@/components/AuthForm';
+import ProfilePopup from '@/components/ProfilePopup';
+import { getPandoVoice, PANDO_VOICE_SETTINGS } from '@/lib/pandoVoice';
+import { usePandoTTS } from '@/hooks/usePandoTTS';
 
 const mascotUrl =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png';
@@ -16,12 +20,13 @@ const replies = [
 
 export default function PandoHero() {
   const router = useRouter();
+  const { user } = useAuth();
   const [prompt, setPrompt] = useState('');
   const [reply, setReply] = useState(replies[0]);
-  const [muted, setMuted] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const { muted, isSpeaking, isSpeakingRef, speak, toggleMute } = usePandoTTS();
   const [mascotMove, setMascotMove] = useState('');
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [authMode, setAuthMode] = useState('sign-in');
   const hasSpokenRef = useRef(false);
 
@@ -43,64 +48,16 @@ export default function PandoHero() {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  // Voice synthesis helper
-  const getVoice = () => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return null;
-    const voices = window.speechSynthesis.getVoices();
-    return (
-      voices.find(
-        (v) =>
-          v.lang.startsWith('en') &&
-          (v.name.includes('Natural') ||
-            v.name.includes('Google') ||
-            v.name.includes('Samantha') ||
-            v.name.includes('Daniel') ||
-            v.name.includes('Alex'))
-      ) ||
-      voices.find((v) => v.lang.startsWith('en')) ||
-      voices[0]
-    );
-  };
-
-  const speak = (text) => {
-    if (muted || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voice = getVoice();
-      if (voice) utterance.voice = voice;
-      utterance.rate = 0.96;
-      utterance.pitch = 1.08;
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn('Speech synthesis error:', e);
-      setIsSpeaking(false);
-    }
-  };
-
-  // Pre-load voices on mount
+  // Speak immediately on landing. Browsers may block audio before any user
+  // gesture on the page, so we also retry on the first click/keydown/touch.
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
+    if (!muted && !hasSpokenRef.current) {
+      hasSpokenRef.current = true;
+      speak(reply);
     }
-    return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, []);
 
-  // Auto-speak on first user interaction (click, touch, keydown)
-  useEffect(() => {
     const handleFirstInteraction = () => {
-      if (!muted && !hasSpokenRef.current) {
-        hasSpokenRef.current = true;
+      if (!muted && !isSpeakingRef.current) {
         speak(reply);
       }
     };
@@ -114,33 +71,24 @@ export default function PandoHero() {
       window.removeEventListener('keydown', handleFirstInteraction);
       window.removeEventListener('touchstart', handleFirstInteraction);
     };
-  }, [reply, muted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const submitPrompt = (event) => {
     event?.preventDefault();
     const query = prompt.trim();
     router.push(query ? `/search?q=${encodeURIComponent(query)}` : '/search');
     const nextReply = query
-      ? `${replies[Math.floor(Math.random() * replies.length)]} I’m ready when you are.`
-      : replies[0];
+      ? `Analyzing options for "${query}"... I’m ready when you are.`
+      : (isPersonalized ? reply : replies[0]);
     setReply(nextReply);
     speak(nextReply);
   };
 
-  const toggleMute = () => {
-    if (!muted) {
-      window.speechSynthesis?.cancel();
-      setIsSpeaking(false);
-      setMuted(true);
-    } else {
-      setMuted(false);
-      speak(reply);
-    }
-  };
+  const handleToggleMute = () => toggleMute(reply);
 
   const handleMascotOrBubbleClick = () => {
-    if (muted) setMuted(false);
-    speak(reply);
+    speak(reply, { force: true });
   };
 
   return (
@@ -154,16 +102,29 @@ export default function PandoHero() {
           <span className="brand-name">Hi Pando!</span>
         </a>
         <div className="nav-actions">
-          <button 
-            className="nav-action nav-action-soft" 
-            style={{cursor: 'pointer', background: 'rgba(255, 250, 243, 0.45)', backdropFilter: 'blur(8px)', border: '1px solid rgba(0,0,0,0.08)', fontSize: '9px', fontWeight: '800', letterSpacing: '0.1em', padding: '0 18px', minHeight: '34px'}}
-            onClick={() => {
-              setAuthMode('sign-in');
-              setIsAuthOpen(true);
-            }}
-          >
-            SIGN IN / SIGN UP
-          </button>
+          {user ? (
+            <button 
+              onClick={() => setIsProfileOpen(true)} 
+              className="nav-action nav-action-soft" 
+              style={{ cursor: 'pointer', background: 'rgba(255, 250, 243, 0.45)', backdropFilter: 'blur(8px)', border: '1px solid rgba(0,0,0,0.08)', fontSize: '12px', fontWeight: '600', padding: '0 18px', minHeight: '34px', display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#e11d48', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold' }}>
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              Hi, {user.name || 'User'}
+            </button>
+          ) : (
+            <button 
+              className="nav-action nav-action-soft" 
+              style={{cursor: 'pointer', background: 'rgba(255, 250, 243, 0.45)', backdropFilter: 'blur(8px)', border: '1px solid rgba(0,0,0,0.08)', fontSize: '9px', fontWeight: '800', letterSpacing: '0.1em', padding: '0 18px', minHeight: '34px'}}
+              onClick={() => {
+                setAuthMode('sign-in');
+                setIsAuthOpen(true);
+              }}
+            >
+              SIGN IN / SIGN UP
+            </button>
+          )}
           <a className="nav-action nav-action-primary" href="/explore">
             EXPLORE MAP{' '}
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -215,7 +176,7 @@ export default function PandoHero() {
                 className={`bubble-mute-btn ${muted ? 'is-muted' : 'is-active'}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleMute();
+                  handleToggleMute();
                 }}
                 aria-label={muted ? 'Unmute Pando' : 'Mute Pando'}
                 aria-pressed={muted}
@@ -252,6 +213,10 @@ export default function PandoHero() {
           onSwitchMode={setAuthMode} 
           onClose={() => setIsAuthOpen(false)} 
         />
+      )}
+      
+      {isProfileOpen && (
+        <ProfilePopup onClose={() => setIsProfileOpen(false)} />
       )}
     </main>
   );

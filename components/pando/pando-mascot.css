@@ -1,283 +1,431 @@
-/* PANDO MASCOT & RESPONSE BUBBLE STYLES - EMBEDDED CONTAINER */
+/* ================================================================
+   PANDO — floating concierge widget.
+   Lives outside the property grid entirely (position: fixed), matching
+   the mascot + gold "Pando says" speech-bubble pattern used on the
+   Home and Explore pages, instead of being boxed into a card/rail.
+   Reads the page-scoped tokens defined on .container in
+   pando-properties.module.css plus the shared globals.css tokens
+   (--ink, --acid, --signal) so it matches the rest of the app.
+   ================================================================ */
 
-.pando-embedded-container {
+.pando-floating-agent {
+  position: fixed;
+  right: 0px;
+  bottom: 4px;
+  z-index: 200;
   display: flex;
   align-items: flex-end;
-  justify-content: flex-end;
   gap: 0;
-  max-width: 100%;
-  pointer-events: auto;
-  user-select: none;
-  z-index: 20;
+  pointer-events: none;
+  max-width: min(96vw, 820px);
 }
 
-/* RESPONSE SPEECH BUBBLE — matches the landing page (.speech-bubble in styles/globals.css) */
-.pando-speech-bubble {
+.pando-bubble-col {
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+  margin-right: -16px;
+  margin-bottom: 20px;
+}
+
+/* Bubble — same gold gradient / hard-edge-shadow language as .speech-bubble */
+.pando-bubble {
   position: relative;
-  max-width: 360px;
-  margin-right: -28px;
-  padding: 18px 20px 20px;
-  background: linear-gradient(145deg, rgba(255,231,181,0.97), rgba(197,160,89,0.94));
-  border: 2px solid var(--ink);
-  border-radius: 24px 24px 24px 8px;
-  box-shadow: 10px 12px 0 rgba(30,30,34,0.28), inset 3px 3px 0 rgba(255,255,255,0.42), inset -5px -7px 14px rgba(104,73,33,0.2);
-  z-index: 25;
-  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
-  margin-bottom: 100px;
+  width: min(350px, 92vw);
+  padding: 16px 18px 16px;
+  background: linear-gradient(145deg, rgba(255, 231, 181, 0.97), rgba(197, 160, 89, 0.94));
+  border: 2.5px solid var(--ink, #1e1e22);
+  border-radius: 20px 8px 20px 20px;
+  box-shadow: 7px 8px 0 rgba(30, 30, 34, 0.28), inset 2px 2px 0 rgba(255, 255, 255, 0.42),
+    inset -4px -5px 10px rgba(104, 73, 33, 0.18);
+  transform: rotate(-1deg);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  pointer-events: auto;
+  animation: speechAppear 0.4s ease both;
 }
 
-.pando-speech-bubble.is-speaking {
-  transform: translateY(-5px);
-  background: linear-gradient(145deg, #ffe9bb, #d5ae65);
-  box-shadow: 12px 15px 0 rgba(30,30,34,0.3), inset 3px 3px 0 rgba(255,255,255,0.5), inset -5px -7px 16px rgba(104,73,33,0.22);
+.pando-bubble.is-speaking {
+  transform: rotate(-0.3deg) translateY(-3px);
+  box-shadow: 8px 10px 0 rgba(30, 30, 34, 0.3), inset 2px 2px 0 rgba(255, 255, 255, 0.5),
+    inset -4px -5px 12px rgba(104, 73, 33, 0.2);
 }
 
-.bubble-header {
+@keyframes speechAppear {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.pando-bubble-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 9px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.bubble-header .red-dot {
-  width: 8px;
-  height: 8px;
+.pando-bubble-dot {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--signal);
-  display: inline-block;
-  box-shadow: 0 0 0 5px rgba(240, 68, 46, 0.16);
-  animation: pulse 2s infinite;
-}
-
-.bubble-header .header-text {
-  color: var(--signal);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
-.bubble-message {
-  margin: 0;
-  color: var(--ink);
-  font-size: clamp(12px, 1.05vw, 15px);
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  font-weight: 900;
-}
-
-.bubble-pointer {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  right: -12px;
-  bottom: 24px;
-  background: var(--acid);
-  border-right: 2px solid var(--ink);
-  border-bottom: 2px solid var(--ink);
-  box-shadow: 5px 5px 0 rgba(30,30,34,0.2);
-  transform: rotate(-45deg);
-}
-
-/* PANDO MASCOT CHARACTER WITH DYNAMIC SHADOW */
-.pando-character-wrap {
-  width: 190px;
-  position: relative;
+  background: var(--signal, #d22c23);
   flex-shrink: 0;
-  z-index: 22;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(210, 44, 35, 0.18);
 }
 
-@media (min-width: 640px) {
-  .pando-character-wrap {
-    width: 215px;
-  }
+.pando-bubble-label {
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--signal, #d22c23);
 }
 
-@media (min-width: 1024px) {
-  .pando-character-wrap {
-    width: 240px;
-  }
-}
-
-.pando-mascot-img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  display: block;
-  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.12));
-  animation: pando-float 4.5s ease-in-out infinite;
-  transition: transform 0.3s ease, filter 0.3s ease;
-}
-
-.pando-mascot-img:hover {
-  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.18));
-  transform: scale(1.03);
-}
-
-/* Ground shadow oval underneath mascot */
-.pando-character-wrap::after {
-  content: "";
-  position: absolute;
-  bottom: 0px;
-  width: 50%;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 50%;
-  filter: blur(3px);
-  z-index: -1;
-  animation: pando-shadow 4.5s ease-in-out infinite;
-  pointer-events: none;
-}
-
-/* ANIMATION KEYFRAMES */
-@keyframes pando-float {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-6px) rotate(1.2deg);
-  }
-}
-
-@keyframes pando-shadow {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(0.75);
-    opacity: 0.3;
-  }
-}
-
-.pando-character-wrap.is-talking-anim {
-  animation: mascot-talking 0.6s ease-in-out infinite alternate;
-}
-
-@keyframes mascot-talking {
-  0% {
-    transform: translateY(0) rotate(0deg);
-  }
-  100% {
-    transform: translateY(-3px) rotate(-1.5deg);
-  }
-}
-
-.pando-character-wrap.mascot-twist {
-  animation: mascot-twist 2.2s ease-in-out both;
-}
-
-.pando-character-wrap.mascot-jump {
-  animation: mascot-jump 2.2s cubic-bezier(0.2, 0.8, 0.3, 1) both;
-}
-
-.pando-character-wrap.mascot-dance {
-  animation: mascot-dance 2.2s ease-in-out both;
-}
-
-@keyframes mascot-twist {
-  0%, 100% {
-    transform: rotate(0) translateX(0);
-  }
-  25% {
-    transform: rotate(-4deg) translateX(-4px);
-  }
-  55% {
-    transform: rotate(5deg) translateX(5px);
-  }
-  78% {
-    transform: rotate(-2deg) translateX(-3px);
-  }
-}
-
-@keyframes mascot-jump {
-  0%, 100% {
-    transform: translateY(0) rotate(0);
-  }
-  25% {
-    transform: translateY(-12px) rotate(-2deg);
-  }
-  48% {
-    transform: translateY(0) rotate(2deg);
-  }
-  62% {
-    transform: translateY(-6px) rotate(-1deg);
-  }
-  80% {
-    transform: translateY(0) rotate(0);
-  }
-}
-
-@keyframes mascot-dance {
-  0%, 100% {
-    transform: rotate(0) translateX(0) scaleX(1);
-  }
-  20% {
-    transform: rotate(-3deg) translateX(-4px);
-  }
-  42% {
-    transform: rotate(4deg) translateX(4px);
-  }
-  64% {
-    transform: rotate(-3deg) translateX(-4px);
-  }
-  82% {
-    transform: rotate(2deg) translateX(2px);
-  }
-}
-
-/* VOICE CONTROL BUTTON ON SPEECH NOTE HEADER — matches .bubble-mute-btn in styles/globals.css */
-.pando-voice-header-btn {
+.pando-bubble-mute-btn {
+  margin-left: auto;
   display: grid;
   place-items: center;
   box-sizing: border-box;
   width: 24px;
   height: 24px;
   padding: 0;
-  margin: 0;
-  line-height: 0;
-  flex-shrink: 0;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--ink, #1e1e22);
   border-radius: 50%;
-  background: var(--water);
+  background: var(--water, #4e7d63);
   color: #fff;
-  transition: all 0.2s ease;
   cursor: pointer;
-}
-.pando-voice-header-btn svg { display: block; }
-
-.pando-voice-header-btn:hover {
-  background: var(--ink);
-  color: var(--acid);
+  flex-shrink: 0;
 }
 
-.pando-voice-header-btn.is-muted {
+.pando-bubble-mute-btn:hover {
+  background: var(--ink, #1e1e22);
+  color: var(--acid, #c5a059);
+}
+
+.pando-bubble-mute-btn.is-muted {
   background: transparent;
-  color: var(--ink);
+  color: var(--ink, #1e1e22);
+}
+
+.pando-bubble-mute-btn:focus-visible {
+  outline: 2px solid var(--ink, #1e1e22);
+  outline-offset: 2px;
+}
+
+.pando-bubble-quote {
+  margin: 0 0 10px 0;
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--ink, #1e1e22);
+}
+
+.pando-bubble-tail {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  right: -10px;
+  top: 24px;
+  background: var(--acid, #c5a059);
+  border-right: 2.5px solid var(--ink, #1e1e22);
+  border-top: 2.5px solid var(--ink, #1e1e22);
+  box-shadow: 3px -3px 0 rgba(30, 30, 34, 0.2);
+  transform: rotate(45deg);
+}
+
+/* Ask row — compact single input bar */
+.pando-ask-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid var(--ink, #1e1e22);
+  border-radius: 999px;
+  padding: 3px 3px 3px 12px;
+}
+
+.pando-ask-row:focus-within {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.pando-ask-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: var(--ink, #1e1e22);
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pando-ask-input::placeholder {
+  color: rgba(30, 30, 34, 0.5);
+}
+
+.pando-ask-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pando-ask-mic,
+.pando-ask-send {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 2px solid var(--ink, #1e1e22);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.pando-ask-mic {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ink, #1e1e22);
+}
+
+.pando-ask-mic:hover {
+  background: #fff;
+}
+
+.pando-ask-mic.is-listening {
+  background: var(--signal, #d22c23);
+  color: #fff;
+  animation: pulseListening 1.2s infinite;
+}
+
+@keyframes pulseListening {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.pando-ask-send {
+  background: var(--signal, #d22c23);
+  color: #fffaf3;
+}
+
+.pando-ask-send:hover {
+  background: var(--ink, #1e1e22);
+}
+
+.pando-ask-send:active {
+  transform: scale(0.94);
+}
+
+.pando-ask-mic:focus-visible,
+.pando-ask-send:focus-visible {
+  outline: 2px solid var(--ink, #1e1e22);
+  outline-offset: 2px;
+}
+
+.pando-show-more-btn {
+  width: 100%;
+  margin-top: 12px;
+  background: #ffffff;
+  border: 1.5px solid var(--ink, #1e1e22);
+  padding: 9px 20px;
+  border-radius: 999px;
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink, #1e1e22);
+  cursor: pointer;
+  display: block;
+  text-align: center;
+  transition: all 0.15s ease;
+  box-shadow: 2px 2px 0 rgba(30, 30, 34, 0.15);
+}
+
+.pando-show-more-btn:hover {
+  background: #fcf9f2;
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 rgba(30, 30, 34, 0.22);
+}
+
+/* Character — the virtual agent. Two twinkling sparkle accents keep it
+   reading as the active AI presence, without a glow washing out behind it. */
+.pando-character-wrap {
+  position: relative;
+  width: clamp(240px, 24vw, 380px);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  pointer-events: auto;
+  transform: translate(6px, 0px);
+}
+
+.pando-character-wrap:focus-visible {
+  outline: 2px solid var(--acid, #c5a059);
+  outline-offset: 6px;
+}
+
+.pando-sparkle {
+  position: absolute;
+  z-index: 2;
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+  background: radial-gradient(circle, #fff 0%, rgba(255, 255, 255, 0) 70%);
+  clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%);
+  animation: pandoTwinkle 2.4s ease-in-out infinite;
+}
+
+.pando-sparkle-1 {
+  top: 6%;
+  right: 12%;
+  animation-delay: 0s;
+}
+
+.pando-sparkle-2 {
+  top: 42%;
+  left: 2%;
+  width: 6px;
+  height: 6px;
+  animation-delay: 1.1s;
+}
+
+@keyframes pandoTwinkle {
+  0%, 100% { opacity: 0; transform: scale(0.4); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.pando-mascot-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.35));
+  animation: pando-float 5.5s ease-in-out infinite;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.pando-mascot-img:hover {
+  transform: scale(1.02);
+}
+
+@keyframes pando-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.pando-character-wrap.is-talking-anim .pando-mascot-img {
+  animation: pando-float 5.5s ease-in-out infinite, mascot-talking 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes mascot-talking {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-2px) rotate(-0.6deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pando-sparkle,
+  .pando-mascot-img,
+  .pando-bubble {
+    animation: none !important;
+  }
 }
 
 /* RESPONSIVE SCALING */
+@media (max-width: 1080px) {
+  .pando-floating-agent {
+    bottom: 4px;
+  }
+  .pando-character-wrap {
+    width: clamp(120px, 15vw, 180px);
+    transform: translate(0px, 0px);
+  }
+  .pando-bubble-col {
+    margin-right: -14px;
+    margin-bottom: 0px;
+  }
+  .pando-bubble {
+    width: min(260px, 100%);
+    padding: 9px 12px 10px;
+  }
+  .pando-bubble-quote {
+    font-size: 11.5px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+    -webkit-line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .pando-bubble-header {
+    margin-bottom: 6px;
+  }
+}
+
 @media (max-width: 639px) {
-  .pando-embedded-container {
-    flex-direction: column-reverse;
-    align-items: flex-end;
-    gap: 6px;
+  /* No-scroll leaves very little spare room on a phone-width viewport, so
+     the floating widget shrinks to a compact corner presence here rather
+     than covering the last card underneath it. */
+  .pando-floating-agent {
+    bottom: 8px;
+    right: 8px;
   }
-
-  .pando-speech-bubble {
-    max-width: 250px;
-    margin-right: 0;
-    margin-bottom: -16px;
+  .pando-character-wrap {
+    width: 76px;
   }
-
-  .bubble-pointer {
-    right: 30px;
-    bottom: -8px;
-    transform: rotate(45deg);
+  .pando-bubble-col {
+    margin-right: -6px;
+    margin-bottom: 28px;
+  }
+  .pando-bubble {
+    width: min(150px, 100%);
+    padding: 8px 10px 9px;
+    border-radius: 14px 14px 5px 14px;
+  }
+  .pando-bubble-header {
+    margin-bottom: 5px;
+  }
+  .pando-bubble-label {
+    font-size: 8.5px;
+  }
+  .pando-bubble-mute-btn {
+    width: 18px;
+    height: 18px;
+  }
+  .pando-bubble-quote {
+    font-size: 10.5px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .pando-ask-row {
+    padding: 2px 2px 2px 8px;
+  }
+  .pando-ask-input {
+    font-size: 10px;
+  }
+  .pando-ask-mic,
+  .pando-ask-send {
+    width: 22px;
+    height: 22px;
+  }
+  .pando-bubble-tail {
+    width: 12px;
+    height: 12px;
+    right: -6px;
+    top: 14px;
   }
 }

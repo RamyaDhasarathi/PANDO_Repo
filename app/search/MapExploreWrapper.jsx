@@ -1,5 +1,6 @@
-'use client';
 import dynamic from 'next/dynamic';
+import dbConnect from '@/lib/mongodb';
+import Listing from '@/lib/models/Listing';
 
 const PandoMapExplore = dynamic(
   () => import('@/components/home/PandoMapExplore'),
@@ -12,6 +13,20 @@ const PandoMapExplore = dynamic(
   )}
 );
 
-export default function MapExploreWrapper() {
-  return <PandoMapExplore />;
+export default async function MapExploreWrapper() {
+  await dbConnect();
+  
+  // Fetch all properties to populate the map
+  const properties = await Listing.find({}).lean();
+  
+  // Serialize the properties to pass them as props safely
+  const serializedProperties = properties.map(p => {
+    return {
+      ...p,
+      _id: p._id.toString(),
+      createdAt: p.createdAt ? p.createdAt.toISOString() : null,
+    };
+  });
+
+  return <PandoMapExplore dbProperties={serializedProperties} />;
 }
