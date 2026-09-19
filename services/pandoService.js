@@ -8,17 +8,48 @@ export class PandoService {
    * names a property or its location — that's the reveal you get by
    * hovering or opening a card — so it stays a hook, not a recap.
    */
-  static getSummaryMessage(pageProperties = []) {
-    if (!pageProperties.length) {
-      return "No matches yet — try widening your filters.";
+  static getSummaryMessage(pageProperties = [], searchContext = {}) {
+    if (!pageProperties || !pageProperties.length) {
+      return searchContext.searchQuery
+        ? `I couldn't find any properties matching "${searchContext.searchQuery}". Try broadening your filters.`
+        : "No matching residences found — try widening your location or typology filters.";
     }
 
-    const maxBedrooms = Math.max(...pageProperties.map((p) => p.bedrooms));
-    const maxYield = Math.max(...pageProperties.map((p) => p.yield));
-    const hooks = [...new Set(pageProperties.flatMap((p) => p.tags || []))].slice(0, 2);
-    const hookSummary = hooks.length ? hooks.join(' and ').toLowerCase() : 'standout amenities';
+    const formatAed = (val) => {
+      if (!val) return '0 dirhams';
+      if (val >= 1000000) return (val / 1000000).toFixed(1).replace('.0', '') + ' million dirhams';
+      if (val >= 1000) return (val / 1000).toFixed(1).replace('.0', '') + ' thousand dirhams';
+      return val + ' dirhams';
+    };
 
-    return `Up to ${maxBedrooms} bedrooms, ${maxYield}% net yield, and ${hookSummary} — take a closer look.`;
+    const firstProp = pageProperties[0];
+    const firstTitle = firstProp.title || firstProp.name || 'Featured Residence';
+    const firstLoc = firstProp.community || firstProp.location || 'Dubai';
+    const firstPrice = formatAed(firstProp.price);
+    const total = pageProperties.length;
+    const communities = [...new Set(pageProperties.map((p) => p.community || p.location).filter(Boolean))];
+
+    if (searchContext.searchQuery) {
+      return `I found ${total} luxury ${total === 1 ? 'residence' : 'residences'} matching "${searchContext.searchQuery}". Top option: ${firstTitle} in ${firstLoc} valued at ${firstPrice}.`;
+    }
+
+    const activeFilterParts = [];
+    if (searchContext.selectedLocation && searchContext.selectedLocation !== 'all') {
+      activeFilterParts.push(`in ${searchContext.selectedLocation}`);
+    }
+    if (searchContext.selectedType && searchContext.selectedType !== 'all') {
+      activeFilterParts.push(`type ${searchContext.selectedType}`);
+    }
+    if (searchContext.selectedPrice && searchContext.selectedPrice !== 'all') {
+      activeFilterParts.push(`price bracket ${searchContext.selectedPrice}`);
+    }
+
+    if (activeFilterParts.length > 0) {
+      return `I found ${total} luxury ${total === 1 ? 'residence' : 'residences'} matching your criteria (${activeFilterParts.join(', ')}). Top option: ${firstTitle} in ${firstLoc} at ${firstPrice}.`;
+    }
+
+    const locText = communities.length > 0 ? `across ${communities.slice(0, 2).join(' and ')}` : 'in Dubai';
+    return `Tracking ${total} luxury residences ${locText}. Top recommendation: ${firstTitle} in ${firstLoc} valued at ${firstPrice}. Click any card to inspect details.`;
   }
 
   /**

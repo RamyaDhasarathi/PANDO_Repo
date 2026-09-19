@@ -63,19 +63,22 @@ export const PropertyCard = ({
       </div>
 
       <div className={styles.cardBody}>
-        <div className={styles.cardLocation}>
-          {property.location || property.community || 'Dubai'}
-        </div>
-        <h3 className={styles.cardTitle}>
-          {property.name || property.title}
-        </h3>
-        
-        <div className={styles.cardPriceRow}>
-          <div className={styles.cardPrice}>
-            {formatAed(property.price)}
+        <div className={styles.cardHeaderRow}>
+          <div className={styles.cardTitleWrap}>
+            <div className={styles.cardLocation}>
+              {property.location || property.community || 'Dubai'}
+            </div>
+            <h3 className={styles.cardTitle}>
+              {property.name || property.title}
+            </h3>
           </div>
-          <div className={styles.cardPriceUsd}>
-            {formatUsd(property.priceUsd || (property.price * 0.27))}
+          <div className={styles.cardPriceWrap}>
+            <div className={styles.cardPrice}>
+              {formatAed(property.price)}
+            </div>
+            <div className={styles.cardPriceUsd}>
+              {formatUsd(property.priceUsd || (property.price * 0.27))}
+            </div>
           </div>
         </div>
         

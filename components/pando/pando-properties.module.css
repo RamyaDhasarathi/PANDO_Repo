@@ -242,7 +242,7 @@
   width: 100%;
   flex: 1 1 0%;
   min-width: 0;
-  min-height: 150px;
+  min-height: 110px;
   overflow: hidden;
   background-color: #EDE7DC;
 }
@@ -289,15 +289,28 @@
 
 .cardBody {
   flex: 0 0 auto;
-  padding: 18px 20px 20px;
+  padding: 12px 16px 14px;
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
+.cardHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.cardTitleWrap {
+  flex: 1;
+  min-width: 0;
+}
+
 .cardLocation {
-  margin: 0 0 6px 0;
-  font-size: 12px;
+  margin: 0 0 2px 0;
+  font-size: 11.5px;
   color: var(--p-stone);
   white-space: nowrap;
   overflow: hidden;
@@ -305,53 +318,52 @@
 }
 
 .cardTitle {
-  margin: 0 0 14px 0;
+  margin: 0;
   font-family: var(--p-serif);
-  font-size: clamp(17px, 1.5vw, 20px);
+  font-size: clamp(15px, 1.3vw, 18px);
   font-weight: 500;
   color: var(--p-ink);
   letter-spacing: -0.005em;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
-.cardPriceRow {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
+.cardPriceWrap {
+  text-align: right;
+  flex-shrink: 0;
 }
 
 .cardPrice {
   font-family: var(--p-serif);
-  font-size: clamp(17px, 1.6vw, 20px);
-  font-weight: 500;
+  font-size: clamp(15px, 1.4vw, 18px);
+  font-weight: 600;
   color: var(--p-bronze-deep);
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .cardPriceUsd {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--p-stone);
+  white-space: nowrap;
 }
 
 .cardDifferentiator {
-  margin: 2px 0 16px 0;
+  margin: 4px 0 10px 0;
   font-family: var(--p-serif);
   font-style: italic;
-  font-size: 13.5px;
+  font-size: 12.5px;
   color: var(--p-ink);
   opacity: 0.75;
-  line-height: 1.35;
+  line-height: 1.25;
 }
 
 .cardFootRow {
   margin-top: auto;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding-top: 12px;
+  padding-top: 8px;
   border-top: 1px solid var(--p-hairline);
 }
 

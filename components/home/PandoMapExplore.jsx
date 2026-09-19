@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Volume2, VolumeX } from 'lucide-react';
 import { properties as rawDatasetProperties } from '@/data/properties';
+import { useAuth } from '@/providers/AuthProvider';
+import AuthForm from '@/components/AuthForm';
 
 const UNIFIED_PROPERTIES = rawDatasetProperties;
 
@@ -93,6 +95,13 @@ const PANDO_TIPS = [
 export default function PandoMapExplore({ dbProperties = [] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
+  
+  // Auth modal states for protecting detail view
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingPropertyId, setPendingPropertyId] = useState(null);
+  const [authMode, setAuthMode] = useState('sign-in');
+
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeNavTab, setActiveNavTab] = useState('Buy');
@@ -103,7 +112,7 @@ export default function PandoMapExplore({ dbProperties = [] }) {
   const hasSpokenRef = useRef(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechText, setSpeechText] = useState(
-    'Click on any property pin to explore details, or search any area or project in Dubai!'
+    'Loading Dubai map properties & intelligence...'
   );
   const speechTextRef = useRef(speechText);
   // Live properties from MongoDB — used for map pins
@@ -139,6 +148,34 @@ export default function PandoMapExplore({ dbProperties = [] }) {
       .catch((err) => console.error('Map properties fetch error:', err));
   }, []);
 
+  // 1) TASK 1: Overview Analytics Speech when user lands on Map page
+  useEffect(() => {
+    if (liveProperties && liveProperties.length > 0) {
+      const total = liveProperties.length;
+      const villas = liveProperties.filter((p) =>
+        (p.category || p.propertyType || '').toLowerCase().includes('villa')
+      ).length;
+      const apartments = liveProperties.filter((p) =>
+        (p.category || p.propertyType || '').toLowerCase().includes('apartment')
+      ).length;
+      const penthouses = liveProperties.filter((p) =>
+        (p.category || p.propertyType || '').toLowerCase().includes('penthouse')
+      ).length;
+
+      const commCounts = liveProperties.reduce((acc, p) => {
+        const comm = p.community || p.location;
+        if (comm) acc[comm] = (acc[comm] || 0) + 1;
+        return acc;
+      }, {});
+      const topCommunities = Object.keys(commCounts).slice(0, 3).join(', ');
+
+      const overviewText = `Welcome to Dubai Property Explorer! I am currently tracking ${total} premium residences across ${topCommunities || 'prime Dubai locations'} — featuring ${villas} luxury villas, ${apartments} apartments, and ${penthouses} sky penthouses. Click on any property pin on the map to explore full details!`;
+
+      if (!selectedProperty) {
+        setSpeechText(overviewText);
+      }
+    }
+  }, [liveProperties, selectedProperty]);
 
   // Read URL query on mount
   useEffect(() => {
@@ -157,8 +194,6 @@ export default function PandoMapExplore({ dbProperties = [] }) {
 
     if (q) {
       setSearchQuery(q);
-      // Attempt to find a match in liveProperties (populated async after mount)
-      // The filteredProperties useMemo will handle the actual filtering
     }
   }, [searchParams]);
 
@@ -209,15 +244,32 @@ export default function PandoMapExplore({ dbProperties = [] }) {
     }
   };
 
+  // 2) TASK 2: Fix ReferenceError toggleMute function
+  const toggleMute = () => {
+    setIsMuted((prev) => {
+      const nextState = !prev;
+      mutedRef.current = nextState;
+      if (nextState) {
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+        }
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+      } else {
+        if (speechTextRef.current) {
+          speak(speechTextRef.current);
+        }
+      }
+      return nextState;
+    });
+  };
+
   useEffect(() => {
     if (hasUserInteracted) {
       speak(speechText);
     }
   }, [speechText, isMuted, hasUserInteracted, speak]);
 
-  // Speak the initial summary immediately on landing. Browsers may block audio
-  // before any user gesture on the page, so we also retry on the first
-  // click/keydown/touch.
   useEffect(() => {
     if (!speechText || hasSpokenRef.current) return;
     hasSpokenRef.current = true;
@@ -249,17 +301,34 @@ export default function PandoMapExplore({ dbProperties = [] }) {
     setHasUserInteracted(true);
     setSelectedProperty(prop);
     
-    // Format price for natural speech instead of spelling out digits
-    let spokenPrice = `${prop.rawPrice} dirhams`;
-    if (prop.rawPrice >= 1000000) {
-      spokenPrice = `${(prop.rawPrice / 1000000).toFixed(1).replace('.0', '')} million dirhams`;
-    } else if (prop.rawPrice >= 1000) {
-      spokenPrice = `${(prop.rawPrice / 1000).toFixed(1).replace('.0', '')} thousand dirhams`;
+    // Format price & details for natural speech, avoiding undefined dirhams
+    const rawPriceVal = prop.rawPrice || prop.price || 0;
+    let spokenPrice = `${rawPriceVal.toLocaleString()} dirhams`;
+    if (rawPriceVal >= 1000000) {
+      spokenPrice = `${(rawPriceVal / 1000000).toFixed(1).replace('.0', '')} million dirhams`;
+    } else if (rawPriceVal >= 1000) {
+      spokenPrice = `${(rawPriceVal / 1000).toFixed(1).replace('.0', '')} thousand dirhams`;
     }
 
-    const text = `Here are the details for ${prop.title} in ${prop.location}: ${spokenPrice} (${prop.meta}). ${prop.description}`;
+    const titleText = prop.title || prop.name || 'this property';
+    const locText = prop.community || prop.location || 'Dubai';
+    const metaText = prop.meta || (prop.bedrooms ? `${prop.bedrooms} Bed` : '');
+    const descText = prop.description || '';
+
+    const text = `Here are the details for ${titleText} in ${locText}: ${spokenPrice}${metaText ? ' (' + metaText + ')' : ''}. ${descText}`;
     setSpeechText(text);
     speak(text);
+  };
+
+  // 3) TASK 3: Protect viewing full property details without login
+  const handleViewFullPropertyDetails = (e, propId) => {
+    e.preventDefault();
+    if (!user) {
+      setPendingPropertyId(propId);
+      setAuthModalOpen(true);
+    } else {
+      router.push(`/property/${propId}`);
+    }
   };
 
   const handlePandoClick = () => {
@@ -544,8 +613,8 @@ export default function PandoMapExplore({ dbProperties = [] }) {
             )}
 
             {/* Primary Action Button */}
-            <Link
-              href={`/property/${selectedProperty.id}`}
+            <button
+              onClick={(e) => handleViewFullPropertyDetails(e, selectedProperty.id)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -553,7 +622,9 @@ export default function PandoMapExplore({ dbProperties = [] }) {
                 gap: 8,
                 background: '#d22c23',
                 color: '#fff',
-                textDecoration: 'none',
+                border: 'none',
+                width: '100%',
+                cursor: 'pointer',
                 padding: '12px 18px',
                 borderRadius: 12,
                 fontWeight: 900,
@@ -568,7 +639,7 @@ export default function PandoMapExplore({ dbProperties = [] }) {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M7 17L17 7M17 7H7M17 7v10" />
               </svg>
-            </Link>
+            </button>
           </div>
         </div>
       )}
@@ -593,7 +664,7 @@ export default function PandoMapExplore({ dbProperties = [] }) {
                 onClick={(e) => {
                   e.stopPropagation();
                   setHasUserInteracted(true);
-                  toggleMute(speechText);
+                  toggleMute();
                 }}
                 title={isMuted ? 'Unmute Pando' : 'Mute Pando'}
               >
@@ -699,6 +770,21 @@ export default function PandoMapExplore({ dbProperties = [] }) {
           ))}
         </div>
       </div>
+
+      {/* Auth Modal Popup for Guest Users attempting to view details */}
+      {authModalOpen && (
+        <AuthForm
+          mode={authMode}
+          onSwitchMode={setAuthMode}
+          onClose={() => setAuthModalOpen(false)}
+          onSuccess={() => {
+            setAuthModalOpen(false);
+            if (pendingPropertyId) {
+              router.push(`/property/${pendingPropertyId}`);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

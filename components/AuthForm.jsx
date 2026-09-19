@@ -215,8 +215,12 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
-          <div className="w-11 h-11 rounded-xl overflow-hidden flex items-center justify-center mb-4 mx-auto">
-            <Image src="/images/logo-mascot.png" alt="Hi Pando" width={44} height={44} className="w-full h-full object-cover" />
+          <div className="w-[52px] h-[52px] rounded-full border-2 border-[#1e1e22] bg-[#f4eee2] shadow-[2px_2px_0_#1e1e22] overflow-hidden flex items-center justify-center mb-4 mx-auto shrink-0">
+            <img
+              src="/images/pando-logo-regular.png"
+              alt="Hi Pando"
+              className="w-[124%] h-[124%] object-cover object-[50%_30%]"
+            />
           </div>
           <div className="text-3xl font-bold text-gray-900 text-center mb-2">{isSignUp ? "Welcome to Hi Pando" : "Welcome back"}</div>
           <div className="text-gray-500 text-sm text-center mb-8">
