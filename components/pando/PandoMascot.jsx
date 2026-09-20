@@ -19,6 +19,7 @@ export function PandoMascot({
   statusState = 'IDLE',
   onClick,
   onVoiceToggle,
+  onSpeechEnd,
   className = '',
   children,
 }) {
@@ -48,7 +49,11 @@ export function PandoMascot({
   // Trigger speech whenever message updates
   useEffect(() => {
     if (message) {
-      speak(message);
+      speak(message, {
+        onEnd: () => {
+          onSpeechEnd?.();
+        },
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message]);

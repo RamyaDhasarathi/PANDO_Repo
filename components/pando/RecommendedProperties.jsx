@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Mic, ArrowUp, ChevronRight } from 'lucide-react';
 import { PropertyCard } from './PropertyCard';
@@ -8,6 +8,7 @@ import { PropertyFilters } from './PropertyFilters';
 import { PandoMascot } from './PandoMascot';
 import { PropertyDNA } from './PropertyDNA';
 import { PandoService } from '@/services/pandoService';
+import { stopPandoSpeech } from '@/lib/ttsService';
 import AuthForm from '@/components/AuthForm';
 import styles from './pando-properties.module.css';
 
@@ -35,6 +36,7 @@ export const RecommendedProperties = ({
   // Selection & AI Assistant States
   const [pandoMessage, setPandoMessage] = useState('Loading your premium property recommendations...');
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [selectedCardProperty, setSelectedCardProperty] = useState(null);
   const [aiInput, setAiInput] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [statusState, setStatusState] = useState('IDLE');
@@ -42,87 +44,84 @@ export const RecommendedProperties = ({
   const [lastHoveredPropertyId, setLastHoveredPropertyId] = useState(null);
   const [page, setPage] = useState(0);
 
+  // Auth Modal & Speech Sync States
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingPropertyId, setPendingPropertyId] = useState(null);
+  const [pendingAuthPropertyId, setPendingAuthPropertyId] = useState(null);
+  const [authMode, setAuthMode] = useState('sign-in');
+
   const pageCount = Math.max(1, Math.ceil(properties.length / PAGE_SIZE));
-  // Clamp so a filter change that shrinks the result set never leaves the
-  // page pointing past the end.
   const currentPage = Math.min(page, pageCount - 1);
   const pageProperties = properties.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
 
-  // Whenever the underlying result set changes shape (new search/filter),
-  // jump back to page 1 rather than stranding the user on a stale page.
+  // Whenever the underlying result set or search/filter options change:
+  // reset page, reset selected property card speech context, and synthesize
+  // dynamic summary speech based on active DB properties and search query.
   useEffect(() => {
     setPage(0);
-  }, [properties]);
+    setSelectedCardProperty(null);
+    setHasInteracted(false);
+    setPendingAuthPropertyId(null);
+    
+    const summary = PandoService.getSummaryMessage(pageProperties, {
+      searchQuery,
+      selectedLocation,
+      selectedPrice,
+      selectedType,
+    });
+    setPandoMessage(summary);
 
-  // Keep the greeting in sync with the visible page (e.g. after filters
-  // change or the user pages through results) until the user has actually
-  // asked something or opened a card — at that point their conversation
-  // takes priority over the summary.
-  useEffect(() => {
-    if (!hasInteracted) {
-      setPandoMessage(PandoService.getSummaryMessage(pageProperties));
+    if (pageProperties.length > 0 && !selectedPropertyId) {
+      onSelectProperty?.(pageProperties[0].id);
     }
-  }, [pageProperties, hasInteracted]);
+  }, [properties, searchQuery, selectedLocation, selectedPrice, selectedType]);
 
   const goToPage = (next) => {
     setPage(next);
     setHasInteracted(false);
+    setSelectedCardProperty(null);
     setHoveredPropertyId(null);
     setLastHoveredPropertyId(null);
+    setPendingAuthPropertyId(null);
   };
 
   const hoveredProperty = pageProperties.find((p) => p.id === hoveredPropertyId);
   const lastHoveredProperty = pageProperties.find((p) => p.id === lastHoveredPropertyId);
-  // While hovering, show that card's details. Once the mouse leaves, keep
-  // showing the last-hovered card rather than snapping back to the
-  // generic message — only the fresh-load default falls through.
-  const dnaProperty = hoveredProperty || lastHoveredProperty || pageProperties[0];
-  const displayedMessage = hoveredProperty
-    ? PandoService.getPropertyExplanation(hoveredProperty)
-    : lastHoveredProperty
-    ? PandoService.getPropertyExplanation(lastHoveredProperty)
-    : pandoMessage;
+  
+  const displayedProperty = selectedCardProperty || hoveredProperty || lastHoveredProperty || pageProperties[0];
 
-  // Auth Modal State
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [pendingPropertyId, setPendingPropertyId] = useState(null);
-  const [authMode, setAuthMode] = useState('sign-in');
-
-  // Synchronize Pando's message with the loaded properties
-  useEffect(() => {
-    if (properties && properties.length > 0) {
-      const firstProp = properties[0];
-      if (!selectedPropertyId) {
-        onSelectProperty?.(firstProp.id);
-      }
-      
-      if (searchQuery) {
-        let spokenPrice = '';
-        if (firstProp.price) {
-          if (firstProp.price >= 1000000) {
-            spokenPrice = `${(firstProp.price / 1000000).toFixed(1).replace('.0', '')} million dirhams`;
-          } else if (firstProp.price >= 1000) {
-            spokenPrice = `${(firstProp.price / 1000).toFixed(1).replace('.0', '')} thousand dirhams`;
-          } else {
-            spokenPrice = `${firstProp.price} dirhams`;
-          }
-        }
-        setPandoMessage(`I found ${properties.length} properties matching "${searchQuery}". Here is a great option: ${firstProp.name || firstProp.title} ${spokenPrice ? 'for ' + spokenPrice : ''}.`);
-      } else {
-        setPandoMessage(PandoService.getPropertyExplanation(firstProp));
-      }
-    } else if (properties && properties.length === 0) {
-      setPandoMessage(searchQuery ? `I couldn't find any properties matching "${searchQuery}". Try adjusting your filters.` : 'Welcome to the AI Concierge Workspace.');
+  // Callback when Mascot Pando finishes speaking out loud
+  const handleSpeechEnd = () => {
+    if (!user && pendingAuthPropertyId) {
+      setPendingAuthPropertyId(null);
+      setAuthModalOpen(true);
     }
-  }, [properties, searchQuery]);
+  };
 
-  // Handle Property Card Click - Navigate to property or login
+  // Handle Property Card Click - Mascot Pando speaks first, modal opens on speech end if not logged in
   const handleOpenPropertyScreen = (property) => {
+    if (!property) return;
+
+    setSelectedCardProperty(property);
     onSelectProperty?.(property.id);
+    
     const explanation = PandoService.getPropertyExplanation(property);
     setPandoMessage(explanation);
     setHasInteracted(true);
-    setLastHoveredPropertyId(null);
+    setStatusState('SPEAKING');
+
+    if (!user) {
+      setPendingPropertyId(property.id);
+      setPendingAuthPropertyId(property.id);
+    }
+  };
+
+  // Handle 'Show me more details >' button click — open modal/navigate IMMEDIATELY with zero delay
+  const handleShowMoreDetails = (property) => {
+    if (!property) return;
+    stopPandoSpeech();
+    setPendingAuthPropertyId(null);
+    
     if (!user) {
       setPendingPropertyId(property.id);
       setAuthModalOpen(true);
@@ -314,6 +313,7 @@ export const RecommendedProperties = ({
             enableVoice={true}
             isListening={isListening}
             statusState={statusState}
+            onSpeechEnd={handleSpeechEnd}
             onClick={() => {
               const currentProp = properties.find((p) => p.id === selectedPropertyId) || properties[0];
               if (currentProp) {
@@ -323,7 +323,7 @@ export const RecommendedProperties = ({
               }
             }}
           >
-            <PropertyDNA property={properties.find((p) => p.id === selectedPropertyId) || properties[0]} />
+            <PropertyDNA property={displayedProperty} />
             
             <form onSubmit={handleAiSubmit} className="pando-ask-row" style={{ marginTop: '12px' }}>
               <input
@@ -344,15 +344,17 @@ export const RecommendedProperties = ({
               </div>
             </form>
             
-            <button
-              type="button"
-              className="pando-show-more-btn"
-              onClick={() => {
-                setPage((prev) => (prev + 1) % pageCount);
-              }}
-            >
-              Show me more residences &gt;
-            </button>
+            {selectedCardProperty && (
+              <button
+                type="button"
+                className="pando-show-more-btn"
+                onClick={() => {
+                  handleShowMoreDetails(selectedCardProperty);
+                }}
+              >
+                Show me more details &gt;
+              </button>
+            )}
           </PandoMascot>
         </div>
       </div>

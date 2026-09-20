@@ -24,12 +24,17 @@ export function usePandoTTS({ enabled = true } = {}) {
     };
   }, []);
 
-  const speak = useCallback((text, { force = false } = {}) => {
-    if (!text) return;
+  const speak = useCallback((text, options = {}) => {
+    const { force = false, onStart, onEnd, onError } = options;
+    if (!text) {
+      onEnd?.();
+      return;
+    }
     if (force) {
       mutedRef.current = false;
       setMuted(false);
     } else if (mutedRef.current) {
+      onEnd?.();
       return;
     }
     isSpeakingRef.current = true;
@@ -37,14 +42,18 @@ export function usePandoTTS({ enabled = true } = {}) {
       onStart: () => {
         isSpeakingRef.current = true;
         setIsSpeaking(true);
+        onStart?.();
       },
-      onEnd: () => {
+      onEnd: (event) => {
         isSpeakingRef.current = false;
         setIsSpeaking(false);
+        onEnd?.(event);
       },
-      onError: () => {
+      onError: (event) => {
         isSpeakingRef.current = false;
         setIsSpeaking(false);
+        onError?.(event);
+        onEnd?.(event);
       },
     });
   }, []);

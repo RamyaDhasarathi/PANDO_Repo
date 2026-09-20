@@ -3,13 +3,36 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
 import styles from "./ImmersivePropertyView.module.css";
 import { formatAED, formatPrice, bedroomLabel } from "@/lib/format";
 import { explainProperty, answerPropertyQuestion } from "@/lib/propertyAssistant";
 import { usePandoTTS } from "@/hooks/usePandoTTS";
+import { useAuth } from "@/providers/AuthProvider";
+import AuthForm from "@/components/AuthForm";
 
 export default function ImmersivePropertyView({ property }) {
+  const router = useRouter();
+  const { user, loading } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState("sign-in");
+
+  const handleBack = (e) => {
+    e?.preventDefault();
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/explore");
+    }
+  };
+
+  useEffect(() => {
+    if (!loading && !user) {
+      setAuthModalOpen(true);
+    }
+  }, [user, loading]);
+
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [pandoMessage, setPandoMessage] = useState("");
   const [inputQuery, setInputQuery] = useState("");
@@ -197,9 +220,14 @@ export default function ImmersivePropertyView({ property }) {
           </Link>
 
           <div className={styles.topActionRow}>
-            <Link href="/search" className={styles.backLink}>
+            <button
+              type="button"
+              onClick={handleBack}
+              className={styles.backLink}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            >
               <span className={styles.backArrow}>←</span> Back to Properties
-            </Link>
+            </button>
             <span className={styles.verifiedBadge}>
               <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
                 <path d="M13.485 1.929a1.5 1.5 0 0 1 2.121 2.122l-8.5 8.5a1.5 1.5 0 0 1-2.121 0l-4.25-4.25a1.5 1.5 0 0 1 2.121-2.122L6.043 9.364l7.442-7.435z" />
@@ -329,6 +357,17 @@ export default function ImmersivePropertyView({ property }) {
           </div>
         </div>
       </div>
+
+      {authModalOpen && (
+        <AuthForm
+          mode={authMode}
+          onSwitchMode={setAuthMode}
+          onClose={() => {
+            window.location.href = "/explore";
+          }}
+          onSuccess={() => setAuthModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
