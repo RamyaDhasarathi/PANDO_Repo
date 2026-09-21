@@ -48,28 +48,32 @@ export default function PandoHero() {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  // Speak immediately on landing. Browsers may block audio before any user
-  // gesture on the page, so we also retry on the first click/keydown/touch.
+  // Speak initial greeting once on landing.
   useEffect(() => {
-    if (!muted && !hasSpokenRef.current) {
-      hasSpokenRef.current = true;
-      speak(reply);
-    }
+    const timer = setTimeout(() => {
+      if (!muted && !hasSpokenRef.current) {
+        speak(reply, {
+          onStart: () => {
+            hasSpokenRef.current = true;
+          },
+        });
+      }
+    }, 300);
 
-    const handleFirstInteraction = () => {
-      if (!muted && !isSpeakingRef.current) {
-        speak(reply);
+    const handleFirstGesture = () => {
+      if (!muted && !hasSpokenRef.current) {
+        hasSpokenRef.current = true;
+        speak(reply, { force: true });
       }
     };
 
-    window.addEventListener('click', handleFirstInteraction, { once: true });
-    window.addEventListener('keydown', handleFirstInteraction, { once: true });
-    window.addEventListener('touchstart', handleFirstInteraction, { once: true });
+    window.addEventListener('pointerdown', handleFirstGesture, { once: true });
+    window.addEventListener('keydown', handleFirstGesture, { once: true });
 
     return () => {
-      window.removeEventListener('click', handleFirstInteraction);
-      window.removeEventListener('keydown', handleFirstInteraction);
-      window.removeEventListener('touchstart', handleFirstInteraction);
+      clearTimeout(timer);
+      window.removeEventListener('pointerdown', handleFirstGesture);
+      window.removeEventListener('keydown', handleFirstGesture);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -85,7 +89,10 @@ export default function PandoHero() {
     speak(nextReply);
   };
 
-  const handleToggleMute = () => toggleMute(reply);
+  const handleToggleMute = (e) => {
+    e?.stopPropagation();
+    toggleMute(reply || replies[0]);
+  };
 
   const handleMascotOrBubbleClick = () => {
     speak(reply, { force: true });
