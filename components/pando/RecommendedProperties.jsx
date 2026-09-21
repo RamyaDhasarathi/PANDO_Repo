@@ -343,18 +343,6 @@ export const RecommendedProperties = ({
                 </button>
               </div>
             </form>
-            
-            {selectedCardProperty && (
-              <button
-                type="button"
-                className="pando-show-more-btn"
-                onClick={() => {
-                  handleShowMoreDetails(selectedCardProperty);
-                }}
-              >
-                Show me more details &gt;
-              </button>
-            )}
           </PandoMascot>
         </div>
       </div>

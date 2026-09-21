@@ -27,14 +27,14 @@
   justify-content: flex-end;
   pointer-events: none;
   margin-right: -16px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 /* Bubble — same gold gradient / hard-edge-shadow language as .speech-bubble */
 .pando-bubble {
   position: relative;
-  width: min(350px, 92vw);
-  padding: 16px 18px 16px;
+  width: min(310px, 90vw);
+  padding: 12px 14px 12px;
   background: linear-gradient(145deg, rgba(255, 231, 181, 0.97), rgba(197, 160, 89, 0.94));
   border: 2.5px solid var(--ink, #1e1e22);
   border-radius: 20px 8px 20px 20px;
@@ -257,7 +257,7 @@
    reading as the active AI presence, without a glow washing out behind it. */
 .pando-character-wrap {
   position: relative;
-  width: clamp(240px, 24vw, 380px);
+  width: clamp(160px, 15vw, 230px);
   flex-shrink: 0;
   display: flex;
   align-items: center;
