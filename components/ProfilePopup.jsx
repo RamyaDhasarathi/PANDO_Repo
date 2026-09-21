@@ -89,7 +89,7 @@ export default function ProfilePopup({ onClose }) {
   if (!user || !mounted) return null;
 
   const content = (
-    <div className="fixed inset-0 w-screen h-screen bg-black/50 backdrop-blur-[6px] z-[99999] flex justify-end items-start pt-[75px] pr-[24px] pb-[24px] box-border" onClick={onClose}>
+    <div className="fixed inset-0 w-screen h-screen bg-black/50 backdrop-blur-[6px] z-[99999] flex justify-center sm:justify-end items-start pt-[75px] px-[16px] sm:pr-[24px] pb-[24px] box-border" onClick={onClose}>
       <div className="bg-white w-full max-w-[390px] max-h-[calc(100vh-100px)] overflow-y-auto rounded-[18px] shadow-[0_25px_60px_rgba(0,0,0,0.3)] p-[24px] relative flex flex-col gap-[20px] animate-[slideIn_0.25s_ease-out]" onClick={(e) => e.stopPropagation()}>
         <button type="button" className="absolute top-[16px] right-[16px] bg-[#f3f4f6] border-none w-[32px] h-[32px] rounded-full flex items-center justify-center cursor-pointer text-[#4b5563] transition-colors duration-200 hover:bg-[#e5e7eb]" onClick={onClose} aria-label="Close">
           <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">

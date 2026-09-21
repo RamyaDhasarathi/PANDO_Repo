@@ -65,17 +65,17 @@ export function usePandoTTS({ enabled = true } = {}) {
   }, []);
 
   const toggleMute = useCallback((textToResumeWith) => {
-    setMuted((prevMuted) => {
-      const next = !prevMuted;
-      if (next) {
-        stopPandoSpeech();
-        isSpeakingRef.current = false;
-        setIsSpeaking(false);
-      } else if (textToResumeWith) {
-        speak(textToResumeWith);
-      }
-      return next;
-    });
+    const nextMuted = !mutedRef.current;
+    mutedRef.current = nextMuted;
+    setMuted(nextMuted);
+
+    if (nextMuted) {
+      stopPandoSpeech();
+      isSpeakingRef.current = false;
+      setIsSpeaking(false);
+    } else if (textToResumeWith) {
+      speak(textToResumeWith, { force: true });
+    }
   }, [speak]);
 
   return { muted, setMuted, isSpeaking, isSpeakingRef, speak, stop, toggleMute };

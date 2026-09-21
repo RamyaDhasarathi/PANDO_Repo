@@ -8,6 +8,7 @@ import { Volume2, VolumeX } from 'lucide-react';
 import { properties as rawDatasetProperties } from '@/data/properties';
 import { useAuth } from '@/providers/AuthProvider';
 import AuthForm from '@/components/AuthForm';
+import { usePandoTTS } from '@/hooks/usePandoTTS';
 
 const UNIFIED_PROPERTIES = rawDatasetProperties;
 
@@ -42,8 +43,6 @@ const COMMUNITY_COORDS = {
   'Water Canal': { lat: 25.1820, lng: 55.2500 },
 };
 
-// Empty, generated dynamically in component instead
-
 const CATEGORIES = ['All', 'Apartments', 'Villas', 'Off-Plan', 'Penthouses', 'Townhouses'];
 const NAV_TABS = ['Buy', 'Rent', 'Off-Plan', 'Explore'];
 
@@ -52,37 +51,6 @@ const formatAedShort = (value) => {
   if (value >= 1_000) return `AED ${Math.round(value / 1_000)}K`;
   return `AED ${value.toLocaleString()}`;
 };
-
-// Builds a live stats summary of whatever properties are currently on screen,
-// so Pando's bubble always reflects the active filters instead of a static hint.
-function buildResultsSummary(results, { activeCategory, activeNavTab, searchQuery }) {
-  const verb = activeNavTab === 'Rent' ? 'to rent' : activeNavTab === 'Off-Plan' ? 'off-plan' : 'for sale';
-  const categoryLabel = activeCategory !== 'All' ? ` ${activeCategory.toLowerCase()}` : '';
-  const queryLabel = searchQuery.trim() ? ` matching "${searchQuery.trim()}"` : '';
-
-  if (results.length === 0) {
-    return `No${categoryLabel} properties${queryLabel} found ${verb} right now. Try a different filter or search term.`;
-  }
-
-  const prices = results.map((p) => p.rawPrice).filter((v) => typeof v === 'number');
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
-  const priceRange =
-    minPrice === maxPrice
-      ? formatAedShort(minPrice)
-      : `${formatAedShort(minPrice)} to ${formatAedShort(maxPrice)}`;
-
-  const communityCounts = results.reduce((acc, p) => {
-    acc[p.community] = (acc[p.community] || 0) + 1;
-    return acc;
-  }, {});
-  const topCommunity = Object.entries(communityCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
-
-  const propertyWord = categoryLabel ? '' : results.length === 1 ? ' property' : ' properties';
-  const communityNote = topCommunity ? `, mostly around ${topCommunity}` : '';
-
-  return `I found ${results.length}${categoryLabel}${propertyWord}${queryLabel} ${verb}${communityNote}, ranging from ${priceRange}. Click any pin to explore.`;
-}
 
 const PANDO_TIPS = [
   'Did you know Palm Jumeirah properties have seen a 14% ROI increase this year?',
@@ -106,24 +74,18 @@ export default function PandoMapExplore({ dbProperties = [] }) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeNavTab, setActiveNavTab] = useState('Buy');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isMuted, setIsMuted] = useState(false);
-  const mutedRef = useRef(false);
-  const isSpeakingRef = useRef(false);
-  const hasSpokenRef = useRef(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  
+  // Unified Text-to-Speech
+  const { muted: isMuted, isSpeaking, isSpeakingRef, speak, stop, toggleMute: toggleTTSMute } = usePandoTTS();
   const [speechText, setSpeechText] = useState(
     'Loading Dubai map properties & intelligence...'
   );
-  const speechTextRef = useRef(speechText);
+  
   // Live properties from MongoDB — used for map pins
   const [liveProperties, setLiveProperties] = useState([]);
   const [apiSearchResults, setApiSearchResults] = useState(null);
 
-  useEffect(() => {
-    speechTextRef.current = speechText;
-  }, [speechText]);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
-  // Increments each time a filter/tab is clicked — signals PandoMapInner to fly to Dubai
   const [filterZoomKey, setFilterZoomKey] = useState(0);
 
   // Fetch all properties from MongoDB on mount for map pins
@@ -132,14 +94,10 @@ export default function PandoMapExplore({ dbProperties = [] }) {
       .then((r) => r.json())
       .then((data) => {
         if (data.success && data.data) {
-          // Normalize: MongoDB stores coordinates as { lat, lng };
-          // PandoMapInner expects top-level .lat and .lng
           const normalized = data.data.map((p) => ({
             ...p,
-            // Use DB coordinates if present, otherwise fall back to COMMUNITY_COORDS
             lat: p.coordinates?.lat ?? COMMUNITY_COORDS[p.community]?.lat ?? null,
             lng: p.coordinates?.lng ?? COMMUNITY_COORDS[p.community]?.lng ?? null,
-            // Normalise image field
             image: p.image || (p.images && p.images[0]) || null,
           }));
           setLiveProperties(normalized);
@@ -148,9 +106,13 @@ export default function PandoMapExplore({ dbProperties = [] }) {
       .catch((err) => console.error('Map properties fetch error:', err));
   }, []);
 
-  // 1) TASK 1: Overview Analytics Speech when user lands on Map page
+  const hasSpokenRef = useRef(false);
+
+  const overviewTextRef = useRef('');
+
+  // Overview Analytics Speech when live properties land on Map page
   useEffect(() => {
-    if (liveProperties && liveProperties.length > 0) {
+    if (liveProperties && liveProperties.length > 0 && !hasSpokenRef.current) {
       const total = liveProperties.length;
       const villas = liveProperties.filter((p) =>
         (p.category || p.propertyType || '').toLowerCase().includes('villa')
@@ -171,11 +133,30 @@ export default function PandoMapExplore({ dbProperties = [] }) {
 
       const overviewText = `Welcome to Dubai Property Explorer! I am currently tracking ${total} premium residences across ${topCommunities || 'prime Dubai locations'} — featuring ${villas} luxury villas, ${apartments} apartments, and ${penthouses} sky penthouses. Click on any property pin on the map to explore full details!`;
 
-      if (!selectedProperty) {
-        setSpeechText(overviewText);
-      }
+      overviewTextRef.current = overviewText;
+      setSpeechText(overviewText);
+      speak(overviewText, {
+        onStart: () => {
+          hasSpokenRef.current = true;
+        },
+      });
+
+      const handleFirstGesture = () => {
+        if (!hasSpokenRef.current) {
+          hasSpokenRef.current = true;
+          speak(overviewText, { force: true });
+        }
+      };
+
+      window.addEventListener('pointerdown', handleFirstGesture, { once: true });
+      window.addEventListener('keydown', handleFirstGesture, { once: true });
+
+      return () => {
+        window.removeEventListener('pointerdown', handleFirstGesture);
+        window.removeEventListener('keydown', handleFirstGesture);
+      };
     }
-  }, [liveProperties, selectedProperty]);
+  }, [liveProperties]);
 
   // Read URL query on mount
   useEffect(() => {
@@ -197,111 +178,8 @@ export default function PandoMapExplore({ dbProperties = [] }) {
     }
   }, [searchParams]);
 
-  // Voice synthesis
-  const getVoice = () => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return null;
-    const voices = window.speechSynthesis.getVoices();
-    return (
-      voices.find(
-        (v) =>
-          v.lang.startsWith('en') &&
-          (v.name.includes('Natural') ||
-            v.name.includes('Google') ||
-            v.name.includes('Samantha') ||
-            v.name.includes('Daniel'))
-      ) ||
-      voices.find((v) => v.lang.startsWith('en')) ||
-      voices[0]
-    );
-  };
-
-  const speak = (text) => {
-    if (mutedRef.current || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voice = getVoice();
-      if (voice) utterance.voice = voice;
-      utterance.rate = 0.95;
-      utterance.pitch = 1.05;
-      utterance.onstart = () => {
-        setIsSpeaking(true);
-        isSpeakingRef.current = true;
-      };
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        isSpeakingRef.current = false;
-      };
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-        isSpeakingRef.current = false;
-      };
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn(e);
-      setIsSpeaking(false);
-      isSpeakingRef.current = false;
-    }
-  };
-
-  // 2) TASK 2: Fix ReferenceError toggleMute function
-  const toggleMute = () => {
-    setIsMuted((prev) => {
-      const nextState = !prev;
-      mutedRef.current = nextState;
-      if (nextState) {
-        if (typeof window !== 'undefined' && window.speechSynthesis) {
-          window.speechSynthesis.cancel();
-        }
-        setIsSpeaking(false);
-        isSpeakingRef.current = false;
-      } else {
-        if (speechTextRef.current) {
-          speak(speechTextRef.current);
-        }
-      }
-      return nextState;
-    });
-  };
-
-  useEffect(() => {
-    if (hasUserInteracted) {
-      speak(speechText);
-    }
-  }, [speechText, isMuted, hasUserInteracted, speak]);
-
-  useEffect(() => {
-    if (!speechText || hasSpokenRef.current) return;
-    hasSpokenRef.current = true;
-    speak(speechText);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [speechText]);
-
-  useEffect(() => {
-    const handleFirstInteraction = () => {
-      setHasUserInteracted(true);
-      if (!isSpeakingRef.current) {
-        speak(speechTextRef.current);
-      }
-    };
-
-    window.addEventListener('click', handleFirstInteraction, { once: true });
-    window.addEventListener('keydown', handleFirstInteraction, { once: true });
-    window.addEventListener('touchstart', handleFirstInteraction, { once: true });
-
-    return () => {
-      window.removeEventListener('click', handleFirstInteraction);
-      window.removeEventListener('keydown', handleFirstInteraction);
-      window.removeEventListener('touchstart', handleFirstInteraction);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleSelectProperty = (prop) => {
-    setHasUserInteracted(true);
-    setSelectedProperty(prop);
-    
-    // Format price & details for natural speech, avoiding undefined dirhams
+  const getPropertySpeechText = (prop) => {
+    if (!prop) return '';
     const rawPriceVal = prop.rawPrice || prop.price || 0;
     let spokenPrice = `${rawPriceVal.toLocaleString()} dirhams`;
     if (rawPriceVal >= 1000000) {
@@ -315,7 +193,25 @@ export default function PandoMapExplore({ dbProperties = [] }) {
     const metaText = prop.meta || (prop.bedrooms ? `${prop.bedrooms} Bed` : '');
     const descText = prop.description || '';
 
-    const text = `Here are the details for ${titleText} in ${locText}: ${spokenPrice}${metaText ? ' (' + metaText + ')' : ''}. ${descText}`;
+    return `Here are the details for ${titleText} in ${locText}: ${spokenPrice}${metaText ? ' (' + metaText + ')' : ''}. ${descText}`;
+  };
+
+  const toggleMute = (e) => {
+    e?.stopPropagation();
+    let textToSpeak = speechText;
+    if (selectedProperty) {
+      textToSpeak = getPropertySpeechText(selectedProperty);
+    } else if (!textToSpeak || textToSpeak.startsWith('Loading')) {
+      textToSpeak = overviewTextRef.current || 'Welcome to Dubai Property Explorer!';
+    }
+    toggleTTSMute(textToSpeak);
+  };
+
+  const handleSelectProperty = (prop) => {
+    setHasUserInteracted(true);
+    setSelectedProperty(prop);
+    
+    const text = getPropertySpeechText(prop);
     setSpeechText(text);
     speak(text);
   };
@@ -333,9 +229,15 @@ export default function PandoMapExplore({ dbProperties = [] }) {
 
   const handlePandoClick = () => {
     setHasUserInteracted(true);
-    const tip = PANDO_TIPS[Math.floor(Math.random() * PANDO_TIPS.length)];
-    setSpeechText(tip);
-    speak(tip);
+    if (selectedProperty) {
+      const text = getPropertySpeechText(selectedProperty);
+      setSpeechText(text);
+      speak(text, { force: true });
+    } else {
+      const tip = PANDO_TIPS[Math.floor(Math.random() * PANDO_TIPS.length)];
+      setSpeechText(tip);
+      speak(tip, { force: true });
+    }
   };
 
   const handleSearchSubmit = async (e) => {
@@ -496,25 +398,8 @@ export default function PandoMapExplore({ dbProperties = [] }) {
 
       {/* ── PROPERTY DETAILS MODAL / CARD ───────────────────────── */}
       {selectedProperty && (
-        <div
-          style={{
-            position: 'absolute',
-            left: 24,
-            bottom: 24,
-            width: 'min(420px, calc(100vw - 48px))',
-            maxHeight: 'calc(100vh - 120px)',
-            background: 'rgba(255, 255, 255, 0.96)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            borderRadius: 20,
-            boxShadow: '0 20px 50px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.06)',
-            zIndex: 1000,
-            overflowY: 'auto',
-            animation: 'speechAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
+        <div className="pando-explore-property-card">
+          <div className="pando-explore-drag-handle" />
           {/* Property Image Hero */}
           <div style={{ position: 'relative', width: '100%', height: 190, overflow: 'hidden', borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <img
@@ -664,7 +549,7 @@ export default function PandoMapExplore({ dbProperties = [] }) {
                 onClick={(e) => {
                   e.stopPropagation();
                   setHasUserInteracted(true);
-                  toggleMute();
+                  toggleMute(e);
                 }}
                 title={isMuted ? 'Unmute Pando' : 'Mute Pando'}
               >

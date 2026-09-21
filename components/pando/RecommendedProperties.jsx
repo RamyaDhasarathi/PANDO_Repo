@@ -307,7 +307,7 @@ export const RecommendedProperties = ({
         )}
 
         {/* INTEGRATED PANDO OVERLAY UNIT MATCHING IMAGE 2 */}
-        <div style={{ position: 'fixed', bottom: '24px', right: '32px', zIndex: 100, pointerEvents: 'none' }}>
+        <div className={styles.pandoMascotFixedWrapper}>
           <PandoMascot
             message={pandoMessage}
             enableVoice={true}
@@ -343,18 +343,6 @@ export const RecommendedProperties = ({
                 </button>
               </div>
             </form>
-            
-            {selectedCardProperty && (
-              <button
-                type="button"
-                className="pando-show-more-btn"
-                onClick={() => {
-                  handleShowMoreDetails(selectedCardProperty);
-                }}
-              >
-                Show me more details &gt;
-              </button>
-            )}
           </PandoMascot>
         </div>
       </div>

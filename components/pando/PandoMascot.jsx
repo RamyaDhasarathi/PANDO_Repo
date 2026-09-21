@@ -60,8 +60,13 @@ export function PandoMascot({
 
   const toggleMute = (e) => {
     e?.stopPropagation();
-    toggleTTSMute(message);
+    toggleTTSMute(message || DEFAULT_MESSAGE);
     onVoiceToggle?.(!muted);
+  };
+
+  const handleCharacterClick = (e) => {
+    onClick?.(e);
+    speak(message || DEFAULT_MESSAGE, { force: true });
   };
 
   return (
@@ -96,13 +101,13 @@ export function PandoMascot({
       {/* Character — the virtual agent, made to shine: glow halo + twinkle accents */}
       <div
         className={`pando-character-wrap ${isSpeaking ? 'is-talking-anim' : ''}`}
-        onClick={onClick}
+        onClick={handleCharacterClick}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            onClick?.();
+            handleCharacterClick(e);
           }
         }}
         aria-label="Speak with Pando"
