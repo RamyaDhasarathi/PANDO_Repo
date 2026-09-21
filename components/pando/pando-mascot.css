@@ -373,54 +373,53 @@
 }
 
 @media (max-width: 639px) {
-  /* No-scroll leaves very little spare room on a phone-width viewport, so
-     the floating widget shrinks to a compact corner presence here rather
-     than covering the last card underneath it. */
   .pando-floating-agent {
     bottom: 8px;
     right: 8px;
+    max-width: 95vw;
   }
   .pando-character-wrap {
     width: 76px;
+    flex-shrink: 0;
   }
   .pando-bubble-col {
     margin-right: -6px;
-    margin-bottom: 28px;
+    margin-bottom: 8px;
   }
   .pando-bubble {
-    width: min(150px, 100%);
-    padding: 8px 10px 9px;
-    border-radius: 14px 14px 5px 14px;
+    width: min(280px, 72vw);
+    padding: 10px 12px 10px;
+    border-radius: 16px 16px 6px 16px;
   }
   .pando-bubble-header {
     margin-bottom: 5px;
   }
   .pando-bubble-label {
-    font-size: 8.5px;
+    font-size: 9px;
   }
   .pando-bubble-mute-btn {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
   .pando-bubble-quote {
-    font-size: 10.5px;
-    line-height: 1.2;
+    font-size: 11px;
+    line-height: 1.3;
     margin-bottom: 6px;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
   .pando-ask-row {
-    padding: 2px 2px 2px 8px;
+    padding: 3px 4px 3px 8px;
   }
   .pando-ask-input {
-    font-size: 10px;
+    font-size: 11px;
   }
   .pando-ask-mic,
   .pando-ask-send {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
   .pando-bubble-tail {
     width: 12px;

@@ -398,25 +398,8 @@ export default function PandoMapExplore({ dbProperties = [] }) {
 
       {/* ── PROPERTY DETAILS MODAL / CARD ───────────────────────── */}
       {selectedProperty && (
-        <div
-          style={{
-            position: 'absolute',
-            left: 24,
-            bottom: 24,
-            width: 'min(420px, calc(100vw - 48px))',
-            maxHeight: 'calc(100vh - 120px)',
-            background: 'rgba(255, 255, 255, 0.96)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            borderRadius: 20,
-            boxShadow: '0 20px 50px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.06)',
-            zIndex: 1000,
-            overflowY: 'auto',
-            animation: 'speechAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
+        <div className="pando-explore-property-card">
+          <div className="pando-explore-drag-handle" />
           {/* Property Image Hero */}
           <div style={{ position: 'relative', width: '100%', height: 190, overflow: 'hidden', borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
             <img

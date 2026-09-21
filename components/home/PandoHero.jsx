@@ -21,6 +21,7 @@ const replies = [
 export default function PandoHero() {
   const router = useRouter();
   const { user } = useAuth();
+  const isPersonalized = Boolean(user);
   const [prompt, setPrompt] = useState('');
   const [reply, setReply] = useState(replies[0]);
   const { muted, isSpeaking, isSpeakingRef, speak, toggleMute } = usePandoTTS();

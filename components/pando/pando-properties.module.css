@@ -446,3 +446,18 @@
     padding-top: 6px;
   }
 }
+
+.pandoMascotFixedWrapper {
+  position: fixed;
+  bottom: 24px;
+  right: 32px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .pandoMascotFixedWrapper {
+    bottom: 8px;
+    right: 8px;
+  }
+}
