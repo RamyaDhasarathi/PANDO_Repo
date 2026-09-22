@@ -5,14 +5,10 @@ import dbConnect from '../../../../lib/mongodb';
 import Buyer from '../../../../lib/models/Buyer';
 import { cookies } from 'next/headers';
 
-export const dynamic = 'force-dynamic';
-
-function getTwilioClient() {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  if (!sid || !token) return null;
-  return twilio(sid, token);
-}
+const client = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
 export async function POST(req) {
   try {
@@ -26,9 +22,8 @@ export async function POST(req) {
       );
     }
 
-    // 1. Check code with Twilio (skip if devMode is enabled or Twilio client is not configured)
-    const client = getTwilioClient();
-    if (!devMode && client) {
+    // 1. Check code with Twilio (skip if devMode is enabled)
+    if (!devMode) {
       const check = await client.verify.v2
         .services(process.env.TWILIO_VERIFY_SERVICE_SID)
         .verificationChecks.create({ to: target, code: code });
@@ -69,7 +64,7 @@ export async function POST(req) {
     }
 
     // 3. Create JWT Session
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-dev-mode');
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const alg = 'HS256';
 
     const jwt = await new SignJWT({ userId: user._id.toString(), role: user.role })
