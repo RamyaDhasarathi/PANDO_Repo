@@ -3,10 +3,14 @@ import twilio from 'twilio';
 import dbConnect from '../../../../lib/mongodb';
 import Buyer from '../../../../lib/models/Buyer';
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+export const dynamic = 'force-dynamic';
+
+function getTwilioClient() {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  if (!sid || !token) return null;
+  return twilio(sid, token);
+}
 
 export async function POST(req) {
   try {
@@ -40,6 +44,11 @@ export async function POST(req) {
     }
 
     const channel = isEmail ? 'email' : 'sms';
+    const client = getTwilioClient();
+
+    if (!client) {
+      return NextResponse.json({ success: true, sid: 'dev-mode-simulated-sid' });
+    }
 
     const verification = await client.verify.v2
       .services(process.env.TWILIO_VERIFY_SERVICE_SID)
