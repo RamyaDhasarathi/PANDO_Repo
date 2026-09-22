@@ -3,6 +3,8 @@ import dbConnect from '../../../../lib/mongodb';
 import Property from '../../../../lib/models/Property';
 import { PROPERTIES_DATA } from '../../../../data/quantumProperties';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     await dbConnect();
