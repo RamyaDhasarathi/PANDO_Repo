@@ -170,13 +170,15 @@ export default function PandoMapInner({
         })}
       </MapContainer>
 
-      {/* Layer Switcher — using state for reliable hover */}
+      {/* Layer Switcher — using state for reliable hover and tap */}
       <div
-        style={{ position: 'absolute', left: 24, top: 80, zIndex: 1000 }}
+        className="pando-map-layers-wrap"
         onMouseEnter={() => setIsLayersOpen(true)}
         onMouseLeave={() => setIsLayersOpen(false)}
       >
-        <button style={{
+        <button
+          onClick={() => setIsLayersOpen((prev) => !prev)}
+          style={{
           width: 50, height: 50, borderRadius: 12, overflow: 'hidden',
           position: 'relative', boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
           border: '2px solid rgba(255,255,255,0.8)', cursor: 'pointer',
@@ -199,18 +201,19 @@ export default function PandoMapInner({
         {/* Bridge gap between button and flyout so hover doesn't break */}
         {isLayersOpen && (
           <div style={{
-            position: 'absolute', left: '100%', top: 0,
-            width: 12, height: 60,
+            position: 'absolute', left: 0, top: '100%',
+            width: 50, height: 12,
             background: 'transparent',
           }} />
         )}
 
         {isLayersOpen && (
           <div style={{
-            position: 'absolute', left: 'calc(100% + 12px)', top: 0,
+            position: 'absolute', left: 0, top: 'calc(100% + 8px)',
             background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(12px)',
-            padding: 8, borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-            border: '1px solid rgba(0,0,0,0.06)', display: 'flex', gap: 8,
+            padding: 8, borderRadius: 12, boxShadow: '0 12px 35px rgba(0,0,0,0.22)',
+            border: '1px solid rgba(0,0,0,0.08)', display: 'flex', gap: 8,
+            zIndex: 100000,
           }}>
             {Object.entries(MAP_LAYERS).map(([key, layer]) => (
               <button key={key} onClick={() => setMapLayer(key)}
