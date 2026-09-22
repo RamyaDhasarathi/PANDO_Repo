@@ -1,7 +1,6 @@
-'use client';
-
 import React, { useState, useEffect, useRef } from 'react';
 import { SlidersHorizontal, ChevronDown, Check, Search, X } from 'lucide-react';
+import styles from './pando-properties.module.css';
 
 export const PropertyFilters = ({
   selectedLocation,
@@ -102,9 +101,9 @@ export const PropertyFilters = ({
   });
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', zIndex: (isRefineOpen || isLocationDropdownOpen) ? 500 : 1 }}>
+    <div ref={containerRef} className={styles.filtersContainer} style={{ zIndex: (isRefineOpen || isLocationDropdownOpen) ? 5000 : 1 }}>
       {/* Primary Filter Row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className={styles.filterPrimaryRow}>
         {/* All locations Pill Dropdown Button */}
         <div style={{ position: 'relative' }}>
           <button
@@ -112,39 +111,14 @@ export const PropertyFilters = ({
               setIsLocationDropdownOpen(!isLocationDropdownOpen);
               setIsRefineOpen(false);
             }}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: '1px solid var(--p-hairline)',
-              color: 'var(--p-ink)',
-              padding: '2px 0 6px',
-              fontSize: '13.5px',
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-            }}
+            className={styles.filterPillBtn}
           >
             <span style={{ whiteSpace: 'nowrap' }}>{getActiveLocationLabel()}</span>
             <ChevronDown size={14} color="var(--p-stone)" />
           </button>
 
           {isLocationDropdownOpen && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 10px)',
-                right: 0,
-                width: '230px',
-                backgroundColor: '#FFFFFF',
-                border: '1px solid var(--p-hairline)',
-                borderRadius: '10px',
-                boxShadow: '0 16px 36px rgba(30,30,34,0.16)',
-                zIndex: 501,
-                padding: '10px 12px',
-              }}
-            >
+            <div className={styles.locationDropdown}>
               {locations.map((loc) => (
                 <button
                   key={loc.value}
@@ -168,54 +142,19 @@ export const PropertyFilters = ({
             setIsRefineOpen(!isRefineOpen);
             setIsLocationDropdownOpen(false);
           }}
-          style={{
-            padding: '2px 0 6px',
-            fontSize: '13.5px',
-            fontWeight: 500,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '7px',
-            cursor: 'pointer',
-            border: 'none',
-            background: 'none',
-            color: 'var(--p-ink)',
-          }}
+          className={styles.refineBtn}
         >
           <SlidersHorizontal size={14} />
           <span>Refine</span>
           {hasActiveFilters && (
-            <span
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--p-bronze)',
-                display: 'inline-block',
-              }}
-            />
+            <span className={styles.activeFilterDot} />
           )}
         </button>
       </div>
 
       {/* Expanded Refine Panel */}
       {isRefineOpen && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 12px)',
-            right: 0,
-            width: 'min(92vw, 520px)',
-            maxHeight: 'calc(100vh - 160px)',
-            overflowY: 'auto',
-            backgroundColor: '#FFFFFF',
-            border: '1px solid var(--p-hairline)',
-            borderRadius: '14px',
-            boxShadow: '0 24px 52px rgba(0, 0, 0, 0.22)',
-            zIndex: 501,
-            padding: '22px 24px',
-            boxSizing: 'border-box',
-          }}
-        >
+        <div className={styles.refinePanel}>
           <div
             style={{
               display: 'flex',
@@ -289,13 +228,7 @@ export const PropertyFilters = ({
           </div>
 
           {/* 3-Column Filter Options */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '16px',
-            }}
-          >
+          <div className={styles.refineGrid}>
             <div>
               <p style={{ margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--p-stone)' }}>Typology</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>

@@ -374,25 +374,25 @@
 
 @media (max-width: 639px) {
   .pando-floating-agent {
-    bottom: 8px;
-    right: 8px;
-    max-width: 95vw;
+    bottom: 4px;
+    right: 4px;
+    max-width: 98vw;
   }
   .pando-character-wrap {
-    width: 76px;
+    width: 110px;
     flex-shrink: 0;
   }
   .pando-bubble-col {
-    margin-right: -6px;
-    margin-bottom: 8px;
+    margin-right: -14px;
+    margin-bottom: 4px;
   }
   .pando-bubble {
-    width: min(280px, 72vw);
-    padding: 10px 12px 10px;
+    width: min(245px, 64vw);
+    padding: 9px 11px 9px;
     border-radius: 16px 16px 6px 16px;
   }
   .pando-bubble-header {
-    margin-bottom: 5px;
+    margin-bottom: 4px;
   }
   .pando-bubble-label {
     font-size: 9px;
@@ -403,8 +403,8 @@
   }
   .pando-bubble-quote {
     font-size: 11px;
-    line-height: 1.3;
-    margin-bottom: 6px;
+    line-height: 1.25;
+    margin-bottom: 5px;
     -webkit-line-clamp: 3;
     display: -webkit-box;
     -webkit-box-orient: vertical;
