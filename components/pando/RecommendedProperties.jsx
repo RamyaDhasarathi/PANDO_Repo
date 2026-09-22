@@ -98,35 +98,53 @@ export const RecommendedProperties = ({
     }
   };
 
-  // Handle Property Card Click - Mascot Pando speaks first, modal opens on speech end if not logged in
-  const handleOpenPropertyScreen = (property) => {
+  // Handle selecting a card to update Pando AI speech context
+  const handleSelectCard = (property) => {
     if (!property) return;
-
+    const targetId = property.id || property._id || property.originalId;
     setSelectedCardProperty(property);
-    onSelectProperty?.(property.id);
-    
+    onSelectProperty?.(targetId);
+
     const explanation = PandoService.getPropertyExplanation(property);
     setPandoMessage(explanation);
     setHasInteracted(true);
     setStatusState('SPEAKING');
+  };
+
+  // Handle 'View residence' click — Navigate immediately or open Auth modal for guests
+  const handleOpenPropertyScreen = (property) => {
+    if (!property) return;
+    const targetId = property.id || property._id || property.originalId;
+    if (!targetId) return;
+
+    setSelectedCardProperty(property);
+    onSelectProperty?.(targetId);
+
+    stopPandoSpeech();
+    setPendingAuthPropertyId(null);
 
     if (!user) {
-      setPendingPropertyId(property.id);
-      setPendingAuthPropertyId(property.id);
+      setPendingPropertyId(targetId);
+      setAuthModalOpen(true);
+    } else {
+      router.push(`/property/${targetId}`);
     }
   };
 
   // Handle 'Show me more details >' button click — open modal/navigate IMMEDIATELY with zero delay
   const handleShowMoreDetails = (property) => {
     if (!property) return;
+    const targetId = property.id || property._id || property.originalId;
+    if (!targetId) return;
+
     stopPandoSpeech();
     setPendingAuthPropertyId(null);
     
     if (!user) {
-      setPendingPropertyId(property.id);
+      setPendingPropertyId(targetId);
       setAuthModalOpen(true);
     } else {
-      router.push(`/property/${property.id}`);
+      router.push(`/property/${targetId}`);
     }
   };
 
@@ -299,7 +317,7 @@ export const RecommendedProperties = ({
                   onOpenDetails={() => handleOpenPropertyScreen(property)}
                   onToggleSave={onToggleSave}
                   isSaved={savedIds.includes(property.id)}
-                  onSelect={() => handleOpenPropertyScreen(property)}
+                  onSelect={() => handleSelectCard(property)}
                 />
               </div>
             ))}
@@ -354,8 +372,11 @@ export const RecommendedProperties = ({
           onSwitchMode={setAuthMode} 
           onClose={() => setAuthModalOpen(false)}
           onSuccess={() => {
+            setAuthModalOpen(false);
             if (pendingPropertyId) {
-              router.push(`/property/${pendingPropertyId}`);
+              const targetId = pendingPropertyId;
+              setPendingPropertyId(null);
+              router.push(`/property/${targetId}`);
             }
           }}
         />

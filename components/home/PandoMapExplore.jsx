@@ -87,6 +87,7 @@ export default function PandoMapExplore({ dbProperties = [] }) {
 
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const [filterZoomKey, setFilterZoomKey] = useState(0);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   // Fetch all properties from MongoDB on mount for map pins
   useEffect(() => {
@@ -401,7 +402,7 @@ export default function PandoMapExplore({ dbProperties = [] }) {
         <div className="pando-explore-property-card">
           <div className="pando-explore-drag-handle" />
           {/* Property Image Hero */}
-          <div style={{ position: 'relative', width: '100%', height: 190, overflow: 'hidden', borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
+          <div className="pando-card-hero">
             <img
               src={selectedProperty.image}
               alt={selectedProperty.title}
@@ -411,17 +412,17 @@ export default function PandoMapExplore({ dbProperties = [] }) {
               }}
             />
             {/* Badges */}
-            <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 6 }}>
+            <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 5 }}>
               <span style={{
                 background: selectedProperty.purpose === 'rent' ? '#4e7d63' : '#d22c23',
-                color: '#fff', fontSize: 10, fontWeight: 900, letterSpacing: '0.08em',
-                padding: '4px 9px', borderRadius: 999, textTransform: 'uppercase',
+                color: '#fff', fontSize: 9, fontWeight: 900, letterSpacing: '0.08em',
+                padding: '3px 8px', borderRadius: 999, textTransform: 'uppercase',
               }}>
                 {selectedProperty.purpose === 'rent' ? 'FOR RENT' : 'FOR SALE'}
               </span>
               <span style={{
                 background: 'rgba(0,0,0,0.65)', color: '#fff',
-                fontSize: 10, fontWeight: 800, padding: '4px 8px', borderRadius: 999,
+                fontSize: 9, fontWeight: 800, padding: '3px 7px', borderRadius: 999,
               }}>
                 {selectedProperty.category}
               </span>
@@ -431,10 +432,10 @@ export default function PandoMapExplore({ dbProperties = [] }) {
             <button
               onClick={() => setSelectedProperty(null)}
               style={{
-                position: 'absolute', top: 12, right: 12, width: 30, height: 30,
+                position: 'absolute', top: 10, right: 10, width: 28, height: 28,
                 borderRadius: '50%', background: 'rgba(0,0,0,0.65)', color: '#fff',
                 display: 'grid', placeItems: 'center', border: 0, cursor: 'pointer',
-                fontWeight: 800, fontSize: 14,
+                fontWeight: 800, fontSize: 13,
               }}
               title="Close Details"
             >
@@ -443,52 +444,49 @@ export default function PandoMapExplore({ dbProperties = [] }) {
           </div>
 
           {/* Property Content Details */}
-          <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="pando-card-body">
             <div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#d22c23', letterSpacing: '-0.02em' }}>
+              <div style={{ fontSize: 18, fontWeight: 900, color: '#d22c23', letterSpacing: '-0.02em' }}>
                 {selectedProperty.price}
               </div>
-              <h3 style={{ margin: '4px 0 2px', fontSize: 16, fontWeight: 800, color: '#1e1e22', lineHeight: 1.3 }}>
+              <h3 style={{ margin: '2px 0 2px', fontSize: 14, fontWeight: 800, color: '#1e1e22', lineHeight: 1.25 }}>
                 {selectedProperty.title}
               </h3>
-              <div style={{ fontSize: 12, color: '#666', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+              <div style={{ fontSize: 11, color: '#666', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
                 <span>📍 {selectedProperty.location}, {selectedProperty.city}</span>
               </div>
             </div>
 
             {/* Specs Grid */}
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8,
-              background: '#f8fafc', padding: '10px 12px', borderRadius: 12, border: '1px solid #eef0f4',
-            }}>
+            <div className="pando-card-specs">
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: '#888', fontWeight: 700, textTransform: 'uppercase' }}>Bedrooms</div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: '#1e1e22' }}>{selectedProperty.bedrooms ?? '-'} Beds</div>
+                <div style={{ fontSize: 9, color: '#888', fontWeight: 700, textTransform: 'uppercase' }}>Bedrooms</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#1e1e22' }}>{selectedProperty.bedrooms ?? '-'} Beds</div>
               </div>
               <div style={{ textAlign: 'center', borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 10, color: '#888', fontWeight: 700, textTransform: 'uppercase' }}>Bathrooms</div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: '#1e1e22' }}>{selectedProperty.bathrooms ?? '-'} Baths</div>
+                <div style={{ fontSize: 9, color: '#888', fontWeight: 700, textTransform: 'uppercase' }}>Bathrooms</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#1e1e22' }}>{selectedProperty.bathrooms ?? '-'} Baths</div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: '#888', fontWeight: 700, textTransform: 'uppercase' }}>Area</div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: '#1e1e22' }}>{selectedProperty.areaSqft ? `${selectedProperty.areaSqft} sqft` : '-'}</div>
+                <div style={{ fontSize: 9, color: '#888', fontWeight: 700, textTransform: 'uppercase' }}>Area</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#1e1e22' }}>{selectedProperty.areaSqft ? `${selectedProperty.areaSqft} sqft` : '-'}</div>
               </div>
             </div>
 
             {/* Description */}
-            <p style={{ margin: 0, fontSize: 12, color: '#555', lineHeight: 1.5 }}>
+            <p className="pando-card-desc">
               {selectedProperty.description}
             </p>
 
             {/* Amenities Chips */}
             {selectedProperty.amenities && selectedProperty.amenities.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                {selectedProperty.amenities.map((am) => (
+              <div className="pando-card-amenities">
+                {selectedProperty.amenities.slice(0, 3).map((am) => (
                   <span
                     key={am}
                     style={{
-                      background: '#f1f5f9', color: '#475569', fontSize: 10,
-                      fontWeight: 700, padding: '3px 8px', borderRadius: 6,
+                      background: '#f1f5f9', color: '#475569', fontSize: 9,
+                      fontWeight: 700, padding: '2px 6px', borderRadius: 6,
                     }}
                   >
                     ✓ {am}
@@ -504,24 +502,24 @@ export default function PandoMapExplore({ dbProperties = [] }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 8,
+                gap: 6,
                 background: '#d22c23',
                 color: '#fff',
                 border: 'none',
                 width: '100%',
                 cursor: 'pointer',
-                padding: '12px 18px',
-                borderRadius: 12,
+                padding: '10px 14px',
+                borderRadius: 10,
                 fontWeight: 900,
-                fontSize: 13,
-                letterSpacing: '0.04em',
-                boxShadow: '0 4px 14px rgba(210, 44, 35, 0.35)',
+                fontSize: 12,
+                letterSpacing: '0.03em',
+                boxShadow: '0 4px 12px rgba(210, 44, 35, 0.3)',
                 transition: 'all 0.2s ease',
-                marginTop: 4,
+                marginTop: 2,
               }}
             >
               View Full Property Details
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M7 17L17 7M17 7H7M17 7v10" />
               </svg>
             </button>
@@ -530,9 +528,9 @@ export default function PandoMapExplore({ dbProperties = [] }) {
       )}
 
       {/* ── FLOATING PANDO AI CHARACTER OVER MAP (RIGHT SIDE) ── */}
-      <div className="pando-ai">
+      <div className={`pando-ai ${selectedProperty ? 'has-card' : ''}`}>
         {/* Speech Bubble Attached Directly Above Pando's Extended Hand */}
-        <div className="pando-speech-container">
+        <div className={`pando-speech-container ${isCategoryOpen ? 'dimmed' : ''}`}>
           <div
             className={`speech-bubble ${isSpeaking ? 'speaking' : ''}`}
             role="status"
@@ -559,8 +557,6 @@ export default function PandoMapExplore({ dbProperties = [] }) {
             <p>{speechText}</p>
             <div className="bubble-tail" />
           </div>
-
-
         </div>
 
         {/* 3D Mascot Character */}
@@ -574,17 +570,12 @@ export default function PandoMapExplore({ dbProperties = [] }) {
 
       {/* ── CATEGORY FILTER (Top Left) ─────────────────────────── */}
       <div
-        style={{ position: 'absolute', left: 24, top: 140, zIndex: 900 }}
-        onMouseEnter={(e) => {
-          const flyout = e.currentTarget.querySelector('.filter-flyout');
-          if (flyout) flyout.style.opacity = '1';
-        }}
-        onMouseLeave={(e) => {
-          const flyout = e.currentTarget.querySelector('.filter-flyout');
-          if (flyout) flyout.style.opacity = '0';
-        }}
+        className="pando-category-filter-wrap"
+        onMouseEnter={() => setIsCategoryOpen(true)}
+        onMouseLeave={() => setIsCategoryOpen(false)}
       >
         <button
+          onClick={() => setIsCategoryOpen((prev) => !prev)}
           style={{
             width: 50,
             height: 50,
@@ -609,23 +600,7 @@ export default function PandoMapExplore({ dbProperties = [] }) {
         </button>
 
         <div
-          className="filter-flyout"
-          style={{
-            position: 'absolute',
-            left: '100%',
-            top: 0,
-            marginLeft: 12,
-            width: 176,
-            background: 'rgba(255,255,255,0.96)',
-            backdropFilter: 'blur(12px)',
-            padding: 8,
-            borderRadius: 12,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-            border: '1px solid rgba(0,0,0,0.06)',
-            opacity: 0,
-            transition: 'opacity 0.2s ease',
-            pointerEvents: 'auto',
-          }}
+          className={`filter-flyout ${isCategoryOpen ? 'open' : ''}`}
         >
           {CATEGORIES.map((cat) => (
             <button
@@ -634,6 +609,7 @@ export default function PandoMapExplore({ dbProperties = [] }) {
                 setHasUserInteracted(true);
                 setSelectedProperty(null);
                 setActiveCategory(cat);
+                setIsCategoryOpen(false);
                 setFilterZoomKey((k) => k + 1);
               }}
               style={{

@@ -60,8 +60,11 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
         if (data.success) {
           await login();
           onClose();
-          onSuccess?.();
-          router.refresh();
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            router.refresh();
+          }
         } else {
           setError(data.error || "Failed to bypass OTP");
         }
@@ -166,8 +169,11 @@ export default function AuthForm({ mode, onSwitchMode, onClose, onSuccess }) {
       if (data.success) {
         await login(); // Refresh the auth state
         onClose();
-        onSuccess?.();
-        router.refresh();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          router.refresh();
+        }
       } else {
         setError(data.error || "Invalid OTP");
       }

@@ -17,15 +17,19 @@ export const PropertyCard = ({
   const formatAed = (val) => 'AED ' + (val?.toLocaleString('en-US') ?? '');
   const formatUsd = (val) => '~$' + (val?.toLocaleString('en-US') ?? '') + ' USD';
 
-  const handleActivate = () => {
+  const handleCardClick = () => {
     onSelect?.(property);
+  };
+
+  const handleViewResidenceClick = (e) => {
+    e?.stopPropagation();
     onOpenDetails?.(property);
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      handleActivate();
+      onOpenDetails?.(property);
     }
   };
 
@@ -36,10 +40,10 @@ export const PropertyCard = ({
     <div
       role="button"
       tabIndex={0}
-      onClick={handleActivate}
+      onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       className={styles.card}
-      aria-label={`View ${property.name}, ${property.propertyType}, ${formatAed(property.price)}`}
+      aria-label={`View ${property.name || property.title}, ${property.propertyType || property.type}, ${formatAed(property.price)}`}
     >
       <div className={styles.cardImageWrap}>
         <img
@@ -54,7 +58,7 @@ export const PropertyCard = ({
             onToggleSave?.(property.id);
           }}
           onKeyDown={(e) => e.stopPropagation()}
-          aria-label={isSaved ? `Remove ${property.name} from saved` : `Save ${property.name}`}
+          aria-label={isSaved ? `Remove ${property.name || property.title} from saved` : `Save ${property.name || property.title}`}
           aria-pressed={isSaved}
           className={styles.saveBtn}
         >
@@ -83,14 +87,14 @@ export const PropertyCard = ({
         </div>
         
         <div className={styles.cardDifferentiator}>
-          — {differentiator || property.propertyType}
+          — {differentiator || property.propertyType || property.type}
         </div>
 
         <div className={styles.cardFootRow}>
           <div className={styles.cardSpecs}>
             {`${property.bedrooms || 0}-bed residence, ${(property.area || property.areaSqft || 0).toLocaleString('en-US')} sq ft`}
           </div>
-          <button className={styles.cardLink} onClick={(e) => { e.stopPropagation(); handleActivate(); }}>
+          <button className={styles.cardLink} onClick={handleViewResidenceClick}>
             <span>View residence</span>
             <span className={styles.cardArrow} aria-hidden="true">→</span>
           </button>
