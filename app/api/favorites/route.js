@@ -5,8 +5,6 @@ import dbConnect from '../../../lib/mongodb';
 import Buyer from '../../../lib/models/Buyer';
 import Listing from '../../../lib/models/Listing';
 
-export const dynamic = 'force-dynamic';
-
 // Utility to get current user ID
 async function getUserId() {
   const token = cookies().get('auth_token')?.value;

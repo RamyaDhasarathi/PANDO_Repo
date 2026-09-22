@@ -4,8 +4,6 @@ import Buyer from '@/lib/models/Buyer';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
-export const dynamic = 'force-dynamic';
-
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
 
 async function getUserFromToken() {

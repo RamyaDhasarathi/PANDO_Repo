@@ -3,8 +3,6 @@ import dbConnect from '@/lib/mongodb';
 import Listing from '@/lib/models/Listing';
 import { properties as rawDatasetProperties } from '@/data/properties';
 
-export const dynamic = 'force-dynamic';
-
 // COMMUNITY_COORDS mapping from PandoMapExplore for accurate coordinates
 const COMMUNITY_COORDS = {
   'Dubai Marina': { lat: 25.0772, lng: 55.1332 },
