@@ -292,6 +292,7 @@
   display: flex;
   align-items: flex-end;
   gap: 0;
+  animation: pandoDrift 5s ease-in-out infinite;
 }
 
 /* ==================================================
@@ -310,7 +311,7 @@
   max-width: 240px;
   margin-bottom: 140px;
   margin-right: -38px;
-  animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1), pandoDrift 5s ease-in-out infinite;
+  animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
   z-index: 3;
 }
@@ -459,7 +460,6 @@
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.4));
-  animation: pandoDrift 5s ease-in-out infinite;
   pointer-events: auto;
   cursor: pointer;
   transition: filter 0.2s ease;
@@ -646,56 +646,241 @@
 }
 
 @media (max-width: 768px) {
+  /* Gallery Nav Pill top-right */
+  .galleryNav {
+    top: 12px;
+    right: 12px;
+    padding: 3px 8px;
+    z-index: 30;
+    gap: 4px;
+  }
+
+  .navArrow {
+    width: 22px;
+    height: 22px;
+  }
+
+  .navCounter {
+    font-size: 0.72rem;
+  }
+
+  /* Top Left Overlay */
   .topLeftOverlay {
-    top: 14px;
-    left: 14px;
-    gap: 6px;
-    max-width: 90%;
+    top: 12px;
+    left: 12px;
+    right: 80px;
+    gap: 4px;
+    max-width: calc(100vw - 94px);
+    z-index: 25;
   }
-  .propertyTitle {
-    font-size: 1.2rem;
-  }
-  .bottomLeftOverlay {
-    bottom: max(14px, env(safe-area-inset-bottom, 14px));
-    left: 14px;
-    gap: 8px;
-    max-width: 55%;
-    z-index: 12;
-  }
-  .priceTag {
+
+  .brandLink {
     font-size: 1rem;
+  }
+
+  .topActionRow {
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .backLink {
+    font-size: 0.72rem;
     padding: 4px 10px;
   }
+
+  .verifiedBadge {
+    font-size: 0.6rem;
+    padding: 4px 8px;
+  }
+
+  .propertyTitle {
+    font-size: 1.15rem;
+    line-height: 1.2;
+    margin: 3px 0 1px;
+  }
+
+  .propertySubtitle {
+    font-size: 0.75rem;
+  }
+
+  /* Bottom Left Overlay: Stacked Price + Specs Block on Mobile */
+  .bottomLeftOverlay {
+    position: absolute;
+    left: 12px;
+    bottom: max(52px, calc(env(safe-area-inset-bottom, 0px) + 52px));
+    max-width: 58%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    z-index: 20;
+    pointer-events: auto;
+  }
+
+  .priceRow {
+    flex-shrink: 0;
+  }
+
+  .priceTag {
+    font-size: 0.95rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    background: rgba(16, 35, 29, 0.75);
+  }
+
   .infoStrip {
-    padding: 5px 10px;
-    gap: 6px;
+    padding: 4px 8px;
+    gap: 4px;
     font-size: 0.65rem;
+    border-radius: 8px;
+    background: rgba(16, 35, 29, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    overflow: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+
+  .infoStrip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .infoItem {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  .infoDivider {
+    font-size: 0.65rem;
+    opacity: 0.4;
+  }
+
+  /* Pando Interactive Unit */
   .pandoInteractiveUnit {
-    right: 10px;
-    bottom: max(10px, env(safe-area-inset-bottom, 10px));
-    z-index: 15;
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: max(8px, env(safe-area-inset-bottom, 8px));
+    width: auto;
+    max-width: none;
+    align-items: stretch;
+    z-index: 22;
   }
+
+  .pandoRow {
+    position: absolute;
+    bottom: 44px;
+    right: 0;
+    display: flex;
+    align-items: flex-end;
+    pointer-events: auto;
+  }
+
   .speechBubble {
-    max-width: 170px;
-    padding: 8px 10px;
-    margin-bottom: 8px;
-    margin-right: -10px;
+    max-width: min(190px, calc(100vw - 160px));
+    padding: 10px 12px;
+    margin-bottom: 172px;
+    margin-right: -22px;
+    z-index: 30;
   }
+
+  .speechBubble::after {
+    right: -10px;
+    bottom: 12px;
+    width: 16px;
+    height: 16px;
+  }
+
   .speechBubbleText {
     font-size: 0.72rem;
-    line-height: 1.2;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
+
   .pandoCharacter {
-    width: 110px;
+    width: 145px;
   }
+
   .pandoShadow {
-    width: 100px;
+    width: 120px;
   }
+
+  /* Compact Optimized Chat Input Bar on Mobile */
   .pandoInputWrap {
-    max-width: 220px;
+    width: 100%;
+    max-width: 100%;
   }
+
+  .inputContainer {
+    width: 100%;
+    height: 38px;
+    padding: 2px 4px 2px 10px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+
   .textInput {
-    font-size: 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+
+  .micButton {
+    width: 28px;
+    height: 28px;
+    margin-right: 3px;
+  }
+
+  .sendButton {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bottomLeftOverlay {
+    bottom: max(48px, calc(env(safe-area-inset-bottom, 0px) + 48px));
+    left: 10px;
+    max-width: 58%;
+    gap: 3px;
+  }
+
+  .priceTag {
+    font-size: 0.88rem;
+    padding: 3px 8px;
+  }
+
+  .infoStrip {
+    padding: 3px 6px;
+    gap: 3px;
+    font-size: 0.6rem;
+  }
+
+  .infoItem {
+    font-size: 0.6rem;
+  }
+
+  .pandoInteractiveUnit {
+    left: 10px;
+    right: 10px;
+  }
+
+  .speechBubble {
+    max-width: min(175px, calc(100vw - 150px));
+    margin-bottom: 165px;
+  }
+
+  .pandoCharacter {
+    width: 135px;
+  }
+
+  .pandoShadow {
+    width: 110px;
   }
 }
