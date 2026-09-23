@@ -82,8 +82,40 @@
   color: var(--signal, #d22c23);
 }
 
-.pando-bubble-mute-btn {
+.pando-bubble-actions {
   margin-left: auto;
+  margin-right: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+}
+
+.pando-bubble-history-btn {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 2px solid var(--ink, #1e1e22);
+  border-radius: 50%;
+  background: var(--ink, #1e1e22);
+  color: var(--acid, #c5a059);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.pando-bubble-history-btn:hover,
+.pando-bubble-history-btn.is-active {
+  background: var(--signal, #d22c23);
+  border-color: var(--signal, #d22c23);
+  color: #fff;
+  transform: scale(1.08);
+}
+
+.pando-bubble-mute-btn {
   display: grid;
   place-items: center;
   box-sizing: border-box;
@@ -111,6 +143,138 @@
 .pando-bubble-mute-btn:focus-visible {
   outline: 2px solid var(--ink, #1e1e22);
   outline-offset: 2px;
+}
+
+/* Integrated Recent History Drawer inside pando-bubble */
+.pando-history-drawer {
+  display: flex;
+  flex-direction: column;
+  background: rgba(30, 30, 34, 0.94);
+  border: 1.5px solid var(--ink, #1e1e22);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-top: 4px;
+  color: #ffffff;
+  animation: speechAppear 0.25s ease both;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.pando-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pando-history-title {
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--acid, #c5a059);
+}
+
+.pando-history-close-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.pando-history-close-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.pando-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 185px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pando-history-list::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+.pando-history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  text-decoration: none;
+  min-width: 0;
+  overflow: hidden;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.pando-history-item:hover {
+  background: rgba(197, 160, 89, 0.3);
+  transform: translateX(2px);
+}
+
+.pando-history-thumb {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.pando-history-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pando-history-item-title {
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0 0 2px;
+  min-width: 0;
+}
+
+.pando-history-item-meta {
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 9.5px;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  min-width: 0;
+}
+
+.pando-history-empty {
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  padding: 10px 0;
+  margin: 0;
 }
 
 .pando-bubble-quote {
@@ -397,9 +561,36 @@
   .pando-bubble-label {
     font-size: 9px;
   }
+  .pando-bubble-actions {
+    gap: 4px;
+    margin-right: 2px;
+  }
+  .pando-bubble-history-btn,
   .pando-bubble-mute-btn {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
+  }
+  .pando-history-drawer {
+    padding: 8px 10px;
+    margin-top: 2px;
+  }
+  .pando-history-list {
+    max-height: 135px;
+    gap: 4px;
+  }
+  .pando-history-item {
+    padding: 4px 6px;
+    gap: 6px;
+  }
+  .pando-history-thumb {
+    width: 28px;
+    height: 28px;
+  }
+  .pando-history-item-title {
+    font-size: 10px;
+  }
+  .pando-history-item-meta {
+    font-size: 9px;
   }
   .pando-bubble-quote {
     font-size: 11px;

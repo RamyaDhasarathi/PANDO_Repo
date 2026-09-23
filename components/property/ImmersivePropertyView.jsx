@@ -4,19 +4,22 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
+import { ChevronLeft, ChevronRight, Volume2, VolumeX, History, X } from "lucide-react";
 import styles from "./ImmersivePropertyView.module.css";
 import { formatAED, formatPrice, bedroomLabel } from "@/lib/format";
 import { explainProperty, answerPropertyQuestion } from "@/lib/propertyAssistant";
 import { usePandoTTS } from "@/hooks/usePandoTTS";
 import { useAuth } from "@/providers/AuthProvider";
 import AuthForm from "@/components/AuthForm";
+import { recordPropertyView, fetchPropertyHistory } from "@/lib/historyService";
 
 export default function ImmersivePropertyView({ property }) {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState("sign-in");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyItems, setHistoryItems] = useState([]);
 
   const handleBack = (e) => {
     e?.preventDefault();
@@ -32,6 +35,22 @@ export default function ImmersivePropertyView({ property }) {
       setAuthModalOpen(true);
     }
   }, [user, loading]);
+
+  // Record property view on mount & property change
+  useEffect(() => {
+    if (property) {
+      recordPropertyView(property);
+    }
+  }, [property]);
+
+  const toggleHistoryPopover = async (e) => {
+    e?.stopPropagation();
+    if (!historyOpen) {
+      const items = await fetchPropertyHistory();
+      setHistoryItems(items);
+    }
+    setHistoryOpen((prev) => !prev);
+  };
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [pandoMessage, setPandoMessage] = useState("");
@@ -274,19 +293,84 @@ export default function ImmersivePropertyView({ property }) {
                   <span className={styles.bubblePulse} />
                   PANDO SAYS
                 </div>
-                {speechSupported && (
+
+                <div className={styles.bubbleHeaderActions}>
+                  {/* History Icon Button */}
                   <button
                     type="button"
-                    className={`${styles.bubbleSpeakerBtn} ${muted ? styles.isMuted : ""} ${!muted && isSpeaking ? styles.bubbleSpeakerActive : ""}`}
-                    onClick={toggleVoiceAudio}
-                    aria-label={muted ? "Turn Pando voice ON" : "Turn Pando voice OFF"}
-                    title={muted ? "Turn voice ON" : "Turn voice OFF"}
+                    className={`${styles.bubbleHistoryBtn} ${historyOpen ? styles.bubbleHistoryBtnActive : ""}`}
+                    onClick={toggleHistoryPopover}
+                    aria-label="View recent property history"
+                    title={historyOpen ? "Show Pando message" : "Recent property history"}
                   >
-                    {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                    <History size={13} />
                   </button>
-                )}
+
+                  {/* Speaker Mute/Unmute Button */}
+                  {speechSupported && (
+                    <button
+                      type="button"
+                      className={`${styles.bubbleSpeakerBtn} ${muted ? styles.isMuted : ""} ${!muted && isSpeaking ? styles.bubbleSpeakerActive : ""}`}
+                      onClick={toggleVoiceAudio}
+                      aria-label={muted ? "Turn Pando voice ON" : "Turn Pando voice OFF"}
+                      title={muted ? "Turn voice ON" : "Turn voice OFF"}
+                    >
+                      {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                    </button>
+                  )}
+                </div>
               </div>
-              <p className={styles.speechBubbleText}>{pandoMessage}</p>
+
+              {/* Seamless History Drawer or Speech Text inside speechBubble card */}
+              {historyOpen ? (
+                <div className={styles.historyDrawer} onClick={(e) => e.stopPropagation()}>
+                  <div className={styles.historyHeader}>
+                    <span className={styles.historyTitle}>RECENT ACTIVITY</span>
+                    <button
+                      type="button"
+                      className={styles.historyCloseBtn}
+                      onClick={() => setHistoryOpen(false)}
+                      aria-label="Close history"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+
+                  {historyItems.length === 0 ? (
+                    <p className={styles.historyEmpty}>No recent property views yet</p>
+                  ) : (
+                    <div className={styles.historyList}>
+                      {historyItems.map((item, idx) => (
+                        <div
+                          key={item.propertyId || idx}
+                          className={styles.historyItem}
+                          onClick={() => {
+                            setHistoryOpen(false);
+                            router.push(`/property/${item.propertyId}`);
+                          }}
+                        >
+                          <img
+                            src={item.image || "/images/pando-agent.png"}
+                            alt={item.title}
+                            className={styles.historyThumb}
+                            onError={(e) => {
+                              e.target.src = "/images/pando-agent.png";
+                            }}
+                          />
+                          <div className={styles.historyInfo}>
+                            <p className={styles.historyItemTitle}>{item.title}</p>
+                            <p className={styles.historyItemMeta}>
+                              {item.price ? `AED ${(item.price).toLocaleString()}` : item.location}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className={styles.speechBubbleText}>{pandoMessage}</p>
+              )}
             </div>
 
             {/* Physical Pando Character Inside Scene with Ground Shadow */}
