@@ -1,0 +1,17 @@
+{
+  "built_up_area_sqft": {
+    "field_name": "built_up_area_sqft",
+    "min_value": 345.0,
+    "max_value": 16972.0
+  },
+  "price": {
+    "field_name": "price",
+    "min_value": 442000.0,
+    "max_value": 85000000.0
+  },
+  "rent_price": {
+    "field_name": "rent_price",
+    "min_value": 68000.0,
+    "max_value": 950000.0
+  }
+}

@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+pymongo
+python-dotenv
+mlflow
+pydantic
+pytest
+httpx

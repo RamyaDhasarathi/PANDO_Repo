@@ -1,0 +1,70 @@
+PROPERTY_JSON_SCHEMA = {
+    "$jsonSchema": {
+        "bsonType": "object",
+        "required": [
+            "property_id",
+            "property_name",
+            "property_type",
+            "location",
+            "listing_purpose",
+            "bedrooms",
+            "bathrooms",
+            "built_up_area_sqft",
+            "completion_status",
+        ],
+        "properties": {
+            "property_id": {"bsonType": "string"},
+            "property_name": {"bsonType": "string"},
+            "developer": {"bsonType": ["string", "null"]},
+            "property_type": {"bsonType": "string"},
+            "location": {"bsonType": "string"},
+            "community": {"bsonType": ["string", "null"]},
+            "latitude": {"bsonType": ["double", "int", "null"], "minimum": -90, "maximum": 90},
+            "longitude": {"bsonType": ["double", "int", "null"], "minimum": -180, "maximum": 180},
+            "listing_purpose": {"bsonType": "string", "enum": ["Sale", "Rent"]},
+            "price": {"bsonType": ["double", "int", "null"], "minimum": 0},
+            "rent_price": {"bsonType": ["double", "int", "null"], "minimum": 0},
+            "bedrooms": {"bsonType": "int", "minimum": 0},
+            "bathrooms": {"bsonType": "int", "minimum": 0},
+            "built_up_area_sqft": {
+                "bsonType": ["double", "int"],
+                "minimum": 0,
+                "exclusiveMinimum": True,
+            },
+            "furnishing_status": {
+                "bsonType": ["string", "null"],
+                "enum": ["Furnished", "Semi-Furnished", "Unfurnished", None],
+            },
+            "completion_status": {
+                "bsonType": "string",
+                "enum": ["Ready", "Off-Plan", "Under Construction"],
+            },
+            "handover_date": {"bsonType": ["string", "null"]},
+            "amenities": {"bsonType": "array", "items": {"bsonType": "string"}},
+            "parking": {"bsonType": ["int", "null"], "minimum": 0},
+            "view": {"bsonType": ["string", "null"]},
+            "floor": {"bsonType": ["int", "null"]},
+            "rental_estimate": {"bsonType": ["double", "int", "null"], "minimum": 0},
+            "rental_yield": {"bsonType": ["double", "int", "null"], "minimum": 0},
+            "service_charges": {"bsonType": ["double", "int", "null"], "minimum": 0},
+            "property_purpose": {
+                "bsonType": "array",
+                "items": {"bsonType": "string", "enum": ["End use", "Investment", "Rental"]},
+            },
+            "nearby_facilities": {
+                "bsonType": "object",
+                "properties": {
+                    "metro_distance_km": {"bsonType": ["double", "int", "null"], "minimum": 0},
+                    "schools_distance_km": {"bsonType": ["double", "int", "null"], "minimum": 0},
+                    "hospitals_distance_km": {"bsonType": ["double", "int", "null"], "minimum": 0},
+                    "shopping_distance_km": {"bsonType": ["double", "int", "null"], "minimum": 0},
+                    "beaches_distance_km": {"bsonType": ["double", "int", "null"], "minimum": 0},
+                    "business_districts_distance_km": {
+                        "bsonType": ["double", "int", "null"],
+                        "minimum": 0,
+                    },
+                },
+            },
+        },
+    }
+}
