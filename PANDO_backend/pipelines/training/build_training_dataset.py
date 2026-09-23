@@ -39,9 +39,11 @@ pipeline reuses that collection directly (see the property-feature columns above
 re-deriving any of it, satisfying the checklist's "confirm reusable without duplication" item.
 """
 
+import bisect
+from collections import defaultdict
+
 from api.db import get_db
 from pipelines.schemas.interaction_schema import InteractionEventType
-from pipelines.training.behavioral_features import compute_user_behavioral_features
 from pipelines.training.interaction_features import compute_interaction_features
 from pipelines.training.labels import label_for_event
 
@@ -49,60 +51,64 @@ INTERACTIONS_COLLECTION = "hi_pando_interactions"
 PROPERTIES_COLLECTION = "hi_pando_properties"
 PROPERTY_FEATURES_COLLECTION = "hi_pando_property_features"
 
-
-def _find_shown_snapshot(db, user_id: str, property_id: str, before) -> dict | None:
-    """Finds the most recent PROPERTY_SHOWN event for this user+property pair at or before
-    the labeled interaction's timestamp — that's the recommendation context the user was
-    actually reacting to."""
-    return db[INTERACTIONS_COLLECTION].find_one(
-        {
-            "userId": user_id,
-            "propertyId": property_id,
-            "event": InteractionEventType.PROPERTY_SHOWN.value,
-            "timestamp": {"$lte": before},
-        },
-        sort=[("timestamp", -1)],
-    )
+_LABELED_EVENT_TYPES = [
+    InteractionEventType.PROPERTY_SAVED.value,
+    InteractionEventType.PROPERTY_SHORTLISTED.value,
+    InteractionEventType.BROKER_CONTACTED.value,
+    InteractionEventType.VIEWING_REQUESTED.value,
+    InteractionEventType.PROPERTY_REJECTED.value,
+]
 
 
-def _prior_labeled_history_for_join(db, user_id: str, before, exclude_property_id: str) -> list[dict]:
-    """Builds the (propertyId, label, location, property_type) history that
-    compute_historical_user_interest needs, restricted to interactions strictly before `before`
-    (no future leakage) and excluding the property this row is itself about (a row must not use
-    its own outcome as a feature)."""
-    prior_labeled = list(
-        db[INTERACTIONS_COLLECTION].find(
-            {
-                "userId": user_id,
-                "timestamp": {"$lt": before},
-                "propertyId": {"$ne": exclude_property_id},
-                "event": {
-                    "$in": [
-                        InteractionEventType.PROPERTY_SAVED.value,
-                        InteractionEventType.PROPERTY_SHORTLISTED.value,
-                        InteractionEventType.BROKER_CONTACTED.value,
-                        InteractionEventType.VIEWING_REQUESTED.value,
-                        InteractionEventType.PROPERTY_REJECTED.value,
-                    ]
-                },
-            },
-            {"propertyId": 1, "event": 1, "_id": 0},
-        )
-    )
-    if not prior_labeled:
-        return []
+def _behavioral_features_from_history(
+    user_history: list[dict], before, property_features_by_id: dict
+) -> dict:
+    """In-memory equivalent of behavioral_features.compute_user_behavioral_features, given a
+    user's full interaction history (already sorted/loaded once — see build_training_dataset)
+    instead of re-querying MongoDB per row. Same 'any interaction counts as viewed' and
+    strict-before-cutoff semantics as the original."""
+    prior = [h for h in user_history if h["timestamp"] < before]
+    count = len(prior)
+    if not prior:
+        return {
+            "user_previous_interactions_count": 0,
+            "user_avg_price_viewed": None,
+            "user_avg_area_viewed": None,
+        }
 
-    property_ids = list({h["propertyId"] for h in prior_labeled})
-    property_docs = {
-        p["property_id"]: p
-        for p in db[PROPERTIES_COLLECTION].find(
-            {"property_id": {"$in": property_ids}}, {"property_id": 1, "location": 1, "property_type": 1}
-        )
+    prices, areas = [], []
+    for h in prior:
+        features = property_features_by_id.get(h["propertyId"])
+        if features is None:
+            continue
+        prices.append(features["price_normalized"])
+        areas.append(features["built_up_area_sqft_normalized"])
+
+    if not prices:
+        return {
+            "user_previous_interactions_count": count,
+            "user_avg_price_viewed": None,
+            "user_avg_area_viewed": None,
+        }
+
+    return {
+        "user_previous_interactions_count": count,
+        "user_avg_price_viewed": sum(prices) / len(prices),
+        "user_avg_area_viewed": sum(areas) / len(areas),
     }
 
+
+def _prior_labeled_history_for_join(
+    user_labeled_history: list[dict], before, exclude_property_id: str, properties_by_id: dict
+) -> list[dict]:
+    """In-memory equivalent of the original Mongo-per-row join: this user's labeled interactions
+    strictly before `before`, excluding the row's own property, enriched with each property's
+    location/property_type for compute_historical_user_interest."""
     history = []
-    for h in prior_labeled:
-        prop = property_docs.get(h["propertyId"])
+    for h in user_labeled_history:
+        if h["timestamp"] >= before or h["propertyId"] == exclude_property_id:
+            continue
+        prop = properties_by_id.get(h["propertyId"])
         history.append(
             {
                 "propertyId": h["propertyId"],
@@ -115,23 +121,62 @@ def _prior_labeled_history_for_join(db, user_id: str, before, exclude_property_i
 
 
 def build_training_dataset() -> list[dict]:
+    """
+    Builds the Phase 3.2 training rows. Optimized to load the (small, static) properties and
+    property-features collections once and each user's interaction history once, then does all
+    per-row lookups in memory — the original per-row Mongo query pattern (property lookup +
+    property-features lookup + a behavioral-features query + a history-join query, all inside
+    the row loop) meant ~6 sequential network round-trips per labeled row, which made this take
+    minutes against Atlas for a dataset in the low thousands of rows. This version issues a
+    small constant number of bulk queries instead.
+    """
     db = get_db()
 
     labeled_events = list(
+        db[INTERACTIONS_COLLECTION].find({"event": {"$in": _LABELED_EVENT_TYPES}})
+    )
+    if not labeled_events:
+        return []
+
+    user_ids = list({e["userId"] for e in labeled_events})
+
+    # All PROPERTY_SHOWN events for these users, needed to reconstruct the userDna/matchScores
+    # snapshot for labeled events that didn't carry one inline (see build_training_dataset's
+    # original _find_shown_snapshot). Sorted per (user, property) so the "most recent at or
+    # before timestamp" lookup can be done with a binary search instead of a query.
+    shown_events = list(
         db[INTERACTIONS_COLLECTION].find(
-            {
-                "event": {
-                    "$in": [
-                        InteractionEventType.PROPERTY_SAVED.value,
-                        InteractionEventType.PROPERTY_SHORTLISTED.value,
-                        InteractionEventType.BROKER_CONTACTED.value,
-                        InteractionEventType.VIEWING_REQUESTED.value,
-                        InteractionEventType.PROPERTY_REJECTED.value,
-                    ]
-                }
-            }
+            {"userId": {"$in": user_ids}, "event": InteractionEventType.PROPERTY_SHOWN.value}
         )
     )
+    shown_by_user_property: dict[tuple, list[dict]] = defaultdict(list)
+    for e in shown_events:
+        shown_by_user_property[(e["userId"], e["propertyId"])].append(e)
+    for key in shown_by_user_property:
+        shown_by_user_property[key].sort(key=lambda e: e["timestamp"])
+
+    def find_shown_snapshot(user_id: str, property_id: str, before) -> dict | None:
+        candidates = shown_by_user_property.get((user_id, property_id))
+        if not candidates:
+            return None
+        timestamps = [c["timestamp"] for c in candidates]
+        idx = bisect.bisect_right(timestamps, before) - 1
+        return candidates[idx] if idx >= 0 else None
+
+    # Every user's full labeled-interaction history (for the User x Property "historical
+    # interest" join) and full interaction history (for behavioral features), loaded once.
+    all_user_events = list(db[INTERACTIONS_COLLECTION].find({"userId": {"$in": user_ids}}))
+    all_history_by_user: dict[str, list[dict]] = defaultdict(list)
+    labeled_history_by_user: dict[str, list[dict]] = defaultdict(list)
+    for e in all_user_events:
+        all_history_by_user[e["userId"]].append(e)
+        if e["event"] in _LABELED_EVENT_TYPES:
+            labeled_history_by_user[e["userId"]].append(e)
+
+    properties_by_id = {p["property_id"]: p for p in db[PROPERTIES_COLLECTION].find({}, {"_id": 0})}
+    property_features_by_id = {
+        f["property_id"]: f for f in db[PROPERTY_FEATURES_COLLECTION].find({}, {"_id": 0})
+    }
 
     rows = []
     skipped_no_snapshot = 0
@@ -145,14 +190,14 @@ def build_training_dataset() -> list[dict]:
         property_id = interaction["propertyId"]
         timestamp = interaction["timestamp"]
 
-        snapshot = interaction if interaction.get("userDna") is not None else _find_shown_snapshot(
-            db, user_id, property_id, timestamp
+        snapshot = (
+            interaction
+            if interaction.get("userDna") is not None
+            else find_shown_snapshot(user_id, property_id, timestamp)
         )
 
-        property_features = db[PROPERTY_FEATURES_COLLECTION].find_one(
-            {"property_id": property_id}, {"_id": 0}
-        )
-        property_doc = db[PROPERTIES_COLLECTION].find_one({"property_id": property_id}, {"_id": 0})
+        property_features = property_features_by_id.get(property_id)
+        property_doc = properties_by_id.get(property_id)
 
         if snapshot is None or property_features is None or property_doc is None:
             # Can't build a meaningful row without knowing what the user wanted or what the
@@ -179,10 +224,16 @@ def build_training_dataset() -> list[dict]:
 
         # Phase 3.3 behavioral (user-side) features — cut off strictly before this row's own
         # timestamp so the row never learns from its own outcome or from the future.
-        row.update(compute_user_behavioral_features(user_id, before=timestamp))
+        row.update(
+            _behavioral_features_from_history(
+                all_history_by_user.get(user_id, []), timestamp, property_features_by_id
+            )
+        )
 
         # Phase 3.3 User x Property features
-        history = _prior_labeled_history_for_join(db, user_id, timestamp, exclude_property_id=property_id)
+        history = _prior_labeled_history_for_join(
+            labeled_history_by_user.get(user_id, []), timestamp, property_id, properties_by_id
+        )
         row.update(
             compute_interaction_features(user_id, user_dna, property_doc, match_scores, history)
         )

@@ -6,3 +6,6 @@ mlflow
 pydantic
 pytest
 httpx
+jupyter
+ipykernel
+seaborn
