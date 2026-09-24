@@ -10,7 +10,7 @@ async function getUserId() {
   const token = cookies().get('auth_token')?.value;
   if (!token) return null;
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-for-dev-mode');
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'hi-pando-super-secret-jwt-key-change-in-prod');
     const { payload } = await jwtVerify(token, secret);
     return payload.userId;
   } catch (err) {
@@ -18,9 +18,12 @@ async function getUserId() {
   }
 }
 
-// GET: Fetch recent 4 history items for current buyer
-export async function GET() {
+// GET: Fetch property-specific history or recent buyer history
+export async function GET(req) {
   try {
+    const { searchParams } = new URL(req.url);
+    const propertyId = searchParams.get('propertyId');
+
     const userId = await getUserId();
     if (!userId) {
       return NextResponse.json({ success: true, authenticated: false, history: [] });
@@ -32,17 +35,22 @@ export async function GET() {
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 
-    // Sort by viewedAt desc and slice top 4
-    const historyList = (buyer.history || [])
-      .sort((a, b) => new Date(b.viewedAt) - new Date(a.viewedAt))
-      .slice(0, 4)
+    let historyList = buyer.history || [];
+
+    if (propertyId) {
+      historyList = historyList.filter((item) => item.propertyId === propertyId);
+    }
+
+    historyList = historyList
+      .sort((a, b) => new Date(b.viewedAt || b.timestamp) - new Date(a.viewedAt || a.timestamp))
+      .slice(0, 10)
       .map((item) => ({
         propertyId: item.propertyId,
-        title: item.title,
-        location: item.location,
+        query: item.query || item.title,
+        answer: item.answer || item.location || '',
         price: item.price,
         image: item.image,
-        viewedAt: item.viewedAt,
+        timestamp: item.viewedAt || item.timestamp,
       }));
 
     return NextResponse.json({ success: true, authenticated: true, history: historyList });
@@ -52,63 +60,55 @@ export async function GET() {
   }
 }
 
-// POST: Add a property view or query to history
+// POST: Add a property-specific interaction/query to history
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { propertyId, title, location, price, image } = body;
+    const { propertyId, query, answer, title, location, price, image } = body;
     if (!propertyId) {
       return NextResponse.json({ success: false, error: 'Missing propertyId' }, { status: 400 });
     }
 
     const userId = await getUserId();
     if (!userId) {
-      // Unauthenticated users rely on frontend localStorage cache
       return NextResponse.json({ success: true, authenticated: false, message: 'Saved locally' });
     }
 
     await dbConnect();
-    const buyer = await Buyer.findById(userId);
-    if (!buyer) {
-      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
-    }
 
-    if (!buyer.history) {
-      buyer.history = [];
-    }
+    const itemQuery = query || title || 'Property Inquiry';
+    const itemAnswer = answer || location || '';
 
-    // Remove existing entry for same propertyId to avoid duplicates
-    buyer.history = buyer.history.filter((h) => h.propertyId !== propertyId);
-
-    // Push new entry to top
-    buyer.history.unshift({
-      propertyId,
-      title: title || 'Property',
-      location: location || '',
-      price: price || 0,
-      image: image || '',
-      viewedAt: new Date(),
+    // First remove any exact duplicate query item for the same propertyId atomically
+    await Buyer.findByIdAndUpdate(userId, {
+      $pull: {
+        history: { propertyId, title: itemQuery }
+      }
     });
 
-    // Cap history length at 10 items
-    if (buyer.history.length > 10) {
-      buyer.history = buyer.history.slice(0, 10);
-    }
+    // Then push new item to beginning of array atomically without versioning error
+    await Buyer.findByIdAndUpdate(userId, {
+      $push: {
+        history: {
+          $each: [{
+            propertyId,
+            title: itemQuery,
+            location: itemAnswer,
+            price: price || 0,
+            image: image || '',
+            viewedAt: new Date(),
+          }],
+          $position: 0,
+          $slice: 30
+        }
+      }
+    });
 
-    await buyer.save();
-
-    const updatedHistory = buyer.history.slice(0, 4).map((item) => ({
-      propertyId: item.propertyId,
-      title: item.title,
-      location: item.location,
-      price: item.price,
-      image: item.image,
-      viewedAt: item.viewedAt,
-    }));
-
-    return NextResponse.json({ success: true, authenticated: true, history: updatedHistory });
+    return NextResponse.json({ success: true, authenticated: true });
   } catch (error) {
     console.error('History POST Error:', error);
     return NextResponse.json({ success: false, error: 'Failed to record history' }, { status: 500 });
   }
 }
+
+

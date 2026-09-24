@@ -11,6 +11,9 @@ import { useAuth } from '@/providers/AuthProvider';
 import PandoLoader from '@/components/PandoLoader';
 import styles from '@/components/pando/pando-properties.module.css';
 
+import { recordSearchQuery } from '@/lib/historyService';
+import { logRealtimeInteraction } from '@/lib/interactionLogger';
+
 export default function SearchResults() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -26,13 +29,16 @@ export default function SearchResults() {
   const [savedPropertyIds, setSavedPropertyIds] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Sync with searchParams from URL
+  // Sync with searchParams from URL & record search query history
   useEffect(() => {
     const q = searchParams.get('q') || searchParams.get('location') || '';
     const type = searchParams.get('type') || 'all';
     const maxPrice = searchParams.get('maxPrice') || 'all';
 
-    if (q) setSearchQuery(q);
+    if (q) {
+      setSearchQuery(q);
+      recordSearchQuery(q, { location: q, type: type !== 'all' ? type : '' });
+    }
     if (type && type !== 'all') setSelectedType(type);
     if (maxPrice && maxPrice !== 'all') setSelectedPrice(maxPrice);
   }, [searchParams]);
@@ -117,6 +123,9 @@ export default function SearchResults() {
       // Guest mode
       const isNowSaved = PropertyService.toggleSavedProperty(id);
       setSavedPropertyIds(PropertyService.getSavedPropertyIds());
+      if (isNowSaved) {
+        logRealtimeInteraction({ event: 'PROPERTY_SAVED', propertyId: String(id) });
+      }
       showToast(
         isNowSaved
           ? `Saved "${targetProp?.name || 'Property'}" locally. Sign in to sync across devices.`
@@ -124,6 +133,7 @@ export default function SearchResults() {
       );
     }
   };
+
 
   return (
     <div className={styles.container}>
@@ -145,16 +155,22 @@ export default function SearchResults() {
             selectedLocation={selectedLocation}
             onSelectLocation={(loc) => {
               setSelectedLocation(loc);
+              setSearchQuery(''); // CLEAR TEXT SEARCH QUERY ON FILTER SELECTION
+              logRealtimeInteraction({ event: 'SEARCH_FILTER', query: `Location: ${loc}` });
               showToast(`Filter updated: ${loc === 'all' ? 'All Locations' : loc}`);
             }}
             selectedPrice={selectedPrice}
             onSelectPrice={(p) => {
               setSelectedPrice(p);
+              setSearchQuery(''); // CLEAR TEXT SEARCH QUERY ON FILTER SELECTION
+              logRealtimeInteraction({ event: 'SEARCH_FILTER', query: `Price: ${p}` });
               showToast('Valuation filter updated');
             }}
             selectedType={selectedType}
             onSelectType={(t) => {
               setSelectedType(t);
+              setSearchQuery(''); // CLEAR TEXT SEARCH QUERY ON FILTER SELECTION
+              logRealtimeInteraction({ event: 'SEARCH_FILTER', query: `Type: ${t}` });
               showToast('Typology filter updated');
             }}
             selectedSort={selectedSort}

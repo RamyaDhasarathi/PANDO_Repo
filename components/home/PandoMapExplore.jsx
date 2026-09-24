@@ -4,13 +4,18 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Volume2, VolumeX } from 'lucide-react';
 import { properties as rawDatasetProperties } from '@/data/properties';
 import { useAuth } from '@/providers/AuthProvider';
 import AuthForm from '@/components/AuthForm';
 import { usePandoTTS } from '@/hooks/usePandoTTS';
+import { Volume2, VolumeX } from 'lucide-react';
+import { logRealtimeInteraction } from '@/lib/interactionLogger';
+
 
 const UNIFIED_PROPERTIES = rawDatasetProperties;
+
+
+
 
 const MASCOT_URL =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/hf_20260623_061342_344d0b5a-9b73-4799-b66d-cb78af38510c-Photoroom-8tRuDAVe4O0Gxxg6amlBrVSCOL6ouf.png';
@@ -159,6 +164,7 @@ export default function PandoMapExplore({ dbProperties = [] }) {
     }
   }, [liveProperties]);
 
+
   // Read URL query on mount
   useEffect(() => {
     const q = searchParams.get('q') || searchParams.get('location') || '';
@@ -215,7 +221,18 @@ export default function PandoMapExplore({ dbProperties = [] }) {
     const text = getPropertySpeechText(prop);
     setSpeechText(text);
     speak(text);
+
+    if (prop) {
+      const propId = prop.id || prop._id || prop.originalId;
+      if (propId) {
+        logRealtimeInteraction({
+          event: 'PROPERTY_CLICKED',
+          propertyId: String(propId)
+        });
+      }
+    }
   };
+
 
   // 3) TASK 3: Protect viewing full property details without login
   const handleViewFullPropertyDetails = (e, propId) => {
@@ -315,6 +332,39 @@ export default function PandoMapExplore({ dbProperties = [] }) {
       return true;
     });
   }, [searchQuery, activeCategory, activeNavTab, liveProperties, apiSearchResults]);
+
+  // Dynamic Pando Speech Overview & Interaction Logging when filters change
+  const prevFilterSigRef = useRef('');
+  useEffect(() => {
+    if (!liveProperties || liveProperties.length === 0) return;
+    const currentSig = `${activeCategory}_${activeNavTab}`;
+    if (prevFilterSigRef.current && prevFilterSigRef.current !== currentSig) {
+      prevFilterSigRef.current = currentSig;
+      const count = filteredProperties.length;
+      let dynamicOverview = '';
+      
+      if (count === 0) {
+        dynamicOverview = `No residences match your current criteria (${activeCategory} for ${activeNavTab}). Try selecting another typology or location!`;
+      } else {
+        const first = filteredProperties[0];
+        const communities = [...new Set(filteredProperties.map(p => p.community || p.location).filter(Boolean))];
+        const topLocs = communities.slice(0, 2).join(' and ') || 'Dubai';
+        const typeLabel = activeCategory === 'All' ? 'residences' : activeCategory.toLowerCase();
+        
+        dynamicOverview = `Filtered to ${activeCategory} for ${activeNavTab}! I am tracking ${count} luxury ${typeLabel} across ${topLocs}. Top recommendation: ${first.title || first.name} in ${first.community || first.location} valued at ${first.price}. Click any map pin to inspect!`;
+      }
+
+      overviewTextRef.current = dynamicOverview;
+      setSpeechText(dynamicOverview);
+      speak(dynamicOverview, { force: true });
+      logRealtimeInteraction({
+        event: 'PROPERTY_SHOWN',
+        query: `Explore Map Filter: ${activeCategory} (${activeNavTab})`,
+      });
+    } else if (!prevFilterSigRef.current) {
+      prevFilterSigRef.current = currentSig;
+    }
+  }, [filteredProperties, activeCategory, activeNavTab, liveProperties]);
 
   return (
     <div className="pando-app">

@@ -64,7 +64,7 @@ export async function POST(req) {
     }
 
     // 3. Create JWT Session
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'hi-pando-super-secret-jwt-key-change-in-prod');
     const alg = 'HS256';
 
     const jwt = await new SignJWT({ userId: user._id.toString(), role: user.role })

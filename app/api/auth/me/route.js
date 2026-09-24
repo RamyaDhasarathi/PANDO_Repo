@@ -15,7 +15,7 @@ export async function GET() {
       );
     }
 
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'hi-pando-super-secret-jwt-key-change-in-prod');
     
     // Verify the JWT token
     const { payload } = await jwtVerify(token, secret);

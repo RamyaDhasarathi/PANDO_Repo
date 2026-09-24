@@ -996,7 +996,8 @@ h1 em {
 .filter-flyout {
   position: absolute;
   left: 0;
-  top: calc(100% + 8px);
+  top: 100%;
+  margin-top: 6px;
   width: 176px;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(12px);
@@ -1008,8 +1009,19 @@ h1 em {
   visibility: hidden;
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   z-index: 9999;
+}
+
+/* Invisible hover bridge connecting button to dropdown flyout */
+.filter-flyout::before {
+  content: "";
+  position: absolute;
+  top: -14px;
+  left: -10px;
+  right: -10px;
+  height: 14px;
+  background: transparent;
 }
 
 .filter-flyout.open,
@@ -1019,6 +1031,7 @@ h1 em {
   pointer-events: auto;
   transform: translateY(0);
 }
+
 
 .pando-speech-container.dimmed {
   opacity: 0 !important;

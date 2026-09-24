@@ -12,6 +12,8 @@ const ALL_LOCATIONS = Array.from(
   new Set([...localities.map((l) => l.name), ...properties.map((p) => p.community)])
 );
 
+import { recordSearchQuery } from "@/lib/historyService";
+
 export default function SearchBar({
   variant = "hero",
   initialLocation = "",
@@ -83,6 +85,8 @@ export default function SearchBar({
       type: overrides.type ?? type,
       bedroom: overrides.bedroom ?? bedroom,
     };
+
+    recordSearchQuery("", next);
 
     if (onSearch) {
       onSearch(next);

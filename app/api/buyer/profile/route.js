@@ -4,7 +4,7 @@ import Buyer from '@/lib/models/Buyer';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'hi-pando-super-secret-jwt-key-change-in-prod';
 
 async function getUserFromToken() {
   const cookieStore = cookies();

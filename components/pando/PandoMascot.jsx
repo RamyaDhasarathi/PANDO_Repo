@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Volume2, VolumeX, History, X } from 'lucide-react';
+import { Volume2, VolumeX } from 'lucide-react';
 import { usePandoTTS } from '@/hooks/usePandoTTS';
-import { fetchPropertyHistory } from '@/lib/historyService';
 import './pando-mascot.css';
 
 const DEFAULT_MASCOT_URL = '/images/pando/pando.png';
@@ -26,8 +25,6 @@ export function PandoMascot({
   const { muted, isSpeaking: internalSpeaking, speak, toggleMute: toggleTTSMute } = usePandoTTS({ enabled: enableVoice });
   const isSpeaking = externalIsSpeaking ?? internalSpeaking;
   const [mascotMove, setMascotMove] = useState('');
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [historyItems, setHistoryItems] = useState([]);
 
   // Periodic subtle idle mascot animations (twist, jump, dance)
   useEffect(() => {
@@ -65,15 +62,6 @@ export function PandoMascot({
     onVoiceToggle?.(!muted);
   };
 
-  const toggleHistoryPopover = async (e) => {
-    e?.stopPropagation();
-    if (!historyOpen) {
-      const items = await fetchPropertyHistory();
-      setHistoryItems(items);
-    }
-    setHistoryOpen((prev) => !prev);
-  };
-
   const handleCharacterClick = (e) => {
     onClick?.(e);
     speak(message || DEFAULT_MESSAGE, { force: true });
@@ -90,15 +78,6 @@ export function PandoMascot({
             <div className="pando-bubble-actions">
               <button
                 type="button"
-                className={`pando-bubble-history-btn ${historyOpen ? 'is-active' : ''}`}
-                onClick={toggleHistoryPopover}
-                aria-label="View recent property history"
-                title={historyOpen ? 'Show Pando message' : 'Recent property history'}
-              >
-                <History size={13} />
-              </button>
-              <button
-                type="button"
                 className={`pando-bubble-mute-btn ${muted ? 'is-muted' : ''}`}
                 onClick={toggleMute}
                 aria-label={muted ? 'Unmute Pando voice' : 'Mute Pando voice'}
@@ -109,58 +88,9 @@ export function PandoMascot({
             </div>
           </div>
 
-          {historyOpen ? (
-            <div className="pando-history-drawer" onClick={(e) => e.stopPropagation()}>
-              <div className="pando-history-header">
-                <span className="pando-history-title">RECENT ACTIVITY</span>
-                <button
-                  type="button"
-                  className="pando-history-close-btn"
-                  onClick={() => setHistoryOpen(false)}
-                  aria-label="Close history"
-                >
-                  <X size={13} />
-                </button>
-              </div>
-
-              {historyItems.length === 0 ? (
-                <p className="pando-history-empty">No recent property views yet</p>
-              ) : (
-                <div className="pando-history-list">
-                  {historyItems.map((item, idx) => (
-                    <a
-                      key={item.propertyId || idx}
-                      href={`/property/${item.propertyId}`}
-                      className="pando-history-item"
-                      onClick={() => setHistoryOpen(false)}
-                    >
-                      <img
-                        src={item.image || '/images/pando-agent.png'}
-                        alt={item.title}
-                        className="pando-history-thumb"
-                        onError={(e) => {
-                          e.target.src = '/images/pando-agent.png';
-                        }}
-                      />
-                      <div className="pando-history-info">
-                        <p className="pando-history-item-title">{item.title}</p>
-                        <p className="pando-history-item-meta">
-                          {item.price ? `AED ${(item.price).toLocaleString()}` : item.location}
-                        </p>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <>
-              <blockquote key={message} className="pando-bubble-quote" role="status" aria-live="polite">
-                {message}
-              </blockquote>
-              {children}
-            </>
-          )}
+          <blockquote key={message} className="pando-bubble-quote" role="status" aria-live="polite">
+            {message}
+          </blockquote>
 
           {children}
 

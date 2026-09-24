@@ -10,6 +10,8 @@ import { PropertyDNA } from './PropertyDNA';
 import { PandoService } from '@/services/pandoService';
 import { stopPandoSpeech } from '@/lib/ttsService';
 import AuthForm from '@/components/AuthForm';
+import { recordSearchQuery } from '@/lib/historyService';
+import { logRealtimeInteraction } from '@/lib/interactionLogger';
 import styles from './pando-properties.module.css';
 
 export const RecommendedProperties = ({
@@ -76,6 +78,27 @@ export const RecommendedProperties = ({
     }
   }, [properties, searchQuery, selectedLocation, selectedPrice, selectedType]);
 
+  // Log PROPERTY_SHOWN interaction event when recommendations land on screen
+  const prevShownSigRef = useRef('');
+  useEffect(() => {
+    if (pageProperties && pageProperties.length > 0) {
+      const topProp = pageProperties[0];
+      const topId = topProp ? String(topProp.id || topProp._id || topProp.originalId) : 'PROPERTIES_ALL';
+      const sig = `${topId}_${searchQuery}_${selectedLocation}_${selectedType}_${selectedPrice}_${currentPage}`;
+      if (prevShownSigRef.current !== sig) {
+        prevShownSigRef.current = sig;
+        const queryLabel = searchQuery
+          ? `Search: ${searchQuery}`
+          : `Filter: Location(${selectedLocation}), Type(${selectedType}), Price(${selectedPrice})`;
+        logRealtimeInteraction({
+          event: 'PROPERTY_SHOWN',
+          propertyId: topId,
+          query: queryLabel,
+        });
+      }
+    }
+  }, [pageProperties, searchQuery, selectedLocation, selectedType, selectedPrice, currentPage]);
+
   const goToPage = (next) => {
     setPage(next);
     setHasInteracted(false);
@@ -109,6 +132,11 @@ export const RecommendedProperties = ({
     setPandoMessage(explanation);
     setHasInteracted(true);
     setStatusState('SPEAKING');
+
+    logRealtimeInteraction({
+      event: 'PROPERTY_CLICKED',
+      propertyId: String(targetId)
+    });
   };
 
   // Handle 'View residence' click — Navigate immediately or open Auth modal for guests
@@ -116,6 +144,11 @@ export const RecommendedProperties = ({
     if (!property) return;
     const targetId = property.id || property._id || property.originalId;
     if (!targetId) return;
+
+    logRealtimeInteraction({
+      event: 'PROPERTY_CLICKED',
+      propertyId: String(targetId)
+    });
 
     setSelectedCardProperty(property);
     onSelectProperty?.(targetId);
@@ -131,12 +164,14 @@ export const RecommendedProperties = ({
     }
   };
 
+
   // Handle 'Show me more details >' button click — open modal/navigate IMMEDIATELY with zero delay
   const handleShowMoreDetails = (property) => {
     if (!property) return;
     const targetId = property.id || property._id || property.originalId;
     if (!targetId) return;
 
+    logRealtimeInteraction({ event: 'PROPERTY_CLICKED', propertyId: String(targetId) });
     stopPandoSpeech();
     setPendingAuthPropertyId(null);
     
@@ -154,6 +189,7 @@ export const RecommendedProperties = ({
     if (!aiInput.trim()) return;
 
     const queryText = aiInput.trim();
+    recordSearchQuery(queryText);
     setAiInput('');
     setStatusState('THINKING');
 
@@ -162,6 +198,15 @@ export const RecommendedProperties = ({
       setPandoMessage(res.reply);
       setHasInteracted(true);
       setLastHoveredPropertyId(null);
+      
+      logRealtimeInteraction({
+        event: 'CHAT_QUERY',
+        query: queryText,
+        reply: res.reply,
+        propertyId: res.selectedId ? String(res.selectedId) : '',
+        userDna: res.userDna || null
+      });
+
       if (res.selectedId) {
         onSelectProperty?.(res.selectedId);
       }

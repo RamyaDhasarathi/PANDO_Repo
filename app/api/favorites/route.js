@@ -10,7 +10,7 @@ async function getUserId() {
   const token = cookies().get('auth_token')?.value;
   if (!token) return null;
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'hi-pando-super-secret-jwt-key-change-in-prod');
     const { payload } = await jwtVerify(token, secret);
     return payload.userId;
   } catch (err) {
@@ -49,6 +49,8 @@ export async function GET() {
   }
 }
 
+import Interaction from '@/lib/models/Interaction';
+
 // POST to toggle a property in favorites
 export async function POST(req) {
   try {
@@ -76,9 +78,26 @@ export async function POST(req) {
 
     await buyer.save();
 
+    // Log PROPERTY_SAVED event to MongoDB hi_pando_interactions
+    if (isSaved) {
+      try {
+        await Interaction.create({
+          userId: userId,
+          propertyId: String(propertyId),
+          event: 'PROPERTY_SAVED',
+          query: '',
+          reply: '',
+          timestamp: new Date(),
+        });
+      } catch (err) {
+        console.warn('Favorite interaction log error:', err);
+      }
+    }
+
     return NextResponse.json({ success: true, isSaved, savedIds: buyer.favorites });
   } catch (error) {
     console.error('Favorites POST Error:', error);
     return NextResponse.json({ success: false, error: 'Failed to toggle favorite' }, { status: 500 });
   }
 }
+

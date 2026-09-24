@@ -1,12 +1,11 @@
 import { PROPERTIES_DATA } from '@/data/quantumProperties';
+import { extractUserDNA } from '@/lib/buyerDna';
 
 export class PandoService {
   /**
    * Greeting shown in Pando's bubble when the results page first loads (or
    * filters/page change) — a short, curiosity-driving teaser built purely
-   * from stats and standout features of the residences on screen. Never
-   * names a property or its location — that's the reveal you get by
-   * hovering or opening a card — so it stays a hook, not a recap.
+   * from stats and standout features of the residences on screen.
    */
   static getSummaryMessage(pageProperties = [], searchContext = {}) {
     if (!pageProperties || !pageProperties.length) {
@@ -70,7 +69,6 @@ export class PandoService {
     const price = formatAed(property.price);
     const loc = property.community || property.location || 'Dubai';
 
-    // Simple dynamic generator
     return `${name} in ${loc} offers ${beds} bedrooms, ${area} sq.ft of luxury living space at a valuation of ${price}.`;
   }
 
@@ -79,17 +77,59 @@ export class PandoService {
    */
   static processQuery(query, properties = []) {
     const q = query.toLowerCase().trim();
-    if (!properties || properties.length === 0) {
-      return {
-        reply: "I couldn't find any properties in the current database that match.",
-        matchingIds: [],
-        selectedId: null,
-      };
-    }
+    const userDna = extractUserDNA(query);
+
+    // Full catalog fallback for cross-location searches
+    const fullCatalog = Array.isArray(PROPERTIES_DATA) && PROPERTIES_DATA.length > 0 ? PROPERTIES_DATA : properties;
+    const pool = (properties && properties.length > 0) ? properties : fullCatalog;
 
     const formatAedNum = (val) => val ? (val / 1000000).toFixed(1).replace('.0', '') : '0';
 
-    // 1. Under budget queries
+    // 1. Specific Location Search (e.g., "downtown dubai", "palm jumeirah", "dubai hills", "marina", "jvc")
+    const knownLocationsMap = {
+      'downtown dubai': 'Downtown Dubai',
+      'downtown': 'Downtown Dubai',
+      'palm jumeirah': 'Palm Jumeirah',
+      'palm jumeira': 'Palm Jumeirah',
+      'palm': 'Palm Jumeirah',
+      'dubai hills estate': 'Dubai Hills Estate',
+      'dubai hills': 'Dubai Hills Estate',
+      'hills': 'Dubai Hills Estate',
+      'dubai harbour': 'Dubai Harbour',
+      'harbour': 'Dubai Harbour',
+      'dubai marina': 'Dubai Marina',
+      'marina': 'Dubai Marina',
+      'jumeirah village circle': 'Jumeirah Village Circle',
+      'jvc': 'Jumeirah Village Circle',
+      'business bay': 'Business Bay',
+      'the oasis': 'The Oasis',
+      'oasis': 'The Oasis',
+    };
+
+    for (const [key, canonicalLoc] of Object.entries(knownLocationsMap)) {
+      if (q.includes(key)) {
+        // Search across full catalog for matching location
+        const locMatches = fullCatalog.filter(p =>
+          (p.community || p.location || '').toLowerCase().includes(key) ||
+          (p.community || p.location || '').toLowerCase().includes(canonicalLoc.toLowerCase()) ||
+          (p.title || p.name || '').toLowerCase().includes(key)
+        );
+
+        if (locMatches.length > 0) {
+          const top = locMatches[0];
+          return {
+            reply: `I found ${locMatches.length} luxury residences matching "${canonicalLoc}". Top recommendation: ${this.getPropertyExplanation(top)}`,
+            matchingIds: locMatches.map(m => m.id || m._id),
+            selectedId: top.id || top._id,
+            userDna,
+            triggerSearchQuery: query,
+            extractedLocation: canonicalLoc,
+          };
+        }
+      }
+    }
+
+    // 2. Under budget queries
     if (q.includes('under') || q.includes('below') || q.includes('less than') || q.includes('cheapest') || q.includes('affordable')) {
       const match = q.match(/(under|below|less than)\s*(\d+)/i);
       let threshold = 50000000; // Default 50M
@@ -100,78 +140,54 @@ export class PandoService {
       else if (q.includes('60')) threshold = 60000000;
       else if (q.includes('50')) threshold = 50000000;
 
-      const matches = properties.filter((p) => p.price && p.price < threshold);
+      const matches = pool.filter((p) => p.price && p.price < threshold);
       if (matches.length > 0) {
         const first = matches[0];
         const matchNames = matches.slice(0, 3).map((m) => `${m.title || m.name} (AED ${formatAedNum(m.price)}M)`).join(', ');
         return {
           reply: `I found ${matches.length} properties under AED ${threshold / 1000000}M: ${matchNames}. The top match offers ${(first.areaSqft || first.area || 0).toLocaleString()} sq.ft.`,
-          matchingIds: matches.map((m) => m.id),
-          selectedId: first.id,
+          matchingIds: matches.map((m) => m.id || m._id),
+          selectedId: first.id || first._id,
+          userDna,
         };
       }
     }
 
-    // 2. Most expensive
+    // 3. Most expensive
     if (q.includes('most expensive') || q.includes('highest price') || q.includes('highest valuation') || q.includes('priciest')) {
-      const highest = [...properties].sort((a, b) => (b.price || 0) - (a.price || 0))[0];
-      return {
-        reply: `${highest.title || highest.name} is the most valuable residence in the current view at AED ${formatAedNum(highest.price)} million. It features ${highest.bedrooms || 0} bedrooms.`,
-        matchingIds: [highest.id],
-        selectedId: highest.id,
-      };
-    }
-
-    // 3. Most bedrooms / Largest space
-    if (q.includes('most bedroom') || q.includes('highest bedrooms') || q.includes('largest') || q.includes('biggest')) {
-      const mostBeds = [...properties].sort((a, b) => (b.bedrooms || 0) - (a.bedrooms || 0))[0];
-      return {
-        reply: `${mostBeds.title || mostBeds.name} has the most bedrooms with ${mostBeds.bedrooms || 0} bedrooms and an expansive footprint of ${(mostBeds.areaSqft || mostBeds.area || 0).toLocaleString()} sq.ft.`,
-        matchingIds: [mostBeds.id],
-        selectedId: mostBeds.id,
-      };
-    }
-
-    // 4. Comparison queries
-    if (q.includes('compare')) {
-      if (properties.length >= 2) {
-        const p1 = properties[0];
-        const p2 = properties[1];
+      const highest = [...pool].sort((a, b) => (b.price || 0) - (a.price || 0))[0];
+      if (highest) {
         return {
-          reply: `Comparing the top two: ${p1.title || p1.name} offers ${p1.bedrooms || 0} beds at AED ${formatAedNum(p1.price)}M, while ${p2.title || p2.name} offers ${p2.bedrooms || 0} beds at AED ${formatAedNum(p2.price)}M.`,
-          matchingIds: [p1.id, p2.id],
-          selectedId: p1.id,
+          reply: `${highest.title || highest.name} is the most valuable residence in the current view at AED ${formatAedNum(highest.price)} million. It features ${highest.bedrooms || 0} bedrooms.`,
+          matchingIds: [highest.id || highest._id],
+          selectedId: highest.id || highest._id,
+          userDna,
         };
       }
     }
 
-    // 5. Specific Locations / Mentions
-    const locations = ['palm', 'jumeirah', 'hills', 'golf', 'marina', 'yacht', 'downtown', 'burj', 'opera'];
-    for (const loc of locations) {
-      if (q.includes(loc)) {
-        const locMatch = properties.filter(p => 
-          (p.community || '').toLowerCase().includes(loc) || 
-          (p.title || '').toLowerCase().includes(loc) ||
-          (p.description || '').toLowerCase().includes(loc)
-        );
-        if (locMatch.length > 0) {
-          const top = locMatch[0];
-          return {
-            reply: `Found ${locMatch.length} matches for "${loc}". Top option: ${this.getPropertyExplanation(top)}`,
-            matchingIds: locMatch.map(m => m.id),
-            selectedId: top.id,
-          };
-        }
+    // 4. Most bedrooms / Largest space
+    if (q.includes('most bedroom') || q.includes('highest bedrooms') || q.includes('largest') || q.includes('biggest')) {
+      const mostBeds = [...pool].sort((a, b) => (b.bedrooms || 0) - (a.bedrooms || 0))[0];
+      if (mostBeds) {
+        return {
+          reply: `${mostBeds.title || mostBeds.name} has the most bedrooms with ${mostBeds.bedrooms || 0} bedrooms and an expansive footprint of ${(mostBeds.areaSqft || mostBeds.area || 0).toLocaleString()} sq.ft.`,
+          matchingIds: [mostBeds.id || mostBeds._id],
+          selectedId: mostBeds.id || mostBeds._id,
+          userDna,
+        };
       }
     }
 
     // Default dynamic fallback
-    const firstProp = properties[0];
-    const topValuations = properties.slice(0, 3).map(p => `${p.community || 'Dubai'} (${formatAedNum(p.price)}M)`).join(', ');
+    const firstProp = pool[0];
+    const topValuations = pool.slice(0, 3).map(p => `${p.community || p.location || 'Dubai'} (${formatAedNum(p.price)}M)`).join(', ');
     return {
-      reply: `Analyzing "${query}" against the available properties. The top valuations in this view include ${topValuations}. Let's look at ${firstProp.title || firstProp.name}.`,
-      matchingIds: properties.map((p) => p.id),
-      selectedId: firstProp.id,
+      reply: `Analyzing "${query}" against available residences. Top options include ${topValuations}. Recommended option: ${firstProp ? (firstProp.title || firstProp.name) : 'Featured Residence'}.`,
+      matchingIds: pool.map((p) => p.id || p._id),
+      selectedId: firstProp ? (firstProp.id || firstProp._id) : null,
+      userDna,
     };
   }
 }
+

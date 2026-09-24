@@ -11,7 +11,8 @@ import { explainProperty, answerPropertyQuestion } from "@/lib/propertyAssistant
 import { usePandoTTS } from "@/hooks/usePandoTTS";
 import { useAuth } from "@/providers/AuthProvider";
 import AuthForm from "@/components/AuthForm";
-import { recordPropertyView, fetchPropertyHistory } from "@/lib/historyService";
+import { fetchSpecificPropertyHistory, recordSpecificPropertyInteraction } from "@/lib/historyService";
+import { logRealtimeInteraction } from "@/lib/interactionLogger";
 
 export default function ImmersivePropertyView({ property }) {
   const router = useRouter();
@@ -36,17 +37,23 @@ export default function ImmersivePropertyView({ property }) {
     }
   }, [user, loading]);
 
-  // Record property view on mount & property change
+  // Log property view interaction event to MongoDB (guarded against double logging)
+  const loggedPropRef = useRef(null);
   useEffect(() => {
     if (property) {
-      recordPropertyView(property);
+      const propId = property.id || property._id || property.originalId;
+      if (propId && loggedPropRef.current !== String(propId)) {
+        loggedPropRef.current = String(propId);
+        logRealtimeInteraction({ event: 'PROPERTY_VIEWED', propertyId: String(propId) });
+      }
     }
   }, [property]);
+
 
   const toggleHistoryPopover = async (e) => {
     e?.stopPropagation();
     if (!historyOpen) {
-      const items = await fetchPropertyHistory();
+      const items = await fetchSpecificPropertyHistory(property);
       setHistoryItems(items);
     }
     setHistoryOpen((prev) => !prev);
@@ -100,6 +107,17 @@ export default function ImmersivePropertyView({ property }) {
     setInputQuery("");
 
     speakText(answer);
+
+    const propId = property.id || property._id || property.originalId;
+    if (propId) {
+      recordSpecificPropertyInteraction(propId, trimmed, answer);
+      logRealtimeInteraction({
+        event: 'CHAT_QUERY',
+        propertyId: String(propId),
+        query: trimmed,
+        reply: answer,
+      });
+    }
   }, [property, speakText]);
 
   // Speech Recognition (Speech-to-Text) setup
@@ -325,7 +343,7 @@ export default function ImmersivePropertyView({ property }) {
               {historyOpen ? (
                 <div className={styles.historyDrawer} onClick={(e) => e.stopPropagation()}>
                   <div className={styles.historyHeader}>
-                    <span className={styles.historyTitle}>RECENT ACTIVITY</span>
+                    <span className={styles.historyTitle}>SEARCH HISTORY TRAIL</span>
                     <button
                       type="button"
                       className={styles.historyCloseBtn}
@@ -337,31 +355,25 @@ export default function ImmersivePropertyView({ property }) {
                   </div>
 
                   {historyItems.length === 0 ? (
-                    <p className={styles.historyEmpty}>No recent property views yet</p>
+                    <p className={styles.historyEmpty}>No search history recorded</p>
                   ) : (
                     <div className={styles.historyList}>
                       {historyItems.map((item, idx) => (
                         <div
-                          key={item.propertyId || idx}
+                          key={idx}
                           className={styles.historyItem}
+                          style={{ cursor: 'pointer' }}
                           onClick={() => {
+                            if (item.answer) {
+                              setPandoMessage(item.answer);
+                              speakText(item.answer);
+                            }
                             setHistoryOpen(false);
-                            router.push(`/property/${item.propertyId}`);
                           }}
                         >
-                          <img
-                            src={item.image || "/images/pando-agent.png"}
-                            alt={item.title}
-                            className={styles.historyThumb}
-                            onError={(e) => {
-                              e.target.src = "/images/pando-agent.png";
-                            }}
-                          />
                           <div className={styles.historyInfo}>
-                            <p className={styles.historyItemTitle}>{item.title}</p>
-                            <p className={styles.historyItemMeta}>
-                              {item.price ? `AED ${(item.price).toLocaleString()}` : item.location}
-                            </p>
+                            <p className={styles.historyItemTitle}>🔍 {item.query || item.title}</p>
+                            <p className={styles.historyItemMeta}>{item.meta || item.answer || item.location}</p>
                           </div>
                         </div>
                       ))}
