@@ -4,6 +4,8 @@ import Buyer from '@/lib/models/Buyer';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
+export const dynamic = 'force-dynamic';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'hi-pando-super-secret-jwt-key-change-in-prod';
 
 async function getUserFromToken() {

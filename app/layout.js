@@ -22,6 +22,7 @@ const fraunces = Fraunces({
 });
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: "Hi Pando — Find your place in Dubai",
   description:
     "Discover apartments, villas, townhouses and commercial spaces for sale and rent across Dubai.",

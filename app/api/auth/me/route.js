@@ -4,6 +4,8 @@ import dbConnect from '../../../../lib/mongodb';
 import Buyer from '../../../../lib/models/Buyer';
 import { cookies } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const token = cookies().get('auth_token')?.value;

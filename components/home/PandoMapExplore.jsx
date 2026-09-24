@@ -162,7 +162,7 @@ export default function PandoMapExplore({ dbProperties = [] }) {
         window.removeEventListener('keydown', handleFirstGesture);
       };
     }
-  }, [liveProperties]);
+  }, [liveProperties, speak]);
 
 
   // Read URL query on mount
@@ -364,7 +364,7 @@ export default function PandoMapExplore({ dbProperties = [] }) {
     } else if (!prevFilterSigRef.current) {
       prevFilterSigRef.current = currentSig;
     }
-  }, [filteredProperties, activeCategory, activeNavTab, liveProperties]);
+  }, [filteredProperties, activeCategory, activeNavTab, liveProperties, speak]);
 
   return (
     <div className="pando-app">

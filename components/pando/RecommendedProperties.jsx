@@ -76,7 +76,7 @@ export const RecommendedProperties = ({
     if (pageProperties.length > 0 && !selectedPropertyId) {
       onSelectProperty?.(pageProperties[0].id);
     }
-  }, [properties, searchQuery, selectedLocation, selectedPrice, selectedType]);
+  }, [properties, searchQuery, selectedLocation, selectedPrice, selectedType, onSelectProperty, pageProperties, selectedPropertyId]);
 
   // Log PROPERTY_SHOWN interaction event when recommendations land on screen
   const prevShownSigRef = useRef('');

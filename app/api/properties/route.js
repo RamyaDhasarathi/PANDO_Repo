@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import dbConnect from '../../../lib/mongodb';
 import Listing from '../../../lib/models/Listing';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   try {
     await dbConnect();
